@@ -7,33 +7,19 @@ const Access = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-<<<<<<< HEAD
+
+
+
+  
   const handleChecks = async () => {
     const roll = inputValue.trim().toUpperCase();
 
-=======
-<<<<<<< HEAD
-  const codes = ["ellenkic7", "c7", "ellenki c7","elen c7"];
-  const handleChecks = () => {
-    const userInput = inputValue.trim().toLowerCase();
 
-    if(codes.includes(userInput)) {
-        navigate("/home");
-    }else{
-      alert("The code you entered is invalid!!");
-=======
-  const handleChecks = async () => {
-    const roll = inputValue.trim().toUpperCase();
-
->>>>>>> 58c1648 (update all)
     // ---------- FRONTEND VALIDATION ----------
     if (!roll) {
       setError("Please enter your roll number");
       return;
-<<<<<<< HEAD
-=======
->>>>>>> ed0b59a (updated all changes like url and home etc)
->>>>>>> 58c1648 (update all)
+
     }
 
     if (!/^[A-Z0-9]+$/.test(roll)) {
@@ -51,22 +37,24 @@ const Access = () => {
 
     // ---------- BACKEND CHECK ----------
     try {
-     const res = await fetch(`http://localhost:8081/student/exists/${roll}`);
-const exists = await res.json();
+      const res = await fetch(`http://localhost:8081/login`);
+      const exists = await res.json();
 
-if (exists) {
-  navigate(`/profile/${roll}/home`);
-} else {
-  navigate("/profile");
-}
-} catch {
+        if (exists) {
+             navigate(`/profile/${roll}/home`);
+        } else {
+            navigate("/profile");
+          }
+    } catch {
       setError("Backend not reachable");
     } finally {
       setLoading(false);
     }
   };
 
+
   return (
+    <>
     <div
       className="
         min-h-screen flex items-center justify-center
@@ -89,27 +77,15 @@ if (exists) {
           ENTER YOUR ROLL NUMBER
         </h1>
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-        {/* Input */}
-        <div className="relative w-[90%] mx-auto mb-6">
-          <img
-            src="/lock.jpeg"
-            alt="lock"
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-6 pointer-events-none"
-          />
-=======
->>>>>>> 58c1648 (update all)
+
+       
+
         {error && (
           <p className="text-red-500 text-sm font-semibold mb-3">
             {error}
           </p>
         )}
-<<<<<<< HEAD
-=======
->>>>>>> ed0b59a (updated all changes like url and home etc)
->>>>>>> 58c1648 (update all)
+
 
         <form
           onSubmit={(e) => {
@@ -160,7 +136,10 @@ if (exists) {
         </form>
       </div>
     </div>
+    
+    </>
   );
 };
+
 
 export default Access;

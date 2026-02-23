@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import IdeasBoard from "./IdeasBoard";
-import Discussions from "./Discussions";
+import Club from "./Clubs/Club";
 
 export default function Connect() {
   const [activeTab, setActiveTab] = useState("ideas");
@@ -46,14 +46,14 @@ export default function Connect() {
         </button>
 
         <button
-          onClick={() => setActiveTab("discussions")}
-          className={activeTab === "discussions" ? "bg-[#26F2D0] text-black px-6 py-2 rounded" : "bg-[#222] px-6 py-2 rounded"}
+          onClick={() => setActiveTab("club")}
+          className={activeTab === "club" ? "bg-[#26F2D0] text-black px-6 py-2 rounded" : "bg-[#222] px-6 py-2 rounded"}
         >
-          Discussions
+          Clubs
         </button>
       </div>
 
-      {activeTab === "ideas" ? <IdeasBoard /> : <Discussions />}
+      {activeTab === "ideas" ? <IdeasBoard /> : <Club />}
     </div>
   );
 }

@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 @Configuration
-public class MongoConfig {
+public class FileConfig {
 
     @Bean
     public GridFsTemplate gridFsTemplate(MongoDatabaseFactory dbFactory, MongoConverter converter) {

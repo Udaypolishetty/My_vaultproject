@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface StudentProfileRepository extends MongoRepository<StudentProfile, String> {
     boolean existsByRollNumber (String rollNumber);
     Optional<StudentProfile> findByRollNumber (String rollNumber);
+    long countByRole(com.example.PdfBackend.model.Role role);
 }

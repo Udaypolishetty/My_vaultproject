@@ -1,4 +1,4 @@
-package com.example.PdfBackend.controller;
+package com.example.PdfBackend.Controller;
 
 import com.example.PdfBackend.model.Idea;
 import com.example.PdfBackend.model.Comment;

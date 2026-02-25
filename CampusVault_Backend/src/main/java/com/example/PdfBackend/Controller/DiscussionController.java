@@ -1,4 +1,4 @@
-package com.example.PdfBackend.controller;
+package com.example.PdfBackend.Controller;
 
 import com.example.PdfBackend.model.Discussion;
 import com.example.PdfBackend.repository.DiscussionRepository;
@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/discussions")
-@CrossOrigin(origins = "http://localhost:5175")
+@CrossOrigin(origins = "http://localhost:5173")
 public class DiscussionController {
 
     private final DiscussionRepository repository;

@@ -1,4 +1,4 @@
-package com.example.PdfBackend.PdfController;
+package com.example.PdfBackend.Controller;
 
 import com.example.PdfBackend.Service.FileService;
 import lombok.RequiredArgsConstructor;

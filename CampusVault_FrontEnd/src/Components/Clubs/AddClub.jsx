@@ -7,135 +7,250 @@ function AddClub() {
   const [agree, setAgree] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // 1️⃣ Fetch existing club on page load
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
-    fetch("http://localhost:8081/clubs")
-      .then(res => res.json())
-      .then(data => {
-        if (data.length > 0) {
-          setClub(data[0]); // user can create only one club
-        }
-      })
-      .catch(err => console.error(err));
+    if (!token) return;
+    fetchMyClub();
   }, []);
 
-  // 2️⃣ Create club (REAL)
-  const handleCreateClub = async (data) => {
+  const fetchMyClub = async () => {
+    try {
+      const res = await fetch("http://localhost:8081/api/clubs/my", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.length > 0) setClub(data[0]);
+    } catch (err) {
+      console.error("Failed to fetch club:", err);
+    }
+  };
+
+  const handleCreateClub = async (formData) => {
+    setError("");
+    if (!token) { setError("You are not logged in. Please login again."); return; }
+
     try {
       setLoading(true);
-
-      const res = await fetch("http://localhost:8081/clubs/post", {
+      const res = await fetch("http://localhost:8081/api/clubs/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
       });
 
-      if (!res.ok) throw new Error("Failed to create club");
+      if (!res.ok) {
+        const err = await res.json();
+        setError(err.message || "Failed to create club");
+        return;
+      }
 
       const createdClub = await res.json();
       setClub(createdClub);
       setShowForm(false);
+      setAgree(false);
     } catch (err) {
       console.error(err);
-      alert("Club creation failed");
+      setError("Backend not reachable. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // 3️⃣ Delete club (REAL)
   const handleDeleteClub = async () => {
-  const token = localStorage.getItem("token");
+    if (!token) { setError("You are not logged in. Please login again."); return; }
+    if (!window.confirm("Are you sure you want to delete this club?")) return;
 
-  if (!token) {
-    alert("Token missing. Login again.");
-    return;
-  }
+    try {
+      const res = await fetch(`http://localhost:8081/api/clubs/${club.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-  const res = await fetch(
-    `http://localhost:8081/clubs/${club.clubId}`,
-    {
-      method: "DELETE",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
+      if (!res.ok) {
+        const text = await res.text();
+        setError(text || "Delete failed");
+        return;
+      }
+
+      setClub(null);
+      setAgree(false);
+      // ✅ Notify JoinClub to refresh
+      window.dispatchEvent(new Event("clubDeleted"));
+    } catch (err) {
+      console.error("Delete failed:", err);
+      setError("Failed to delete club");
     }
-  );
-
-  if (!res.ok) {
-    console.error("Delete failed:", res.status);
-    return;
-  }
-
-  setClub(null);
-};
+  };
 
   return (
-    <div className="flex flex-col relative">
+    <>
+      <div className="flex flex-col relative">
 
-      {club && (
-        <button
-          onClick={handleDeleteClub}
-          className="absolute top-4 right-4 text-red-400 hover:text-red-600 text-xl"
-        >
-          <MdDelete />
-        </button>
-      )}
-
-      <h1 className="mt-4 font-bold text-center">
-        {club ? club.title : "Create New Club"}
-      </h1>
-
-      <section className="mt-10 flex flex-col gap-4">
-        {club ? (
-          <p>{club.description}</p>
-        ) : (
-          <>
-            <p>
-              Clubs help students improve technical skills, teamwork,
-              leadership, and real-world problem solving.
-            </p>
-            <p>
-              You can create only one club. Once created, you may delete it.
-            </p>
-          </>
+        {/* Delete button */}
+        {club && (
+          <button
+            onClick={handleDeleteClub}
+            className="absolute top-4 right-4 text-red-400 hover:text-red-600 text-xl"
+          >
+            <MdDelete />
+          </button>
         )}
-      </section>
 
-      {!club && (
-        <form className="mt-6">
-          <label className="flex gap-2">
-            <input
-              type="checkbox"
-              checked={agree}
-              onChange={(e) => setAgree(e.target.checked)}
-            />
-            <span>I agree</span>
-          </label>
+        {/* Title */}
+        <h1 className="mt-4 font-bold text-center">
+          {club ? club.title : "Create New Club"}
+        </h1>
 
-          <div className="flex justify-end mt-4">
-            <button
-              type="button"
-              onClick={() => setShowForm(true)}
-              disabled={!agree || loading}
-              className={`rounded-xl px-5 py-2 text-black
-                ${agree ? "bg-[#26F2D0]" : "bg-[#26F2D0]/20 cursor-not-allowed"}
-              `}
-            >
-              {loading ? "Creating..." : "Create Club"}
-            </button>
-          </div>
-        </form>
-      )}
+        {/* Error */}
+        {error && (
+          <p className="text-red-500 text-sm text-center mt-2 font-semibold">
+            {error}
+          </p>
+        )}
 
-      {showForm && (
-        <ClubForm
-          onClose={() => setShowForm(false)}
-          onSubmit={handleCreateClub}
-        />
-      )}
-    </div>
+        {/* Content */}
+        <section className="mt-10 flex flex-col gap-4">
+          {club ? (
+            <div className="flex flex-col gap-3">
+
+              {/* Club details */}
+              <p className="text-gray-300">{club.description}</p>
+              <a
+                href={club.linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline text-sm"
+              >
+                LinkedIn →
+              </a>
+              <p className="text-xs text-gray-500">
+                Created by {club.createdByName} ({club.createdBy})
+              </p>
+
+              {/* Members section */}
+              <div className="mt-2">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-sm font-semibold text-white">Members</h2>
+                  <span className="text-xs text-gray-500">
+                    {club.memberCount ?? club.members?.length ?? 0} / 6 joined
+                  </span>
+                </div>
+
+                {club.memberDetails && club.memberDetails.length > 0 ? (
+                  // ✅ max-h shows ~3 members (each ~40px + gap), scroll for rest
+                  <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar"
+                    style={{ maxHeight: "132px" }} // 3 × 40px + 2 × 6px gap
+                  >
+                    {club.memberDetails.map((member, index) => (
+                      <div
+                        key={member.rollNumber}
+                        className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 py-2 shrink-0"
+                      >
+                        {/* Index circle */}
+                        <div className="w-7 h-7 rounded-full bg-[#26F2D0]/20 text-[#26F2D0]
+                                        flex items-center justify-center text-xs font-bold shrink-0">
+                          {index + 1}
+                        </div>
+
+                        {/* Single line: name · rollNumber · year · branch · LinkedIn (if has club) */}
+                        <div className="flex items-center gap-2 flex-wrap min-w-0 text-xs">
+                          <span className="text-white font-medium">{member.name}</span>
+                          <span className="text-gray-600">·</span>
+                          <span className="text-gray-400">{member.rollNumber}</span>
+                          <span className="text-gray-600">·</span>
+                          <span className="text-gray-400">{member.year}</span>
+                          <span className="text-gray-600">·</span>
+                          <span className="text-gray-400">{member.branch}</span>
+
+                          {/* Show LinkedIn only if member created their own club */}
+                          {member.linkedinUrl && (
+                            <>
+                              <span className="text-gray-600">·</span>
+                              <a
+                                href={member.linkedinUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 hover:underline shrink-0"
+                              >
+                                LinkedIn →
+                              </a>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500 text-center py-3">
+                    No members yet. Share your club!
+                  </p>
+                )}
+              </div>
+
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <p>
+                Clubs help students improve technical skills, teamwork,
+                leadership, and real-world problem solving.
+              </p>
+              <p>
+                You can create only one club. Once created, you may delete it.
+              </p>
+              <p className="text-red-400">
+                Note : Once you create a club title and description, they cannot
+                 be edited or updated, so please fill them out carefully
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* Create form */}
+        {!club && (
+          <form className="mt-6">
+            <label className="flex gap-2 items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agree}
+                onChange={(e) => setAgree(e.target.checked)}
+              />
+              <span>I agree to the club creation terms</span>
+            </label>
+
+            <div className="flex justify-end mt-4">
+              <button
+                type="button"
+                onClick={() => setShowForm(true)}
+                disabled={!agree || loading}
+                className={`rounded-xl px-5 py-2 text-black font-semibold transition
+                  ${agree && !loading
+                    ? "bg-[#26F2D0] hover:scale-105"
+                    : "bg-[#26F2D0]/20 cursor-not-allowed"
+                  }`}
+              >
+                {loading ? "Creating..." : "Create Club"}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Club form modal */}
+        {showForm && (
+          <ClubForm
+            onClose={() => setShowForm(false)}
+            onSubmit={handleCreateClub}
+            loading={loading}
+          />
+        )}
+
+      </div>
+    </>
   );
 }
 

@@ -18,11 +18,14 @@ function AddClub() {
 
   const fetchMyClub = async () => {
     try {
+      console.log("Token:", token);
+    console.log("RollNumber in storage:", localStorage.getItem("rollNumber"));
       const res = await fetch("http://localhost:8081/api/clubs/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
       const data = await res.json();
+       console.log("My clubs response:", data);
       if (data.length > 0) setClub(data[0]);
     } catch (err) {
       console.error("Failed to fetch club:", err);

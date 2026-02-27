@@ -10,62 +10,44 @@ const Access = () => {
   const handleChecks = async () => {
     const roll = inputValue.trim().toUpperCase();
 
-    // ---------- FRONTEND VALIDATION ----------
-    if (!roll) {
-      setError("Please enter your roll number");
-      return;
-    }
-
-    if (!/^[A-Z0-9]+$/.test(roll)) {
-      setError("Roll number must contain only CAPITAL letters and numbers");
-      return;
-    }
-
-    if (roll.length < 4 || roll[2] !== "C" || roll[3] !== "7") {
-      setError("Invalid roll number format — capital letters");
-      return;
-    }
+    if (!roll) { setError("Please enter your roll number"); return; }
+    if (!/^[A-Z0-9]+$/.test(roll)) { setError("Roll number must contain only CAPITAL letters and numbers"); return; }
+    if (roll.length < 4 || roll[2] !== "C" || roll[3] !== "7") { setError("Invalid roll number format — capital letters"); return; }
 
     setError("");
     setLoading(true);
 
     try {
-      // ---------- STEP 1: CHECK IF ROLL NUMBER EXISTS ----------
-      const existsRes = await fetch(
-        `http://localhost:8081/student/exists/${roll}`
-      );
-      const exists = await existsRes.json(); // returns true or false
+      // STEP 1: Check if roll number exists
+      const existsRes = await fetch(`http://localhost:8081/student/exists/${roll}`);
+      const exists = await existsRes.json();
 
       if (!exists) {
-        // 🆕 New student → go to registration page
         navigate("/profile", { state: { rollNumber: roll } });
         return;
       }
 
-      // ---------- STEP 2: IF EXISTS → LOGIN ----------
+      // STEP 2: Login
       const loginRes = await fetch("http://localhost:8081/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rollNumber: roll }),
       });
 
-      if (!loginRes.ok) {
-        setError("Login failed. Please try again.");
-        return;
-      }
+      if (!loginRes.ok) { setError("Login failed. Please try again."); return; }
 
       const data = await loginRes.json();
 
-      // ✅ Save token and info
+      // ✅ Clear old student's data before saving new
+      localStorage.clear();
+
+      // ✅ Save new student's data
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
       localStorage.setItem("rollNumber", data.rollNumber);
       localStorage.setItem("name", data.name);
-       localStorage.setItem("id", data.id);
+      localStorage.setItem("id", data.id);
 
-      // ✅ Navigate based on role
       if (data.role === "ADMIN") {
         navigate("/admin/dashboard");
       } else {
@@ -104,17 +86,10 @@ const Access = () => {
           </h1>
 
           {error && (
-            <p className="text-red-500 text-sm font-semibold mb-3">
-              {error}
-            </p>
+            <p className="text-red-500 text-sm font-semibold mb-3">{error}</p>
           )}
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!loading) handleChecks();
-            }}
-          >
+          <form onSubmit={(e) => { e.preventDefault(); if (!loading) handleChecks(); }}>
             <div className="relative w-[70%] mx-auto mb-4">
               <img
                 src="/lock.jpeg"
@@ -123,10 +98,8 @@ const Access = () => {
               />
               <input
                 className="
-                  w-full
-                  py-3 pl-14 pr-10
-                  rounded-full
-                  text-center
+                  w-full py-3 pl-14 pr-10
+                  rounded-full text-center
                   outline-none
                   shadow-[0_8px_20px_rgba(0,0,0,0.35)]
                 "
@@ -142,12 +115,10 @@ const Access = () => {
                 disabled={loading || !inputValue.trim()}
                 className={`
                   w-10 h-10 rounded-full text-2xl
-                  flex items-center justify-center
-                  transition
-                  ${
-                    loading || !inputValue.trim()
-                      ? "bg-gray-500 cursor-not-allowed"
-                      : "bg-white text-black hover:scale-105"
+                  flex items-center justify-center transition
+                  ${loading || !inputValue.trim()
+                    ? "bg-gray-500 cursor-not-allowed"
+                    : "bg-white text-black hover:scale-105"
                   }
                 `}
               >

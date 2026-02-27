@@ -32,7 +32,7 @@ public class Club {
     private List<String> members = new ArrayList<>();
 
     // ✅ Max members allowed (excluding creator)
-    private static final int MAX_MEMBERS = 6;
+    private static final int MAX_MEMBERS = 20;
 
     public boolean isFull() {
         return members.size() >= MAX_MEMBERS;

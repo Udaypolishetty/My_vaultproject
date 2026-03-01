@@ -1,4 +1,46 @@
+// import React, { useEffect, useState } from "react";
+// import Navbar from "./Components/Navbar";
+// import Home from "./Components/Home";
+// import Update from "./Components/Update";
+// import Upload from "./Components/Upload";
+// import Resources from "./Components/Resources";
+// import About from "./Components/About";
+// import Connect from "./Components/Connect";
+// import "./index.css";
+
+// function App() {
+//   const [activeSection, setActiveSection] = useState(() => {
+//     return localStorage.getItem("activeSection") || "Home";
+//   });
+
+//   useEffect (()=>{
+//     localStorage.setItem("activeSection",activeSection);
+
+//   },[activeSection]); //refresh code.............
+
+//   return (
+//     <div className="bg-[#181818] min-h-screen text-white text-center pt-20">
+//       <Navbar setActiveSection={setActiveSection} />
+//      <div key={activeSection} className="section-animate">
+//       {activeSection === "Home" && <Home />}
+//       {activeSection === "Updates" && <Update />}
+//       {activeSection === "Upload" && <Upload />}
+//       {activeSection === "Resources" && <Resources />}
+//       {activeSection === "Connect" && <Connect />}
+//       {activeSection === "About" && <About />}
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default App;
+
+
+//claude
+
+
 import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "./Components/Navbar";
 import Home from "./Components/Home";
 import Update from "./Components/Update";
@@ -7,28 +49,67 @@ import Resources from "./Components/Resources";
 import About from "./Components/About";
 import Connect from "./Components/Connect";
 import "./index.css";
+import { AnimatePresence, motion } from 'framer-motion';
+
 
 function App() {
-  const [activeSection, setActiveSection] = useState(() => {
-    return localStorage.getItem("activeSection") || "Home";
-  });
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-  useEffect (()=>{
-    localStorage.setItem("activeSection",activeSection);
+  const pathSection = window.location.pathname.split("/").pop();
+  const sectionMap = {
+    home: "Home",
+    updates: "Updates",
+    upload: "Upload",
+    resources: "Resources",
+    connect: "Connect",
+    about: "About"
+  };
 
-  },[activeSection]); //refresh code.............
+  const [activeSection, setActiveSection] = useState(
+    sectionMap[pathSection] || "Home"
+  );
+
+  // ✅ handles both URL update and section change
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+    navigate(`/profile/${id}/${section.toLowerCase()}`);
+  };
+
+  useEffect(() => {
+    localStorage.setItem("activeSection", activeSection);
+  }, [activeSection]);
 
   return (
-    <div className="bg-[#181818] min-h-screen text-white text-center pt-20">
-      <Navbar setActiveSection={setActiveSection} />
-     <div key={activeSection} className="section-animate">
-      {activeSection === "Home" && <Home />}
-      {activeSection === "Updates" && <Update />}
-      {activeSection === "Upload" && <Upload />}
-      {activeSection === "Resources" && <Resources />}
-      {activeSection === "Connect" && <Connect />}
-      {activeSection === "About" && <About />}
-      </div>
+    <div className="bg-[#181818] min-h-screen text-white text-center ">
+      <Navbar setActiveSection={handleSectionChange} />
+      {/* <div key={activeSection} className="section-animate pt-16">
+        {activeSection === "Home" && <Home />}
+        {activeSection === "Updates" && <Update />}
+        {activeSection === "Upload" && <Upload />}
+        {activeSection === "Resources" && <Resources />}
+        {activeSection === "Connect" && <Connect />}
+        {activeSection === "About" && <About />}
+      </div> */}
+
+      <AnimatePresence mode="wait">
+  <motion.div
+    key={activeSection}
+    initial={{ opacity: 0, x: 50 }}
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -50 }}
+    transition={{ duration: 0.3 }}
+    className="pt-16"
+  >
+    {activeSection === "Home" && <Home />}
+    {activeSection === "Updates" && <Update />}
+    {activeSection === "Upload" && <Upload />}
+    {activeSection === "Resources" && <Resources />}
+    {activeSection === "Connect" && <Connect />}
+    {activeSection === "About" && <About />}
+  </motion.div>
+</AnimatePresence>
+
     </div>
   );
 }

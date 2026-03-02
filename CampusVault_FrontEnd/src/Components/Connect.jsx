@@ -175,8 +175,7 @@ export default function Connect() {
       </h2>
 
       <p className="text-gray-400 text-sm max-w-2xl mt-1">
-        Share ideas, discuss college topics, and collaborate with fellow students —
-        all in one place.
+       Share ideas, join clubs, discuss college topics, and collaborate — all in one place.
       </p>
     </div>
 

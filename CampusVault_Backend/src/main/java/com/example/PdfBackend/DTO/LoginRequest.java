@@ -6,4 +6,6 @@ import lombok.Data;
 public class LoginRequest {
 
     private String rollNumber;
+    private String password; // ✅ add this
+
 }

@@ -70,7 +70,6 @@ function App() {
     sectionMap[pathSection] || "Home"
   );
 
-  // ✅ handles both URL update and section change
   const handleSectionChange = (section) => {
     setActiveSection(section);
     navigate(`/profile/${id}/${section.toLowerCase()}`);
@@ -81,37 +80,29 @@ function App() {
   }, [activeSection]);
 
   return (
-    <div className="bg-[#181818] min-h-screen text-white text-center ">
+    <div className="bg-[#181818] flex flex-col min-h-screen text-white">
       <Navbar setActiveSection={handleSectionChange} />
-      {/* <div key={activeSection} className="section-animate pt-16">
-        {activeSection === "Home" && <Home />}
-        {activeSection === "Updates" && <Update />}
-        {activeSection === "Upload" && <Upload />}
-        {activeSection === "Resources" && <Resources />}
-        {activeSection === "Connect" && <Connect />}
-        {activeSection === "About" && <About />}
-      </div> */}
-
-      <AnimatePresence mode="wait">
-  <motion.div
-    key={activeSection}
-    initial={{ opacity: 0, x: 50 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -50 }}
-    transition={{ duration: 0.3 }}
-    className="pt-16"
-  >
-    {activeSection === "Home" && <Home />}
-    {activeSection === "Updates" && <Update />}
-    {activeSection === "Upload" && <Upload />}
-    {activeSection === "Resources" && <Resources />}
-    {activeSection === "Connect" && <Connect />}
-    {activeSection === "About" && <About />}
-  </motion.div>
-</AnimatePresence>
-
+      <div className="flex-1 pt-16 pb-24 overflow-y-auto">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeSection}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.3 }}
+          >
+            {activeSection === "Home" && <Home />}
+            {activeSection === "Updates" && <Update />}
+            {activeSection === "Upload" && <Upload />}
+            {activeSection === "Resources" && <Resources />}
+            {activeSection === "Connect" && <Connect />}
+            {activeSection === "About" && <About />}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
 
 export default App;
+

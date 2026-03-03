@@ -2,11 +2,17 @@ import { useState } from "react";
 import Comment from "./Comment";
 
 export default function IdeaCard({ idea, student, ideas, setIdeas, onClose }) {
+    if (!idea || !idea.title) return null;
   const [open, setOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [active, setActive] = useState(false);
   
   const ideaId = idea._id || idea.id; 
+  const formatYear = (y) => {
+  if (!y) return "";
+  const clean = y.replace(/[^0-9]/g, ""); // strip rd/th/st
+  return ({ "1": "1st", "2": "2nd", "3": "3rd", "4": "4th" }[clean] || y);
+};
 
   const categoryStyles = {
     Tech: "bg-blue-500/20 text-blue-400",
@@ -31,14 +37,14 @@ export default function IdeaCard({ idea, student, ideas, setIdeas, onClose }) {
 
       {/* Branch & Year */}
       <div className="absolute top-4 right-4 text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full">
-        {idea.branch} · {idea.year}
-      </div>
+{idea.createdByBranch} · {formatYear(idea.createdByYear)} Year    
+  </div>
 
       <h3 className="font-bold mt-8 text-left">{idea.title}</h3>
       {/* <p className="text-gray-400 text-left">{idea.description}</p> */}
 <div className="text-gray-400 text-left w-full mt-2">
-  {idea.description.length > 75 ? (
-    <div className="space-y-1 w-full">
+{(idea.description || "").length > 75 ? (    
+  <div className="space-y-1 w-full">
       <p className="line-clamp-2 h-[3rem] overflow-hidden leading-relaxed mb-2 w-full">
         {idea.description}
       </p>
@@ -60,8 +66,8 @@ export default function IdeaCard({ idea, student, ideas, setIdeas, onClose }) {
       <div className="border-t border-white/10 my-4"></div>
 
       <div className="flex justify-between text-sm text-gray-400">
-        <span>by {idea.name}.</span>
-        <div className="flex gap-6">
+<span>by {idea.createdByName}.</span>     
+  <div className="flex gap-6">
           <span>💬 {idea.comments?.length || 0}</span>
           <span>👍 {idea.likes || 0}</span>
         </div>
@@ -101,8 +107,8 @@ export default function IdeaCard({ idea, student, ideas, setIdeas, onClose }) {
 
         {/* Branch & Year */}
         <div className="absolute top-6 right-20 text-sm bg-[#1f2937] text-[#26F2D0] px-4 py-2 rounded-full">
-          {idea.branch} · {idea.year}
-        </div>
+{idea.createdByBranch} · {formatYear(idea.createdByYear)} Year
+ </div>
 
 <h2 className="font-bold text-2xl mt-16 mb-6 text-center leading-tight">{idea.title}</h2>
         <p className="text-gray-300 text-lg leading-relaxed mb-8">{idea.description}</p>
@@ -111,7 +117,7 @@ export default function IdeaCard({ idea, student, ideas, setIdeas, onClose }) {
 
         {/* Stats */}
         <div className="flex justify-between text-lg text-gray-400 mb-8">
-          <span className="font-medium">by {idea.name}</span>
+          <span className="font-medium">by {idea.createdByName}</span>
           <div className="flex gap-8">
             <span>💬 {idea.comments?.length || 0} comments</span>
             <span>👍 {idea.likes || 0} likes</span>
@@ -129,18 +135,23 @@ export default function IdeaCard({ idea, student, ideas, setIdeas, onClose }) {
         </div>
 
         {/* Like Button */}
-        <div className="mt-6 pt-4 border-t border-white/10">
-          <button
-            onClick={async () => {
-              const res = await fetch(`http://localhost:8081/api/ideas/${ideaId}/like`, { method: "POST" });
-              const updated = await res.json();
-              setIdeas(ideas.map(i => (i._id || i.id) === (updated._id || updated.id) ? updated : i));
-            }}
-            className="bg-[#26F2D0]/20 hover:bg-[#26F2D0]/30 text-[#26F2D0] px-6 py-2 rounded-full font-medium transition-all"
-          >
-            👍 Likes ({idea.likes || 0})
-          </button>
-        </div>
+        {/* Like Button */}
+<div className="mt-6 pt-4 border-t border-white/10">
+  <button
+    onClick={async () => {
+      const token = localStorage.getItem("token"); // ✅ added
+      const res = await fetch(`http://localhost:8081/api/ideas/${ideaId}/like`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` } // ✅ added
+      });
+      const updated = await res.json();
+      setIdeas(ideas.map(i => (i._id || i.id) === (updated._id || updated.id) ? updated : i));
+    }}
+    className="bg-[#26F2D0]/20 hover:bg-[#26F2D0]/30 text-[#26F2D0] px-6 py-2 rounded-full font-medium transition-all"
+  >
+    👍 Likes ({idea.likes || 0})
+  </button>
+</div>
       </div>
     </div>
   );

@@ -574,41 +574,44 @@ export default function IdeasBoard() {
           </button>
         ))}
       </div>
-
-      {/* ================= IDEAS GRID ================= */}
-      {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-gray-400 text-lg">Loading ideas...</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8 items-start pb-10">
-          {ideas
-            .filter(i => activeFilter === "All" || i.category === activeFilter)
-            .map(idea => (
-              <IdeaCard
-                key={idea._id}
-                idea={idea}
-                student={student}
-                ideas={ideas}
-                setIdeas={setIdeas}
-              />
-            ))}
-        </div>
-      )}
+{/* ================= IDEAS GRID ================= */}
+{loading ? (
+  <div className="flex items-center justify-center h-64">
+    <p className="text-gray-400 text-lg">Loading ideas...</p>
+  </div>
+) : (
+  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8 items-start pb-10">
+    {ideas.filter(i => activeFilter === "All" || i.category === activeFilter).length === 0 ? (
+      <div className="col-span-3 flex flex-col items-center justify-center h-64 text-center">
+        <p className="text-4xl mb-4">💡</p>
+        <p className="text-gray-400 text-lg">No ideas yet.</p>
+        <p className="text-gray-500 text-sm mt-1">Be the first to post an idea!</p>
+      </div>
+    ) : (
+      ideas
+        .filter(i => activeFilter === "All" || i.category === activeFilter)
+        .map(idea => (
+          <IdeaCard
+            key={idea._id}
+            idea={idea}
+            student={student}
+            ideas={ideas}
+            setIdeas={setIdeas}
+          />
+        ))
+    )}
+  </div>
+)}
 
       {/* ================= IDEA FORM ================= */}
       {showForm && (
         <IdeaForm
           onClose={() => setShowForm(false)}
           onSubmit={async (newIdea) => {
-            const finalIdea = {
-              ...newIdea,
-              name: student.name,
-              year: student.year,
-              branch: student.branch
-            };
+            // ✅ to this
+        const finalIdea = { ...newIdea };
 
-            const res = await fetch("http://localhost:8081/api/ideas", {
+            const res = await fetch("http://localhost:8081/api/ideas/create", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

@@ -148,6 +148,8 @@
 import { useState } from "react";
 import IdeasBoard from "./IdeasBoard";
 import Club from "./Clubs/Club";
+import CampusNews from "./CampusNews";
+
 
 export default function Connect() {
   const [activeTab, setActiveTab] = useState("ideas");
@@ -221,10 +223,21 @@ export default function Connect() {
   >
     Clubs
   </button>
-</div>
+  <button
+          onClick={() => setActiveTab("news")}
+          className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-px whitespace-nowrap ${
+            activeTab === "news"
+              ? "border-[#26F2D0] text-[#26F2D0]"
+              : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
+          }`}
+        >
+          Campus News
+        </button>
+      </div>
 
-
-{activeTab === "ideas" ? <IdeasBoard /> : <Club />}
+      {activeTab === "ideas" && <IdeasBoard />}
+      {activeTab === "clubs" && <Club />}
+      {activeTab === "news" && <CampusNews />}
     </div>
   );
 }

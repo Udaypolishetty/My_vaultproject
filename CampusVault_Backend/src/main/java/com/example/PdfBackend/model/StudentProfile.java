@@ -19,6 +19,7 @@ public class StudentProfile {
     private String degree;
     @Indexed(unique = true)
     private String rollNumber;
+    private String email;
     private String year;
     private String branch;
     private String password;

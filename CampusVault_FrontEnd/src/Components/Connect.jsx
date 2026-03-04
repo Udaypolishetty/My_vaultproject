@@ -155,7 +155,7 @@ export default function Connect() {
   const [activeTab, setActiveTab] = useState("ideas");
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white pt-4 px-10 md:px-10">
+    <div className="min-h-screen bg-[#0f0f0f] text-white pt-4 px-4 md:px-10 overflow-x-hidden">
 
 
     <div className="mt-6 mb-6 px-2 md:px-6">
@@ -204,7 +204,7 @@ export default function Connect() {
 <div className="flex gap-6 mb-8 border-b border-white/20 pb-3  overflow-x-auto">
   <button
     onClick={() => setActiveTab("ideas")}
-    className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-px ${
+    className={`px-6 py-2 font-medium transition-all duration-200 border-b-2  -mb-[2px] ${
       activeTab === "ideas"
         ? "border-[#26F2D0] text-[#26F2D0]"
         : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
@@ -214,9 +214,9 @@ export default function Connect() {
   </button>
 
   <button
-    onClick={() => setActiveTab("discussions")}
-    className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-px ${
-      activeTab === "discussions"
+    onClick={() => setActiveTab("clubs")}
+    className={`px-6 py-2 font-medium transition-all duration-200 border-b-2  -mb-[2px] ${
+      activeTab === "clubs"
         ? "border-[#26F2D0] text-[#26F2D0]"
         : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
     }`}
@@ -225,7 +225,7 @@ export default function Connect() {
   </button>
   <button
           onClick={() => setActiveTab("news")}
-          className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-px whitespace-nowrap ${
+          className={`px-6 py-2 font-medium transition-all duration-200 border-b-2  -mb-[2px] whitespace-nowrap ${
             activeTab === "news"
               ? "border-[#26F2D0] text-[#26F2D0]"
               : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"

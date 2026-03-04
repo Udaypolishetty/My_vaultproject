@@ -193,7 +193,8 @@ const Access = () => {
       const exists = await existsRes.json();
 
       if (!exists) {
-        navigate("/profile/setup", { state: { rollNumber: roll } });
+        // navigate("/profile/setup", { state: { rollNumber: roll } });
+        navigate("/profile");
         return;
       }
 
@@ -212,6 +213,7 @@ const Access = () => {
       localStorage.setItem("rollNumber", data.rollNumber);
       localStorage.setItem("name", data.name);
       localStorage.setItem("id", data.id);
+      localStorage.setItem("Email", data.email)
 
       navigate(`/profile/${data.id}/home`);
 

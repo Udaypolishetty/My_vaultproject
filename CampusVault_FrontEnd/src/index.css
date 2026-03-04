@@ -60,3 +60,14 @@ html, body {
 .animate-fadeIn {
   animation: slideUp 0.4s ease-out;
 }
+
+/* Hide scrollbar globally but keep scrolling */
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}

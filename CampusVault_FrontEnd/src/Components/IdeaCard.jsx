@@ -1,157 +1,635 @@
+// import { useState } from "react";
+// import Comment from "./Comment";
+
+// export default function IdeaCard({ idea, student, ideas, setIdeas, onClose }) {
+//     if (!idea || !idea.title) return null;
+//   const [open, setOpen] = useState(false);
+//   const [showModal, setShowModal] = useState(false);
+//   const [active, setActive] = useState(false);
+  
+//   const ideaId = idea._id || idea.id; 
+//   const formatYear = (y) => {
+//   if (!y) return "";
+//   const clean = y.replace(/[^0-9]/g, ""); // strip rd/th/st
+//   return ({ "1": "1st", "2": "2nd", "3": "3rd", "4": "4th" }[clean] || y);
+// };
+
+//   const categoryStyles = {
+//     Tech: "bg-blue-500/20 text-blue-400",
+//     Academic: "bg-green-500/20 text-green-400 hover:bg-green-500/30",
+//     "Campus Pulse": "bg-red-500/20 text-red-400",
+//     Cultural: "bg-yellow-300/20 text-yellow-400",
+//   };
+
+//   // Compact card (normal view)
+//   const renderCompactCard = () => (
+//     <div 
+//       className="relative bg-[#111] p-6 rounded-xl border border-white/10 
+//                   transition-all duration-300 hover:scale-105 hover:border-[#26F2D0] hover:shadow-lg cursor-pointer"
+//       onClick={() => setShowModal(true)}
+//     >
+//       {/* Category */}
+//       <div className={`absolute top-4 left-4 text-xs font-semibold px-3 py-1 rounded-full
+//         ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}
+//       >
+//         {idea.category}
+//       </div>
+
+//       {/* Branch & Year */}
+//       <div className="absolute top-4 right-4 text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full">
+// {idea.createdByBranch} · {formatYear(idea.createdByYear)} Year    
+//   </div>
+
+//       <h3 className="font-bold mt-8 text-left">{idea.title}</h3>
+//       {/* <p className="text-gray-400 text-left">{idea.description}</p> */}
+// <div className="text-gray-400 text-left w-full mt-2">
+// {(idea.description || "").length > 75 ? (    
+//   <div className="space-y-1 w-full">
+//       <p className="line-clamp-2 h-[3rem] overflow-hidden leading-relaxed mb-2 w-full">
+//         {idea.description}
+//       </p>
+//       <span 
+//         className="text-[#26F2D0] text-sm font-medium cursor-pointer hover:text-white transition-colors block"
+//         onClick={(e) => {
+//           e.stopPropagation();
+//           setShowModal(true);
+//         }}
+//       >
+//         read more →
+//       </span>
+//     </div>
+//   ) : (
+//     <p className="leading-relaxed w-full">{idea.description}</p>
+//   )}
+// </div>
+
+//       <div className="border-t border-white/10 my-4"></div>
+
+//       <div className="flex justify-between text-sm text-gray-400">
+// <span>by {idea.createdByName}.</span>     
+//   <div className="flex gap-6">
+//           <span>💬 {idea.comments?.length || 0}</span>
+//           <span>👍 {idea.likes || 0}</span>
+//         </div>
+//       </div>
+//     </div>
+//   );
+
+//   // Large modal popup
+//   const renderModal = () => (
+//     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+//       {/* Modal Backdrop */}
+//       <div 
+//         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+//         onClick={() => setShowModal(false)}
+//       />
+      
+//       {/* Modal Content */}
+// <div className="relative bg-[#111] w-full max-w-2xl max-h-[90vh] overflow-y-auto 
+//                 [&::-webkit-scrollbar]:hidden [-webkit-scrollbar-width]:none [-ms-overflow-style]:none
+//                 scrollbar-hide rounded-2xl border-2 border-[#26F2D0]/50 shadow-2xl p-8 z-10">
+
+        
+//         {/* Close Button */}
+//         <button
+//           onClick={() => setShowModal(false)}
+//           className="absolute top-6 right-6 text-[#26F2D0] hover:text-red-400 text-xl font-bold transition-all z-20"
+//         >
+//           ×
+//         </button>
+
+//         {/* Category */}
+//         <div className={`absolute top-6 left-6 text-sm font-semibold px-4 py-2 rounded-full
+//           ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}
+//         >
+//           {idea.category}
+//         </div>
+
+//         {/* Branch & Year */}
+//         <div className="absolute top-6 right-20 text-sm bg-[#1f2937] text-[#26F2D0] px-4 py-2 rounded-full">
+// {idea.createdByBranch} · {formatYear(idea.createdByYear)} Year
+//  </div>
+
+// <h2 className="font-bold text-2xl mt-16 mb-6 text-center leading-tight">{idea.title}</h2>
+//         <p className="text-gray-300 text-lg leading-relaxed mb-8">{idea.description}</p>
+
+//         <div className="border-t border-white/20 my-8"></div>
+
+//         {/* Stats */}
+//         <div className="flex justify-between text-lg text-gray-400 mb-8">
+//           <span className="font-medium">by {idea.createdByName}</span>
+//           <div className="flex gap-8">
+//             <span>💬 {idea.comments?.length || 0} comments</span>
+//             <span>👍 {idea.likes || 0} likes</span>
+//           </div>
+//         </div>
+
+//         {/* Interactive Comments */}
+//         <div className="border-t border-white/10 pt-6">
+//           <Comment 
+//             idea={{ ...idea, _id: ideaId }} 
+//             student={student} 
+//             ideas={ideas} 
+//             setIdeas={setIdeas} 
+//           />
+//         </div>
+
+//         {/* Like Button */}
+//         {/* Like Button */}
+// <div className="mt-6 pt-4 border-t border-white/10">
+//   <button
+//     onClick={async () => {
+//       const token = localStorage.getItem("token"); // ✅ added
+//       const res = await fetch(`http://localhost:8081/api/ideas/${ideaId}/like`, {
+//         method: "POST",
+//         headers: { "Authorization": `Bearer ${token}` } // ✅ added
+//       });
+//       const updated = await res.json();
+//       setIdeas(ideas.map(i => (i._id || i.id) === (updated._id || updated.id) ? updated : i));
+//     }}
+//     className="bg-[#26F2D0]/20 hover:bg-[#26F2D0]/30 text-[#26F2D0] px-6 py-2 rounded-full font-medium transition-all"
+//   >
+//     👍 Likes ({idea.likes || 0})
+//   </button>
+// </div>
+//       </div>
+//     </div>
+//   );
+
+//   return showModal ? renderModal() : renderCompactCard();
+// }
+
+
+
+//new mallu......
+
+// import { useState } from "react";
+// import Comment from "./Comment";
+
+// export default function IdeaCard({ idea, student, ideas, setIdeas }) {
+//   const [showModal, setShowModal] = useState(false);
+
+//   const ideaId = idea.id;
+//   const token = localStorage.getItem("token");
+
+//   const alreadyLiked = (idea.likedBy || []).includes(student?.rollNumber);
+//   const [hasLiked, setHasLiked] = useState(alreadyLiked);
+
+//  const formatYear = (y) => {
+//   if (!y) return "";
+
+//   // extract only the number
+//   const num = parseInt(y);
+
+//   const suffix = (n) => {
+//     if (n === 1) return "1st";
+//     if (n === 2) return "2nd";
+//     if (n === 3) return "3rd";
+//     return n + "th";
+//   };
+
+//   //icons...
+//   const categoryIcons = {
+//   Tech: "⚙️",
+//   Academic: "📚",
+//   "Campus Pulse": "🏫",
+//   Cultural: "🎭",
+//   Others: "💬",
+// };
+
+//   return suffix(num) + " Year";
+// };
+
+//   const formattedDate = idea.createdAt
+//     ? new Date(idea.createdAt).toLocaleDateString("en-IN", {
+//         year: "numeric",
+//         month: "long",
+//         day: "numeric",
+//       })
+//     : "";
+
+//   const categoryStyles = {
+//     Tech: "bg-blue-500/20 text-blue-400",
+//     Academic: "bg-green-500/20 text-green-400",
+//     "Campus Pulse": "bg-red-500/20 text-red-400",
+//     Cultural: "bg-yellow-300/20 text-yellow-400",
+//   };
+
+//   const handleLike = async (e) => {
+//     e.stopPropagation();
+//     if (hasLiked) return;
+
+//     const res = await fetch(`http://localhost:8081/api/ideas/${ideaId}/like`, {
+//       method: "POST",
+//       headers: { Authorization: `Bearer ${token}` },
+//     });
+
+//     if (!res.ok) return;
+
+//     const updated = await res.json();
+//     setHasLiked(true);
+//     setIdeas(prev => prev.map(i => (i.id === updated.id ? updated : i)));
+//   };
+
+//   // ✅ Uses idea.createdByEmail from backend — no localStorage guessing
+//   const handleEmail = (e) => {
+//     e.stopPropagation();
+
+//     const recipientEmail = idea.createdByEmail || null;
+
+//     const subject = encodeURIComponent(`Regarding your idea: ${idea.title}`);
+//     const body = encodeURIComponent(
+//       `Hi ${idea.createdByName},\n\nI came across your idea "${idea.title}" and wanted to connect.\n\nBest regards`
+//     );
+
+//     const gmailUrl = recipientEmail
+//       ? `https://mail.google.com/mail/?view=cm&fs=1&to=${recipientEmail}&su=${subject}&body=${body}`
+//       : `https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`;
+
+//     window.open(gmailUrl, "_blank");
+//   };
+
+//   const renderCompactCard = () => (
+//     <div
+//       className="relative bg-[#111] p-6 rounded-xl border border-white/10
+//                   transition-all duration-300 hover:scale-105 hover:border-[#26F2D0] hover:shadow-lg cursor-pointer"
+//       onClick={() => setShowModal(true)}
+//     >
+//       <div
+//         className={`absolute top-4 left-4 text-xs font-semibold px-3 py-1 rounded-full
+//         ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}
+//       >
+//         {idea.category}
+//       </div>
+
+//       <div className="absolute top-4 right-4 flex items-center gap-2">
+//         <div className="text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full">
+// {idea.createdByBranch} · {formatYear(idea.createdByYear)}    
+//     </div>
+//         <button
+//           onClick={handleEmail}
+//           className="text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full
+//                      hover:bg-indigo-500/30 hover:text-indigo-300 transition-all"
+//         >
+//           📧 Email
+//         </button>
+//       </div>
+
+//       <h3 className="font-bold mt-8 text-left">{idea.title}</h3>
+
+//       <div className="text-gray-400 text-left w-full mt-2">
+//         {idea.description.length > 75 ? (
+//           <div className="space-y-1 w-full">
+//             <p className="line-clamp-2 h-[3rem] overflow-hidden leading-relaxed mb-2 w-full">
+//               {idea.description}
+//             </p>
+//             <span
+//               className="text-[#26F2D0] text-sm font-medium cursor-pointer hover:text-white transition-colors block"
+//               onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
+//             >
+//               read more →
+//             </span>
+//           </div>
+//         ) : (
+//           <p className="leading-relaxed w-full">{idea.description}</p>
+//         )}
+//       </div>
+
+//       <div className="border-t border-white/10 my-4"></div>
+
+//       <div className="flex justify-between text-sm text-gray-400">
+//         <div className="flex items-center gap-2">
+//           <span>by {idea.createdByName}</span>
+//           <span className="text-xs text-gray-500">• {formattedDate}</span>
+//         </div>
+//         <div className="flex gap-6 items-center">
+//           <span>💬 {idea.comments?.length || 0}</span>
+//           <button
+//             onClick={handleLike}
+//             disabled={hasLiked}
+//             className={`transition-all ${hasLiked ? "opacity-50 cursor-not-allowed" : "hover:scale-125"}`}
+//           >
+//             👍 {idea.likes || 0}
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+
+//   const renderModal = () => (
+//     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+//       <div
+//         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+//         onClick={() => setShowModal(false)}
+//       />
+//       <div className="relative bg-[#111] w-full max-w-2xl max-h-[90vh] overflow-y-auto
+//                       rounded-2xl border-2 border-[#26F2D0]/50 shadow-2xl p-8 z-10">
+
+//         <button
+//           onClick={() => setShowModal(false)}
+//           className="absolute top-6 right-6 text-[#26F2D0] hover:text-red-400 text-xl font-bold"
+//         >
+//           ×
+//         </button>
+
+//         <div className={`absolute top-6 left-6 text-sm font-semibold px-4 py-2 rounded-full
+//           ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}>
+//           {idea.category}
+//         </div>
+
+//         <div className="absolute top-6 right-20 text-sm bg-[#1f2937] text-[#26F2D0] px-4 py-2 rounded-full">
+//         {idea.createdByBranch} · {formatYear(idea.createdByYear)}     
+//    </div>
+
+//         <h2 className="font-bold text-2xl mt-16 mb-6 text-center">{idea.title}</h2>
+
+//         <p className="text-gray-300 text-lg leading-relaxed mb-8">{idea.description}</p>
+
+//         <div className="border-t border-white/20 my-8"></div>
+
+//         <div className="flex justify-between text-lg text-gray-400 mb-8">
+//           <div>
+//             <span className="font-medium">by {idea.createdByName}</span>
+//             <p className="text-sm text-gray-500">{formattedDate}</p>
+//           </div>
+//           <div className="flex gap-8">
+//             <span>💬 {idea.comments?.length || 0} comments</span>
+//             <span>👍 {idea.likes || 0} likes</span>
+//           </div>
+//         </div>
+
+//         <div className="border-t border-white/10 pt-6">
+//           <Comment idea={idea} student={student} ideas={ideas} setIdeas={setIdeas} />
+//         </div>
+
+//         <div className="mt-6 pt-4 border-t border-white/10 flex gap-4">
+//           <button
+//             onClick={handleLike}
+//             disabled={hasLiked}
+//             className={`px-6 py-2 rounded-full font-medium transition-all ${
+//               hasLiked
+//                 ? "bg-[#26F2D0]/10 text-gray-500 cursor-not-allowed"
+//                 : "bg-[#26F2D0]/20 hover:bg-[#26F2D0]/30 text-[#26F2D0]"
+//             }`}
+//           >
+//             {hasLiked ? "✅ Liked" : "👍 Like"} ({idea.likes || 0})
+//           </button>
+
+//           <button
+//             onClick={handleEmail}
+//             className="px-6 py-2 rounded-full font-medium transition-all
+//                        bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400"
+//           >
+//             📧 Email {idea.createdByName}
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+
+//   return showModal ? renderModal() : renderCompactCard();
+// }
+
+
+//new ,allu(perplexity)
+
 import { useState } from "react";
 import Comment from "./Comment";
 
-export default function IdeaCard({ idea, student, ideas, setIdeas, onClose }) {
-    if (!idea || !idea.title) return null;
-  const [open, setOpen] = useState(false);
+export default function IdeaCard({ idea, student, ideas, setIdeas }) {
   const [showModal, setShowModal] = useState(false);
-  const [active, setActive] = useState(false);
-  
-  const ideaId = idea._id || idea.id; 
+
+  const ideaId = idea.id;
+  const token = localStorage.getItem("token");
+
+  const alreadyLiked = (idea.likedBy || []).includes(student?.rollNumber);
+  const [hasLiked, setHasLiked] = useState(alreadyLiked);
+
   const formatYear = (y) => {
-  if (!y) return "";
-  const clean = y.replace(/[^0-9]/g, ""); // strip rd/th/st
-  return ({ "1": "1st", "2": "2nd", "3": "3rd", "4": "4th" }[clean] || y);
+    if (!y) return "";
+
+    // extract only the number
+    const num = parseInt(y);
+
+    const suffix = (n) => {
+      if (n === 1) return "1st";
+      if (n === 2) return "2nd";
+      if (n === 3) return "3rd";
+      return n + "th";
+    };
+
+    return suffix(num) + " Year"; // ✅ Fixed: moved return outside
+  };
+
+  //icons...
+  const categoryIcons = {
+  Tech: "/tech.png",
+  Academic: "/academic.png",
+  "Campus Pulse": "/campus-pulsee.png",
+  Cultural: "/cultural.png",
+  Others: "/others.png",
 };
+
+  const formattedDate = idea.createdAt
+    ? new Date(idea.createdAt).toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
 
   const categoryStyles = {
     Tech: "bg-blue-500/20 text-blue-400",
-    Academic: "bg-green-500/20 text-green-400 hover:bg-green-500/30",
+    Academic: "bg-green-500/20 text-green-400",
     "Campus Pulse": "bg-red-500/20 text-red-400",
     Cultural: "bg-yellow-300/20 text-yellow-400",
   };
 
-  // Compact card (normal view)
+  const handleLike = async (e) => {
+    e.stopPropagation();
+    if (hasLiked) return;
+
+    const res = await fetch(`http://localhost:8081/api/ideas/${ideaId}/like`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) return;
+
+    const updated = await res.json();
+    setHasLiked(true);
+    setIdeas(prev => prev.map(i => (i.id === updated.id ? updated : i)));
+  };
+
+  // ✅ Uses idea.createdByEmail from backend — no localStorage guessing
+  const handleEmail = (e) => {
+    e.stopPropagation();
+
+    const recipientEmail = idea.createdByEmail || null;
+
+    const subject = encodeURIComponent(`Regarding your idea: ${idea.title}`);
+    const body = encodeURIComponent(
+      `Hi ${idea.createdByName},\n\nI came across your idea "${idea.title}" and wanted to connect.\n\nBest regards`
+    );
+
+    const gmailUrl = recipientEmail
+      ? `https://mail.google.com/mail/?view=cm&fs=1&to=${recipientEmail}&su=${subject}&body=${body}`
+      : `https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`;
+
+    window.open(gmailUrl, "_blank");
+  };
+
   const renderCompactCard = () => (
-    <div 
-      className="relative bg-[#111] p-6 rounded-xl border border-white/10 
+    <div
+      className="relative bg-[#111] p-6 rounded-xl border border-white/10
                   transition-all duration-300 hover:scale-105 hover:border-[#26F2D0] hover:shadow-lg cursor-pointer"
       onClick={() => setShowModal(true)}
     >
-      {/* Category */}
-      <div className={`absolute top-4 left-4 text-xs font-semibold px-3 py-1 rounded-full
+      <div
+        className={`absolute top-4 left-4 text-xs font-semibold px-3 py-1 rounded-full
         ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}
       >
         {idea.category}
       </div>
 
-      {/* Branch & Year */}
-      <div className="absolute top-4 right-4 text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full">
-{idea.createdByBranch} · {formatYear(idea.createdByYear)} Year    
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <div className="text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full">
+          {idea.createdByBranch} · {formatYear(idea.createdByYear)}    
+        </div>
+        <button
+          onClick={handleEmail}
+          className="text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full
+                     hover:bg-indigo-500/30 hover:text-indigo-300 transition-all"
+        >
+          📧 Email
+        </button>
+      </div>
+{/* ✅ Category Icon + Title */}
+<div className="flex items-center gap-3 mt-8">
+  <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10
+                  flex items-center justify-center shrink-0">
+    <img src={categoryIcons[idea.category] || "/others.png"}
+         className="w-6 h-6 object-contain" alt="" />
   </div>
-
-      <h3 className="font-bold mt-8 text-left">{idea.title}</h3>
-      {/* <p className="text-gray-400 text-left">{idea.description}</p> */}
-<div className="text-gray-400 text-left w-full mt-2">
-{(idea.description || "").length > 75 ? (    
-  <div className="space-y-1 w-full">
-      <p className="line-clamp-2 h-[3rem] overflow-hidden leading-relaxed mb-2 w-full">
-        {idea.description}
-      </p>
-      <span 
-        className="text-[#26F2D0] text-sm font-medium cursor-pointer hover:text-white transition-colors block"
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowModal(true);
-        }}
-      >
-        read more →
-      </span>
-    </div>
-  ) : (
-    <p className="leading-relaxed w-full">{idea.description}</p>
-  )}
+  <h3 className="font-bold text-left">{idea.title}</h3>
 </div>
+
+      <div className="text-gray-400 text-left w-full mt-2">
+{(idea.description || "").length > 75 ? (     
+       <div className="space-y-1 w-full">
+            <p className="line-clamp-2 h-[3rem] overflow-hidden leading-relaxed mb-2 w-full">
+              {idea.description}
+            </p>
+            <span
+              className="text-[#26F2D0] text-sm font-medium cursor-pointer hover:text-white transition-colors block"
+              onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
+            >
+              read more →
+            </span>
+          </div>
+        ) : (
+          <p className="leading-relaxed w-full">{idea.description}</p>
+        )}
+      </div>
 
       <div className="border-t border-white/10 my-4"></div>
 
       <div className="flex justify-between text-sm text-gray-400">
-<span>by {idea.createdByName}.</span>     
-  <div className="flex gap-6">
+        <div className="flex items-center gap-2">
+          <span>by {idea.createdByName}</span>
+          <span className="text-xs text-gray-500">• {formattedDate}</span>
+        </div>
+        <div className="flex gap-6 items-center">
           <span>💬 {idea.comments?.length || 0}</span>
-          <span>👍 {idea.likes || 0}</span>
+          <button
+            onClick={handleLike}
+            disabled={hasLiked}
+            className={`transition-all ${hasLiked ? "opacity-50 cursor-not-allowed" : "hover:scale-125"}`}
+          >
+            👍 {idea.likes || 0}
+          </button>
         </div>
       </div>
     </div>
   );
 
-  // Large modal popup
   const renderModal = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      {/* Modal Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={() => setShowModal(false)}
       />
-      
-      {/* Modal Content */}
-<div className="relative bg-[#111] w-full max-w-2xl max-h-[90vh] overflow-y-auto 
-                [&::-webkit-scrollbar]:hidden [-webkit-scrollbar-width]:none [-ms-overflow-style]:none
-                scrollbar-hide rounded-2xl border-2 border-[#26F2D0]/50 shadow-2xl p-8 z-10">
+      <div className="relative bg-[#111] w-full max-w-2xl max-h-[90vh] overflow-y-auto
+                      rounded-2xl border-2 border-[#26F2D0]/50 shadow-2xl p-8 z-10">
 
-        
-        {/* Close Button */}
         <button
           onClick={() => setShowModal(false)}
-          className="absolute top-6 right-6 text-[#26F2D0] hover:text-red-400 text-xl font-bold transition-all z-20"
+          className="absolute top-6 right-6 text-[#26F2D0] hover:text-red-400 text-xl font-bold"
         >
           ×
         </button>
 
-        {/* Category */}
         <div className={`absolute top-6 left-6 text-sm font-semibold px-4 py-2 rounded-full
-          ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}
-        >
+        ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}>
           {idea.category}
         </div>
 
-        {/* Branch & Year */}
         <div className="absolute top-6 right-20 text-sm bg-[#1f2937] text-[#26F2D0] px-4 py-2 rounded-full">
-{idea.createdByBranch} · {formatYear(idea.createdByYear)} Year
- </div>
+          {idea.createdByBranch} · {formatYear(idea.createdByYear)}     
+              </div><div className="flex flex-col items-center mt-12 mb-6">
+  <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10
+                  flex items-center justify-center shadow-inner mb-4">
+    <img
+      src={categoryIcons[idea.category] || "/icons/others.png"}
+      className="w-12 h-12 object-contain"
+      alt=""
+    />
+  </div>
 
-<h2 className="font-bold text-2xl mt-16 mb-6 text-center leading-tight">{idea.title}</h2>
+  <h2 className="font-bold text-2xl text-center">{idea.title}</h2>
+</div>
+        {/* <h2 className="font-bold text-2xl mt-16 mb-6 text-center">{idea.title}</h2> */}
+
         <p className="text-gray-300 text-lg leading-relaxed mb-8">{idea.description}</p>
 
         <div className="border-t border-white/20 my-8"></div>
 
-        {/* Stats */}
         <div className="flex justify-between text-lg text-gray-400 mb-8">
-          <span className="font-medium">by {idea.createdByName}</span>
+          <div>
+            <span className="font-medium">by {idea.createdByName}</span>
+            <p className="text-sm text-gray-500">{formattedDate}</p>
+          </div>
           <div className="flex gap-8">
             <span>💬 {idea.comments?.length || 0} comments</span>
             <span>👍 {idea.likes || 0} likes</span>
           </div>
         </div>
 
-        {/* Interactive Comments */}
         <div className="border-t border-white/10 pt-6">
-          <Comment 
-            idea={{ ...idea, _id: ideaId }} 
-            student={student} 
-            ideas={ideas} 
-            setIdeas={setIdeas} 
-          />
+          <Comment idea={idea} student={student} ideas={ideas} setIdeas={setIdeas} />
         </div>
 
-        {/* Like Button */}
-        {/* Like Button */}
-<div className="mt-6 pt-4 border-t border-white/10">
-  <button
-    onClick={async () => {
-      const token = localStorage.getItem("token"); // ✅ added
-      const res = await fetch(`http://localhost:8081/api/ideas/${ideaId}/like`, {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${token}` } // ✅ added
-      });
-      const updated = await res.json();
-      setIdeas(ideas.map(i => (i._id || i.id) === (updated._id || updated.id) ? updated : i));
-    }}
-    className="bg-[#26F2D0]/20 hover:bg-[#26F2D0]/30 text-[#26F2D0] px-6 py-2 rounded-full font-medium transition-all"
-  >
-    👍 Likes ({idea.likes || 0})
-  </button>
-</div>
+        <div className="mt-6 pt-4 border-t border-white/10 flex gap-4">
+          <button
+            onClick={handleLike}
+            disabled={hasLiked}
+            className={`px-6 py-2 rounded-full font-medium transition-all ${
+              hasLiked
+                ? "bg-[#26F2D0]/10 text-gray-500 cursor-not-allowed"
+                : "bg-[#26F2D0]/20 hover:bg-[#26F2D0]/30 text-[#26F2D0]"
+            }`}
+          >
+            {hasLiked ? "✅ Liked" : "👍 Like"} ({idea.likes || 0})
+          </button>
+
+          <button
+            onClick={handleEmail}
+            className="px-6 py-2 rounded-full font-medium transition-all
+                       bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400"
+          >
+            📧 Email {idea.createdByName}
+          </button>
+        </div>
       </div>
     </div>
   );

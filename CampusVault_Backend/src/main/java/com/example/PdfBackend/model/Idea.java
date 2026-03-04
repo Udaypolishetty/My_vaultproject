@@ -212,6 +212,42 @@
 
 //mallu...
 
+// package com.example.PdfBackend.model;
+
+// import lombok.*;
+// import org.springframework.data.annotation.Id;
+// import org.springframework.data.mongodb.core.mapping.Document;
+
+// import java.time.LocalDateTime;
+// import java.util.ArrayList;
+// import java.util.List;
+// @Data
+// @NoArgsConstructor
+// @AllArgsConstructor
+// @Getter
+// @Setter
+// @Document(collection = "ideas")
+// public class Idea {
+
+//     @Id
+//     private String id;
+//     private String category;
+//     private String title;
+//     private String description;
+//     private String createdByName;
+//     private LocalDateTime createdAt;
+//     private String createdByBranch;
+//     private String createdByYear;
+
+//     private int likes = 0;
+//     private List<String> likedBy = new ArrayList<>();
+//    private List<Comment> comments = new ArrayList<>();
+
+
+// }
+
+//new mallu...
+
 package com.example.PdfBackend.model;
 
 import lombok.*;
@@ -221,11 +257,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Document(collection = "ideas")
 public class Idea {
 
@@ -238,10 +273,9 @@ public class Idea {
     private LocalDateTime createdAt;
     private String createdByBranch;
     private String createdByYear;
-
+    private String createdById;      // ✅ added
+    private String createdByEmail;   // ✅ added
     private int likes = 0;
     private List<String> likedBy = new ArrayList<>();
-   private List<Comment> comments = new ArrayList<>();
-
-
+    private List<Comment> comments = new ArrayList<>();
 }

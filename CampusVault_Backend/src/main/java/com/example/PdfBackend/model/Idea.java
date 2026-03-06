@@ -278,4 +278,5 @@ public class Idea {
     private int likes = 0;
     private List<String> likedBy = new ArrayList<>();
     private List<Comment> comments = new ArrayList<>();
+    private String createdByRollNumber;
 }

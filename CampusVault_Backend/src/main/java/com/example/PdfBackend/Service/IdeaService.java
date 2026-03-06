@@ -184,6 +184,126 @@
 
 //new mallu
 
+// package com.example.PdfBackend.Service;
+
+// import com.example.PdfBackend.CustomException.ForbiddenException;
+// import com.example.PdfBackend.CustomException.NotFoundException;
+// import com.example.PdfBackend.DTO.IdeaDto.IdeaRequest;
+// import com.example.PdfBackend.DTO.IdeaDto.IdeaResponse;
+// import com.example.PdfBackend.model.Idea;
+// import com.example.PdfBackend.model.StudentProfile;
+// import com.example.PdfBackend.repository.IdeaRepository;
+// import com.example.PdfBackend.repository.StudentProfileRepository;
+// import org.springframework.stereotype.Service;
+
+// import java.time.LocalDateTime;
+// import java.util.ArrayList;
+// import java.util.List;
+
+// @Service
+// public class IdeaService {
+
+//     private final IdeaRepository ideaRepository;
+//     private final StudentProfileRepository studentProfileRepository;
+//     private final NotificationService notificationService;
+//     private final StudentProfileRepository studentRepository;
+
+//     public IdeaService(IdeaRepository ideaRepository, StudentProfileRepository studentProfileRepository) {
+//         this.ideaRepository = ideaRepository;
+//         this.studentProfileRepository = studentProfileRepository;
+//     }
+
+//     public List<Idea> getAllIdea() {
+//         return ideaRepository.findAll();
+//     }
+
+//     public IdeaResponse createIdea(IdeaRequest request, String rollNumber) {
+//         StudentProfile student = studentProfileRepository.findByRollNumber(rollNumber)
+//                 .orElseThrow(() -> new NotFoundException("Student not found " + rollNumber));
+
+//         // ✅ one idea per day check
+//         // LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+//         // LocalDateTime endOfDay = startOfDay.plusDays(1);
+
+//         // boolean alreadyPostedToday = ideaRepository.existsByCreatedByIdAndCreatedAtBetween(
+//         //         student.getId(), startOfDay, endOfDay
+//         // );
+
+//         // if (alreadyPostedToday) {
+//         //     throw new ForbiddenException("You can only post one idea per day");
+//         // }
+//         // ✅ 48 hour cooldown — stored in DB, cannot be bypassed
+//             LocalDateTime cutoff = LocalDateTime.now().minusHours(48);
+//             LocalDateTime now = LocalDateTime.now();
+
+//             boolean alreadyPostedRecently = ideaRepository.existsByCreatedByIdAndCreatedAtBetween(
+//                     student.getId(), cutoff, now
+//             );
+
+//             if (alreadyPostedRecently) {
+//                 throw new ForbiddenException("You can only post one idea every 48 hours");
+//             }
+
+//         if (ideaRepository.existsByTitle(request.getTitle())) {
+//             throw new ForbiddenException("An idea with this title already exists");
+//         }
+
+//         Idea idea = new Idea();
+//         idea.setCategory(request.getCategory());
+//         idea.setTitle(request.getTitle());
+//         idea.setDescription(request.getDescription());
+//         idea.setCreatedAt(LocalDateTime.now());
+//         idea.setCreatedByName(student.getName());
+//         idea.setCreatedByBranch(student.getBranch());
+//         idea.setCreatedByYear(student.getYear());
+//         idea.setCreatedById(student.getId());       // ✅ added
+//         idea.setCreatedByEmail(student.getEmail()); // ✅ added
+
+//         return mapToResponse(ideaRepository.save(idea));
+//     }
+
+//     public IdeaResponse likeIdea(String ideaId, String rollNumber) {
+//         Idea idea = ideaRepository.findById(ideaId)
+//                 .orElseThrow(() -> new NotFoundException("Idea not found: " + ideaId));
+
+//         if (idea.getLikedBy() == null) idea.setLikedBy(new ArrayList<>());
+
+//         if (idea.getLikedBy().contains(rollNumber)) {
+//             throw new ForbiddenException("You have already liked this idea");
+//         }
+
+//         idea.getLikedBy().add(rollNumber);
+//         idea.setLikes(idea.getLikes() + 1);
+
+//         return mapToResponse(ideaRepository.save(idea));
+//         StudentProfile liker = studentRepository.findByRollNumber(likerRollNumber)
+//     .orElseThrow(() -> new RuntimeException("Student not found"));
+
+// notificationService.create(
+//     idea.getCreatedByRollNumber(), // idea owner
+//     liker.getName() + " liked your idea \"" + idea.getTitle() + "\"",
+//     "IDEA_LIKE"
+// );
+//     }
+
+//     public IdeaResponse mapToResponse(Idea idea) {
+//         return new IdeaResponse(
+//                 idea.getId(),
+//                 idea.getTitle(),
+//                 idea.getCategory(),
+//                 idea.getDescription(),
+//                 idea.getCreatedAt(),
+//                 idea.getCreatedByName(),
+//                 idea.getCreatedByBranch(),
+//                 idea.getCreatedByYear(),
+//                 idea.getLikes(),
+//                 idea.getLikedBy(),
+//                 idea.getComments() != null ? idea.getComments() : new ArrayList<>()
+//         );
+//     }
+// }
+
+
 package com.example.PdfBackend.Service;
 
 import com.example.PdfBackend.CustomException.ForbiddenException;
@@ -205,10 +325,16 @@ public class IdeaService {
 
     private final IdeaRepository ideaRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final NotificationService notificationService;
 
-    public IdeaService(IdeaRepository ideaRepository, StudentProfileRepository studentProfileRepository) {
+    public IdeaService(
+        IdeaRepository ideaRepository,
+        StudentProfileRepository studentProfileRepository,
+        NotificationService notificationService
+    ) {
         this.ideaRepository = ideaRepository;
         this.studentProfileRepository = studentProfileRepository;
+        this.notificationService = notificationService;
     }
 
     public List<Idea> getAllIdea() {
@@ -219,28 +345,16 @@ public class IdeaService {
         StudentProfile student = studentProfileRepository.findByRollNumber(rollNumber)
                 .orElseThrow(() -> new NotFoundException("Student not found " + rollNumber));
 
-        // ✅ one idea per day check
-        // LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
-        // LocalDateTime endOfDay = startOfDay.plusDays(1);
+        LocalDateTime cutoff = LocalDateTime.now().minusHours(48);
+        LocalDateTime now = LocalDateTime.now();
 
-        // boolean alreadyPostedToday = ideaRepository.existsByCreatedByIdAndCreatedAtBetween(
-        //         student.getId(), startOfDay, endOfDay
-        // );
+        boolean alreadyPostedRecently = ideaRepository.existsByCreatedByIdAndCreatedAtBetween(
+                student.getId(), cutoff, now
+        );
 
-        // if (alreadyPostedToday) {
-        //     throw new ForbiddenException("You can only post one idea per day");
-        // }
-        // ✅ 48 hour cooldown — stored in DB, cannot be bypassed
-            LocalDateTime cutoff = LocalDateTime.now().minusHours(48);
-            LocalDateTime now = LocalDateTime.now();
-
-            boolean alreadyPostedRecently = ideaRepository.existsByCreatedByIdAndCreatedAtBetween(
-                    student.getId(), cutoff, now
-            );
-
-            if (alreadyPostedRecently) {
-                throw new ForbiddenException("You can only post one idea every 48 hours");
-            }
+        if (alreadyPostedRecently) {
+            throw new ForbiddenException("You can only post one idea every 48 hours");
+        }
 
         if (ideaRepository.existsByTitle(request.getTitle())) {
             throw new ForbiddenException("An idea with this title already exists");
@@ -254,8 +368,9 @@ public class IdeaService {
         idea.setCreatedByName(student.getName());
         idea.setCreatedByBranch(student.getBranch());
         idea.setCreatedByYear(student.getYear());
-        idea.setCreatedById(student.getId());       // ✅ added
-        idea.setCreatedByEmail(student.getEmail()); // ✅ added
+        idea.setCreatedById(student.getId());
+        idea.setCreatedByEmail(student.getEmail());
+        idea.setCreatedByRollNumber(rollNumber); // ✅ needed for like notification
 
         return mapToResponse(ideaRepository.save(idea));
     }
@@ -273,7 +388,28 @@ public class IdeaService {
         idea.getLikedBy().add(rollNumber);
         idea.setLikes(idea.getLikes() + 1);
 
-        return mapToResponse(ideaRepository.save(idea));
+        IdeaResponse response = mapToResponse(ideaRepository.save(idea));
+
+        // ✅ notify idea owner — don't notify if you like your own idea
+        try {
+                // ✅ safer null check
+        if (idea.getCreatedByRollNumber() != null && 
+            !idea.getCreatedByRollNumber().equals(rollNumber)) {
+            StudentProfile liker = studentProfileRepository.findByRollNumber(rollNumber)
+                    .orElse(null);
+            if (liker != null) {
+                notificationService.create(
+                    idea.getCreatedByRollNumber(),
+                    liker.getName() + " liked your idea \"" + idea.getTitle() + "\"",
+                    "IDEA_LIKE"
+                );
+            }
+}
+        } catch (Exception e) {
+            System.err.println("Notification failed: " + e.getMessage());
+        }
+
+        return response;
     }
 
     public IdeaResponse mapToResponse(Idea idea) {

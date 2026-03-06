@@ -303,6 +303,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/clubs/**").hasAnyRole("STUDENT", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/student/**").hasAnyRole("STUDENT", "ADMIN")
+                        .requestMatchers("/api/notifications/**").hasAnyRole("STUDENT", "ADMIN")
                         // ✅ Announcements
                         .requestMatchers(HttpMethod.GET, "/api/announcements").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/announcements/**").permitAll()

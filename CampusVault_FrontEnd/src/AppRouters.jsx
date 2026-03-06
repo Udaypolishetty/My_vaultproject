@@ -56,6 +56,7 @@ import About from "./Components/About";
 import Connect from "./Components/Connect";
 import NavbarLayout from "./NavbarLayout";
 import AdminDashboard from "./Components/AdminDashboard"; // ✅ import added
+import StudentDashboard from "./Components/StudentDashboard";
 
 function AppRouters() {
   return (
@@ -73,6 +74,7 @@ function AppRouters() {
           <Route path="connect" element={<Connect />} />
           <Route path="about" element={<About />} />
           <Route path="upload" element={<Upload />} />
+          <Route path="dashboard" element={<StudentDashboard />} />
         </Route>
       </Route>
     </Routes>

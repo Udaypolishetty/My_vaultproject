@@ -404,6 +404,8 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
 
   const alreadyLiked = (idea.likedBy || []).includes(student?.rollNumber);
   const [hasLiked, setHasLiked] = useState(alreadyLiked);
+  const myId = localStorage.getItem("id");
+  const isMyIdea = String(idea.createdById) === String(myId);
 
   const formatYear = (y) => {
     if (!y) return "";
@@ -423,9 +425,9 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
 
   //icons...
   const categoryIcons = {
-  Tech: "/tech.png",
+  Tech: "/techh.png",
   Academic: "/academic.png",
-  "Campus Pulse": "/campus-pulsee.png",
+  "Campus Pulse": "/campuspulse.png",
   Cultural: "/cultural.png",
   Others: "/others.png",
 };
@@ -485,16 +487,23 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
                   transition-all duration-300 hover:scale-105 hover:border-[#26F2D0] hover:shadow-lg cursor-pointer"
       onClick={() => setShowModal(true)}
     >
-      <div
-        className={`absolute top-4 left-4 text-xs font-semibold px-3 py-1 rounded-full
-        ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}
-      >
-        {idea.category}
+      {/* ✅ Category + Yours badge together */}
+      <div className="absolute top-4 left-4 flex items-center gap-2">
+        <div className={`text-xs font-semibold px-3 py-1 rounded-full
+          ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}>
+          {idea.category}
+        </div>
+        {isMyIdea && (
+          <div className="text-xs font-bold px-3 py-1 rounded-full
+                          text-[#26F2D0] border border-[#26F2D0]/30">
+            📌 
+          </div>
+        )}
       </div>
 
       <div className="absolute top-4 right-4 flex items-center gap-2">
         <div className="text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full">
-          {idea.createdByBranch} · {formatYear(idea.createdByYear)}    
+          {idea.createdByBranch} · {formatYear(idea.createdByYear)}    
         </div>
         <button
           onClick={handleEmail}
@@ -536,8 +545,8 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
 
       <div className="flex justify-between text-sm text-gray-400">
         <div className="flex items-center gap-2">
-          <span>by {idea.createdByName}</span>
-          <span className="text-xs text-gray-500">• {formattedDate}</span>
+<span>{isMyIdea ? "✮ Your Idea" : `by ${idea.createdByName}`}</span>  
+        <span className="text-xs text-gray-500">• {formattedDate}</span>
         </div>
         <div className="flex gap-6 items-center">
           <span>💬 {idea.comments?.length || 0}</span>
@@ -596,7 +605,7 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
 
         <div className="flex justify-between text-lg text-gray-400 mb-8">
           <div>
-            <span className="font-medium">by {idea.createdByName}</span>
+<span className="font-medium">{isMyIdea ? "✮ Your Idea" : `by ${idea.createdByName}`}</span>
             <p className="text-sm text-gray-500">{formattedDate}</p>
           </div>
           <div className="flex gap-8">
@@ -622,13 +631,15 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
             {hasLiked ? "✅ Liked" : "👍 Like"} ({idea.likes || 0})
           </button>
 
-          <button
-            onClick={handleEmail}
-            className="px-6 py-2 rounded-full font-medium transition-all
-                       bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400"
-          >
-            📧 Email {idea.createdByName}
-          </button>
+      {!isMyIdea && (
+        <button
+          onClick={handleEmail}
+          className="px-6 py-2 rounded-full font-medium transition-all
+                    bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400"
+        >
+          📧 Email {idea.createdByName}
+        </button>
+)}
         </div>
       </div>
     </div>

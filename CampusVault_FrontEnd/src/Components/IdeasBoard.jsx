@@ -686,6 +686,7 @@
 import React, { useEffect, useState } from "react";
 import IdeaForm from "./IdeaForm";
 import IdeaCard from "./IdeaCard";
+import IdeaRulesModal from "./IdeaRulesModal";
 
 export default function IdeasBoard() {
   const token = localStorage.getItem("token");
@@ -705,6 +706,7 @@ export default function IdeasBoard() {
   const [ideas, setIdeas] = useState([]);
   const [activeFilter, setActiveFilter] = useState("All");
   const [postError, setPostError] = useState("");
+  const [showRules, setShowRules] = useState(false);
 
   useEffect(() => {
     if (!token || !myId) {
@@ -782,17 +784,16 @@ export default function IdeasBoard() {
   const lastPostedAt = localStorage.getItem(cooldownKey);
   const canPost = !lastPostedAt || !isWithin48Hours(lastPostedAt);
 
-  const handlePostClick = () => {
-    if (!canPost) {
-      const remaining = getTimeRemaining(lastPostedAt);
-      setPostError(
-        `You can post another idea after 48 hours.${remaining ? ` Try again in ${remaining}.` : ""}`
-      );
-      return;
-    }
-    setPostError("");
-    setShowForm(true);
-  };
+  // ✅ fix — show rules first
+const handlePostClick = () => {
+  if (!canPost) {
+    const remaining = getTimeRemaining(lastPostedAt);
+    setPostError(`You can post another idea after 48 hours.${remaining ? ` Try again in ${remaining}.` : ""}`);
+    return;
+  }
+  setPostError("");
+  setShowRules(true); // ✅ show rules first
+};
 
   const filteredIdeas = ideas
     .filter(i => activeFilter === "All" || i.category === activeFilter)
@@ -878,6 +879,15 @@ export default function IdeasBoard() {
     ))
   )}
 </div>
+{showRules && (
+  <IdeaRulesModal
+    onClose={() => setShowRules(false)}
+    onContinue={() => {
+      setShowRules(false);
+      setShowForm(true);
+    }}
+  />
+)}
 
       {showForm && (
         <IdeaForm

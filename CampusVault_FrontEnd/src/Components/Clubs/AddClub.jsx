@@ -536,8 +536,7 @@ function AddClub() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const token = localStorage.getItem("token");
-
+const token = sessionStorage.getItem("token");
   useEffect(() => {
     if (!token) return;
     fetchMyClub();

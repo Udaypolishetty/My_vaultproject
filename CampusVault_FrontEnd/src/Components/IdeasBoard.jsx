@@ -689,15 +689,14 @@ import IdeaCard from "./IdeaCard";
 import IdeaRulesModal from "./IdeaRulesModal";
 
 export default function IdeasBoard() {
-  const token = localStorage.getItem("token");
-  // const student = JSON.parse(localStorage.getItem("studentProfile") || "{}");
-  const student = {
-  name: localStorage.getItem("name"),
-  rollNumber: localStorage.getItem("rollNumber"),
-  id: localStorage.getItem("id"),
-  email: localStorage.getItem("Email"),
+const token = sessionStorage.getItem("token");
+const student = {
+  name: sessionStorage.getItem("name"),
+  rollNumber: sessionStorage.getItem("rollNumber"),
+  id: sessionStorage.getItem("id"),
+  email: sessionStorage.getItem("Email"),
 };
-  const myId = localStorage.getItem("id");
+const myId = sessionStorage.getItem("id");
 
   // ✅ Key cooldown by student id so each student has their own cooldown
   const cooldownKey = `lastIdeaPostedAt_${myId}`;
@@ -740,7 +739,7 @@ export default function IdeasBoard() {
   }, []);
 
   //new useefect...
-  useEffect(() => {
+useEffect(() => {
   if (!myId || !token) return;
 
   fetch("http://localhost:8081/api/ideas")
@@ -756,9 +755,10 @@ export default function IdeasBoard() {
       if (myRecentIdea) {
         localStorage.setItem(cooldownKey, myRecentIdea.createdAt);
         const remaining = getTimeRemaining(myRecentIdea.createdAt);
-        setPostError(
-          `You can post another idea after 48 hours.${remaining ? ` Try again in ${remaining}.` : ""}`
-        );
+        setPostError(`You can post another idea after 48 hours.${remaining ? ` Try again in ${remaining}.` : ""}`);
+      } else {
+        localStorage.removeItem(cooldownKey); // ✅ clear if no recent idea found
+        setPostError(""); // ✅ clear error message too
       }
     })
     .catch(err => console.error("Cooldown check failed:", err));

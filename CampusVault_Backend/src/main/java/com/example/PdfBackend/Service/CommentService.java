@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 
 @Service
 public class CommentService {
@@ -84,11 +86,13 @@ public class CommentService {
 
         // ✅ Build from student profile
         Comment comment = new Comment();
+       comment.setId(UUID.randomUUID().toString()); // ✅
         comment.setComment(request.getComment());
         comment.setCommentedBy(student.getName());
         comment.setCommentedYear(student.getYear());
         comment.setCommentedBranch(student.getBranch());
         comment.setOwnerRoll(rollNumber);
+        comment.setCommentAt(LocalDateTime.now());
 
         idea.getComments().add(comment);
         ideaRepository.save(idea);

@@ -122,4 +122,12 @@ public class IdeaController {
                 commentService.deleteComment(ideaId, commentId, userDetails.getUsername())
         );
     }
+    // ✅ DELETE IDEA
+@DeleteMapping("/{id}")
+public ResponseEntity<Void> deleteIdea(
+        @PathVariable String id,
+        @AuthenticationPrincipal UserDetails userDetails) {
+    ideaService.deleteIdea(id, userDetails.getUsername());
+    return ResponseEntity.ok().build();
+}
 }

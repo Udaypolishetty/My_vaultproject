@@ -400,11 +400,11 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
   const [showModal, setShowModal] = useState(false);
 
   const ideaId = idea.id;
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const alreadyLiked = (idea.likedBy || []).includes(student?.rollNumber);
   const [hasLiked, setHasLiked] = useState(alreadyLiked);
-  const myId = localStorage.getItem("id");
+  const myId = sessionStorage.getItem("id");
   const isMyIdea = String(idea.createdById) === String(myId);
 
   const formatYear = (y) => {
@@ -557,6 +557,24 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
           >
             👍 {idea.likes || 0}
           </button>
+          {isMyIdea && (
+  <button
+    onClick={async (e) => {
+      e.stopPropagation();
+      if (!window.confirm("Delete this idea?")) return;
+      const res = await fetch(`http://localhost:8081/api/ideas/${idea.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setIdeas(prev => prev.filter(i => i.id !== idea.id));
+      }
+    }}
+    className="text-red-400 hover:text-red-500 text-xs transition"
+  >
+    🗑️ Delete
+  </button>
+)}
         </div>
       </div>
     </div>

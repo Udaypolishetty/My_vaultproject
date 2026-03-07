@@ -285,16 +285,15 @@ console.log("Login raw response:", raw); // ✅ add this
         return;
       }
 
-     const data = JSON.parse(raw);
-      console.log("Login response:", data); // ✅ add this
+    const data = JSON.parse(raw);
+    console.log("Login response:", data);
 
-      localStorage.clear();
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("rollNumber", data.rollNumber);
-      localStorage.setItem("Email", data.email);
-      localStorage.setItem("name", data.name);
-      localStorage.setItem("id", data.id);
+    sessionStorage.setItem("token", data.token);
+    sessionStorage.setItem("role", data.role);
+    sessionStorage.setItem("rollNumber", data.rollNumber);
+    sessionStorage.setItem("Email", data.email);
+    sessionStorage.setItem("name", data.name);
+    sessionStorage.setItem("id", data.id);
 
       navigate(`/profile/${data.id}/home`);
     } catch (err) {

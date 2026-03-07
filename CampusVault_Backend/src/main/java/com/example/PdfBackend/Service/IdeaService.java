@@ -427,4 +427,14 @@ public class IdeaService {
                 idea.getComments() != null ? idea.getComments() : new ArrayList<>()
         );
     }
+    public void deleteIdea(String ideaId, String rollNumber) {
+    Idea idea = ideaRepository.findById(ideaId)
+            .orElseThrow(() -> new NotFoundException("Idea not found: " + ideaId));
+
+    if (!rollNumber.equals(idea.getCreatedByRollNumber())) {
+        throw new ForbiddenException("You can only delete your own ideas");
+    }
+
+    ideaRepository.deleteById(ideaId);
+}
 }

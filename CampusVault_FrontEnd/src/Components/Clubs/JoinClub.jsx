@@ -201,8 +201,8 @@ function JoinClub() {
   const [message, setMessage] = useState("");
   const [selectedClub, setSelectedClub] = useState(null); // ✅ controls panel swap
 
-  const token = localStorage.getItem("token");
-  const rollNumber = localStorage.getItem("rollNumber");
+  const token = sessionStorage.getItem("token");
+const rollNumber = sessionStorage.getItem("rollNumber");
 
   useEffect(() => {
     fetchAllClubs();

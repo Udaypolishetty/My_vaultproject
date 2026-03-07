@@ -342,7 +342,7 @@ const Resources = () => {
   const [papers, setPapers] = useState([]);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("papers"); // ✅ Added
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const showPapers = async (selectedDomain) => {
     setDomain(selectedDomain);

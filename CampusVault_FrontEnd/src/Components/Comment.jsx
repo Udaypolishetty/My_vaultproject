@@ -215,7 +215,7 @@ export default function Comment({ idea, student, ideas, setIdeas }) {
   const [error, setError] = useState("");
 
   const ideaId = idea.id;
-  const token = localStorage.getItem("token");
+const token = sessionStorage.getItem("token");
 
   const alreadyCommented = (idea.comments || []).some(
     c => c.ownerRoll === student?.rollNumber

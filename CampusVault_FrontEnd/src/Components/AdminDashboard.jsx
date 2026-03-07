@@ -232,14 +232,14 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   const headers = {
     "Authorization": `Bearer ${token}`,
     "Content-Type": "application/json"
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    sessionStorage.clear();
     navigate("/");
   };
 

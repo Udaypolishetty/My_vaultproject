@@ -297,11 +297,11 @@ export default function StudentDashboard() {
   const [notifications, setNotifications] = useState([]);
   const hasMarkedRead = useRef(false); // ✅ prevents loop
 
-  const token = localStorage.getItem("token");
-  const myId = localStorage.getItem("id");
-  const name = localStorage.getItem("name");
-  const rollNumber = localStorage.getItem("rollNumber");
-  const email = localStorage.getItem("Email");
+const token = sessionStorage.getItem("token");
+const myId = sessionStorage.getItem("id");
+const name = sessionStorage.getItem("name");
+const rollNumber = sessionStorage.getItem("rollNumber");
+const email = sessionStorage.getItem("Email");
 
   const location = useLocation();
 

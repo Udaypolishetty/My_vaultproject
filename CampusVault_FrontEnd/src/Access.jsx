@@ -136,6 +136,8 @@
 
 
 //claude...
+
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -178,12 +180,12 @@ const Access = () => {
         if (!loginRes.ok) { setError("Invalid admin credentials."); return; }
 
         const data = await loginRes.json();
-        localStorage.clear();
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.role);
-        localStorage.setItem("rollNumber", data.rollNumber);
-        localStorage.setItem("name", data.name);
-        localStorage.setItem("id", data.id);
+        // Access.jsx — admin login block
+      sessionStorage.setItem("token", data.token);
+      sessionStorage.setItem("role", data.role);
+      sessionStorage.setItem("rollNumber", data.rollNumber);
+      sessionStorage.setItem("name", data.name);
+      sessionStorage.setItem("id", data.id);
         navigate("/admin/dashboard");
         return;
       }
@@ -207,13 +209,13 @@ const Access = () => {
       if (!loginRes.ok) { setError("Login failed. Please try again."); return; }
 
       const data = await loginRes.json();
-      localStorage.clear();
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("rollNumber", data.rollNumber);
-      localStorage.setItem("name", data.name);
-      localStorage.setItem("id", data.id);
-      localStorage.setItem("Email", data.email)
+     // change all these setItems
+      sessionStorage.setItem("token", data.token);
+      sessionStorage.setItem("role", data.role);
+      sessionStorage.setItem("rollNumber", data.rollNumber);
+      sessionStorage.setItem("name", data.name);
+      sessionStorage.setItem("id", data.id);
+      sessionStorage.setItem("Email", data.email);
 
       navigate(`/profile/${data.id}/home`);
 

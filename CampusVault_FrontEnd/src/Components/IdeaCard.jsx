@@ -393,7 +393,287 @@
 
 //new ,allu(perplexity)
 
+// import { useState } from "react";
+// import Comment from "./Comment";
+
+// export default function IdeaCard({ idea, student, ideas, setIdeas }) {
+//   const [showModal, setShowModal] = useState(false);
+
+//   const ideaId = idea.id;
+//   const token = sessionStorage.getItem("token");
+
+//   const alreadyLiked = (idea.likedBy || []).includes(student?.rollNumber);
+//   const [hasLiked, setHasLiked] = useState(alreadyLiked);
+//   const myId = sessionStorage.getItem("id");
+//   const isMyIdea = String(idea.createdById) === String(myId);
+
+//   const formatYear = (y) => {
+//     if (!y) return "";
+
+//     // extract only the number
+//     const num = parseInt(y);
+
+//     const suffix = (n) => {
+//       if (n === 1) return "1st";
+//       if (n === 2) return "2nd";
+//       if (n === 3) return "3rd";
+//       return n + "th";
+//     };
+
+//     return suffix(num) + " Year"; // ✅ Fixed: moved return outside
+//   };
+
+//   //icons...
+//   const categoryIcons = {
+//   Tech: "/techh.png",
+//   Academic: "/academic.png",
+//   "Campus Pulse": "/campuspulse.png",
+//   Cultural: "/cultural.png",
+//   Others: "/others.png",
+// };
+
+//   const formattedDate = idea.createdAt
+//     ? new Date(idea.createdAt).toLocaleDateString("en-IN", {
+//         year: "numeric",
+//         month: "long",
+//         day: "numeric",
+//       })
+//     : "";
+
+//   const categoryStyles = {
+//     Tech: "bg-blue-500/20 text-blue-400",
+//     Academic: "bg-green-500/20 text-green-400",
+//     "Campus Pulse": "bg-red-500/20 text-red-400",
+//     Cultural: "bg-yellow-300/20 text-yellow-400",
+//   };
+
+//   const handleLike = async (e) => {
+//     e.stopPropagation();
+//     if (hasLiked) return;
+//       console.log("Liking idea:", ideaId, "token:", token); 
+
+//     const res = await fetch(`http://localhost:8081/api/ideas/${ideaId}/like`, {
+//       method: "POST",
+//       headers: { Authorization: `Bearer ${token}` },
+//     });
+//      console.log("Like response status:", res.status);
+
+//     if (!res.ok) return;
+
+//     const updated = await res.json();
+//     setHasLiked(true);
+//     setIdeas(prev => prev.map(i => (i.id === updated.id ? updated : i)));
+//   };
+
+//   // ✅ Uses idea.createdByEmail from backend — no localStorage guessing
+//   const handleEmail = (e) => {
+//     e.stopPropagation();
+
+//     const recipientEmail = idea.createdByEmail || null;
+
+//     const subject = encodeURIComponent(`Regarding your idea: ${idea.title}`);
+//     const body = encodeURIComponent(
+//       `Hi ${idea.createdByName},\n\nI came across your idea "${idea.title}" and wanted to connect.\n\nBest regards`
+//     );
+
+//     const gmailUrl = recipientEmail
+//       ? `https://mail.google.com/mail/?view=cm&fs=1&to=${recipientEmail}&su=${subject}&body=${body}`
+//       : `https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`;
+
+//     window.open(gmailUrl, "_blank");
+//   };
+
+//   const renderCompactCard = () => (
+//     <div
+//       className="relative bg-[#111] p-6 rounded-xl border border-white/10
+//                   transition-all duration-300 hover:scale-105 hover:border-[#26F2D0] hover:shadow-lg cursor-pointer"
+//       onClick={() => setShowModal(true)}
+//     >
+//       {/* ✅ Category + Yours badge together */}
+//       <div className="absolute top-4 left-4 flex items-center gap-2">
+//         <div className={`text-xs font-semibold px-3 py-1 rounded-full
+//           ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}>
+//           {idea.category}
+//         </div>
+//         {isMyIdea && (
+//           <div className="text-xs font-bold px-3 py-1 rounded-full
+//                           text-[#26F2D0] border border-[#26F2D0]/30">
+//             📌 
+//           </div>
+//         )}
+//       </div>
+
+//       <div className="absolute top-4 right-4 flex items-center gap-2">
+//         <div className="text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full">
+//           {idea.createdByBranch} · {formatYear(idea.createdByYear)}    
+//         </div>
+//         <button
+//           onClick={handleEmail}
+//           className="text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full
+//                      hover:bg-indigo-500/30 hover:text-indigo-300 transition-all"
+//         >
+//           📧 Email
+//         </button>
+//       </div>
+// {/* ✅ Category Icon + Title */}
+// <div className="flex items-center gap-3 mt-8">
+//   <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10
+//                   flex items-center justify-center shrink-0">
+//     <img src={categoryIcons[idea.category] || "/others.png"}
+//          className="w-6 h-6 object-contain" alt="" />
+//   </div>
+//   <h3 className="font-bold text-left">{idea.title}</h3>
+// </div>
+
+//       <div className="text-gray-400 text-left w-full mt-2">
+// {(idea.description || "").length > 75 ? (     
+//        <div className="space-y-1 w-full">
+//             <p className="line-clamp-2 h-[3rem] overflow-hidden leading-relaxed mb-2 w-full">
+//               {idea.description}
+//             </p>
+//             <span
+//               className="text-[#26F2D0] text-sm font-medium cursor-pointer hover:text-white transition-colors block"
+//               onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
+//             >
+//               read more →
+//             </span>
+//           </div>
+//         ) : (
+//           <p className="leading-relaxed w-full">{idea.description}</p>
+//         )}
+//       </div>
+
+//       <div className="border-t border-white/10 my-4"></div>
+
+//       <div className="flex justify-between text-sm text-gray-400">
+//         <div className="flex items-center gap-2">
+// <span>{isMyIdea ? "✮ Your Idea" : `by ${idea.createdByName}`}</span>  
+//         <span className="text-xs text-gray-500">• {formattedDate}</span>
+//         </div>
+//         <div className="flex gap-6 items-center">
+//           <span>💬 {idea.comments?.length || 0}</span>
+//           <button
+//             onClick={handleLike}
+//             disabled={hasLiked}
+//             className={`transition-all ${hasLiked ? "opacity-50 cursor-not-allowed" : "hover:scale-125"}`}
+//           >
+//             👍 {idea.likes || 0}
+//           </button>
+//           {isMyIdea && (
+//   <button
+//     onClick={async (e) => {
+//       e.stopPropagation();
+//       if (!window.confirm("Delete this idea?")) return;
+//       const res = await fetch(`http://localhost:8081/api/ideas/${idea.id}`, {
+//         method: "DELETE",
+//         headers: { Authorization: `Bearer ${token}` }
+//       });
+//       if (res.ok) {
+//         setIdeas(prev => prev.filter(i => i.id !== idea.id));
+//       }
+//     }}
+//     className="text-red-400 hover:text-red-500 text-xs transition"
+//   >
+//     🗑️ Delete
+//   </button>
+// )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+
+//   const renderModal = () => (
+//     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+//       <div
+//         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+//         onClick={() => setShowModal(false)}
+//       />
+//       <div className="relative bg-[#111] w-full max-w-2xl max-h-[90vh] overflow-y-auto
+//                       rounded-2xl border-2 border-[#26F2D0]/50 shadow-2xl p-8 z-10">
+
+//         <button
+//           onClick={() => setShowModal(false)}
+//           className="absolute top-6 right-6 text-[#26F2D0] hover:text-red-400 text-xl font-bold"
+//         >
+//           ×
+//         </button>
+
+//         <div className={`absolute top-6 left-6 text-sm font-semibold px-4 py-2 rounded-full
+//         ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}>
+//           {idea.category}
+//         </div>
+
+//         <div className="absolute top-6 right-20 text-sm bg-[#1f2937] text-[#26F2D0] px-4 py-2 rounded-full">
+//           {idea.createdByBranch} · {formatYear(idea.createdByYear)}     
+//               </div><div className="flex flex-col items-center mt-12 mb-6">
+//   <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10
+//                   flex items-center justify-center shadow-inner mb-4">
+//     <img
+//       src={categoryIcons[idea.category] || "/icons/others.png"}
+//       className="w-12 h-12 object-contain"
+//       alt=""
+//     />
+//   </div>
+
+//   <h2 className="font-bold text-2xl text-center">{idea.title}</h2>
+// </div>
+//         {/* <h2 className="font-bold text-2xl mt-16 mb-6 text-center">{idea.title}</h2> */}
+
+//         <p className="text-gray-300 text-lg leading-relaxed mb-8">{idea.description}</p>
+
+//         <div className="border-t border-white/20 my-8"></div>
+
+//         <div className="flex justify-between text-lg text-gray-400 mb-8">
+//           <div>
+// <span className="font-medium">{isMyIdea ? "✮ Your Idea" : `by ${idea.createdByName}`}</span>
+//             <p className="text-sm text-gray-500">{formattedDate}</p>
+//           </div>
+//           <div className="flex gap-8">
+//             <span>💬 {idea.comments?.length || 0} comments</span>
+//             <span>👍 {idea.likes || 0} likes</span>
+//           </div>
+//         </div>
+
+//         <div className="border-t border-white/10 pt-6">
+//           <Comment idea={idea} student={student} ideas={ideas} setIdeas={setIdeas} />
+//         </div>
+
+//         <div className="mt-6 pt-4 border-t border-white/10 flex gap-4">
+//           <button
+//             onClick={handleLike}
+//             disabled={hasLiked}
+//             className={`px-6 py-2 rounded-full font-medium transition-all ${
+//               hasLiked
+//                 ? "bg-[#26F2D0]/10 text-gray-500 cursor-not-allowed"
+//                 : "bg-[#26F2D0]/20 hover:bg-[#26F2D0]/30 text-[#26F2D0]"
+//             }`}
+//           >
+//             {hasLiked ? "✅ Liked" : "👍 Like"} ({idea.likes || 0})
+//           </button>
+
+//       {!isMyIdea && (
+//         <button
+//           onClick={handleEmail}
+//           className="px-6 py-2 rounded-full font-medium transition-all
+//                     bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400"
+//         >
+//           📧 Email {idea.createdByName}
+//         </button>
+// )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+
+//   return showModal ? renderModal() : renderCompactCard();
+// }
+
+
+//lucide...
+
+
 import { useState } from "react";
+import { ThumbsUp, MessageCircle, Trash2, Mail } from "lucide-react";
 import Comment from "./Comment";
 
 export default function IdeaCard({ idea, student, ideas, setIdeas }) {
@@ -409,34 +689,27 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
 
   const formatYear = (y) => {
     if (!y) return "";
-
-    // extract only the number
     const num = parseInt(y);
-
     const suffix = (n) => {
       if (n === 1) return "1st";
       if (n === 2) return "2nd";
       if (n === 3) return "3rd";
       return n + "th";
     };
-
-    return suffix(num) + " Year"; // ✅ Fixed: moved return outside
+    return suffix(num) + " Year";
   };
 
-  //icons...
   const categoryIcons = {
-  Tech: "/techh.png",
-  Academic: "/academic.png",
-  "Campus Pulse": "/campuspulse.png",
-  Cultural: "/cultural.png",
-  Others: "/others.png",
-};
+    Tech: "/techh.png",
+    Academic: "/academic.png",
+    "Campus Pulse": "/campuspulse.png",
+    Cultural: "/cultural.png",
+    Others: "/others.png",
+  };
 
   const formattedDate = idea.createdAt
     ? new Date(idea.createdAt).toLocaleDateString("en-IN", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
+        year: "numeric", month: "long", day: "numeric",
       })
     : "";
 
@@ -450,35 +723,39 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
   const handleLike = async (e) => {
     e.stopPropagation();
     if (hasLiked) return;
-
     const res = await fetch(`http://localhost:8081/api/ideas/${ideaId}/like`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     });
-
     if (!res.ok) return;
-
     const updated = await res.json();
     setHasLiked(true);
     setIdeas(prev => prev.map(i => (i.id === updated.id ? updated : i)));
   };
 
-  // ✅ Uses idea.createdByEmail from backend — no localStorage guessing
   const handleEmail = (e) => {
     e.stopPropagation();
-
     const recipientEmail = idea.createdByEmail || null;
-
     const subject = encodeURIComponent(`Regarding your idea: ${idea.title}`);
     const body = encodeURIComponent(
       `Hi ${idea.createdByName},\n\nI came across your idea "${idea.title}" and wanted to connect.\n\nBest regards`
     );
-
     const gmailUrl = recipientEmail
       ? `https://mail.google.com/mail/?view=cm&fs=1&to=${recipientEmail}&su=${subject}&body=${body}`
       : `https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`;
-
     window.open(gmailUrl, "_blank");
+  };
+
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+    if (!window.confirm("Delete this idea?")) return;
+    const res = await fetch(`http://localhost:8081/api/ideas/${idea.id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      setIdeas(prev => prev.filter(i => i.id !== idea.id));
+    }
   };
 
   const renderCompactCard = () => (
@@ -487,7 +764,7 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
                   transition-all duration-300 hover:scale-105 hover:border-[#26F2D0] hover:shadow-lg cursor-pointer"
       onClick={() => setShowModal(true)}
     >
-      {/* ✅ Category + Yours badge together */}
+      {/* Category + Yours badge */}
       <div className="absolute top-4 left-4 flex items-center gap-2">
         <div className={`text-xs font-semibold px-3 py-1 rounded-full
           ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}>
@@ -496,36 +773,38 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
         {isMyIdea && (
           <div className="text-xs font-bold px-3 py-1 rounded-full
                           text-[#26F2D0] border border-[#26F2D0]/30">
-            📌 
+            📌
           </div>
         )}
       </div>
 
       <div className="absolute top-4 right-4 flex items-center gap-2">
         <div className="text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full">
-          {idea.createdByBranch} · {formatYear(idea.createdByYear)}    
+          {idea.createdByBranch} · {formatYear(idea.createdByYear)}
         </div>
         <button
           onClick={handleEmail}
-          className="text-xs bg-[#1f2937] text-[#26F2D0] px-3 py-1 rounded-full
-                     hover:bg-indigo-500/30 hover:text-indigo-300 transition-all"
+          className="w-7 h-7 rounded-full flex items-center justify-center
+                     bg-[#1f2937] text-[#26F2D0] hover:bg-indigo-500/30
+                     hover:text-indigo-300 transition-all"
         >
-          📧 Email
+          <Mail size={13} />
         </button>
       </div>
-{/* ✅ Category Icon + Title */}
-<div className="flex items-center gap-3 mt-8">
-  <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10
-                  flex items-center justify-center shrink-0">
-    <img src={categoryIcons[idea.category] || "/others.png"}
-         className="w-6 h-6 object-contain" alt="" />
-  </div>
-  <h3 className="font-bold text-left">{idea.title}</h3>
-</div>
+
+      {/* Category Icon + Title */}
+      <div className="flex items-center gap-3 mt-8">
+        <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10
+                        flex items-center justify-center shrink-0">
+          <img src={categoryIcons[idea.category] || "/others.png"}
+               className="w-6 h-6 object-contain" alt="" />
+        </div>
+        <h3 className="font-bold text-left">{idea.title}</h3>
+      </div>
 
       <div className="text-gray-400 text-left w-full mt-2">
-{(idea.description || "").length > 75 ? (     
-       <div className="space-y-1 w-full">
+        {(idea.description || "").length > 75 ? (
+          <div className="space-y-1 w-full">
             <p className="line-clamp-2 h-[3rem] overflow-hidden leading-relaxed mb-2 w-full">
               {idea.description}
             </p>
@@ -545,36 +824,41 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
 
       <div className="flex justify-between text-sm text-gray-400">
         <div className="flex items-center gap-2">
-<span>{isMyIdea ? "✮ Your Idea" : `by ${idea.createdByName}`}</span>  
-        <span className="text-xs text-gray-500">• {formattedDate}</span>
+          <span>{isMyIdea ? "✮ Your Idea" : `by ${idea.createdByName}`}</span>
+          <span className="text-xs text-gray-500">• {formattedDate}</span>
         </div>
-        <div className="flex gap-6 items-center">
-          <span>💬 {idea.comments?.length || 0}</span>
+        <div className="flex gap-4 items-center">
+          {/* Comments */}
+          <span className="flex items-center gap-1 text-gray-500">
+            <MessageCircle size={14} />
+            {idea.comments?.length || 0}
+          </span>
+
+          {/* Like */}
           <button
             onClick={handleLike}
             disabled={hasLiked}
-            className={`transition-all ${hasLiked ? "opacity-50 cursor-not-allowed" : "hover:scale-125"}`}
+            className={`flex items-center gap-1 transition-all
+              ${hasLiked
+                ? "text-[#26F2D0] cursor-not-allowed"
+                : "text-gray-500 hover:text-[#26F2D0] hover:scale-110"
+              }`}
           >
-            👍 {idea.likes || 0}
+            <ThumbsUp size={14} fill={hasLiked ? "#26F2D0" : "none"} />
+            {idea.likes || 0}
           </button>
+
+          {/* Delete */}
           {isMyIdea && (
-  <button
-    onClick={async (e) => {
-      e.stopPropagation();
-      if (!window.confirm("Delete this idea?")) return;
-      const res = await fetch(`http://localhost:8081/api/ideas/${idea.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        setIdeas(prev => prev.filter(i => i.id !== idea.id));
-      }
-    }}
-    className="text-red-400 hover:text-red-500 text-xs transition"
-  >
-    🗑️ Delete
-  </button>
-)}
+            <button
+              onClick={handleDelete}
+              className="flex items-center gap-1 text-gray-600
+                         hover:text-red-400 hover:bg-red-400/10
+                         rounded-full p-1 transition-all"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -597,25 +881,25 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
         </button>
 
         <div className={`absolute top-6 left-6 text-sm font-semibold px-4 py-2 rounded-full
-        ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}>
+          ${categoryStyles[idea.category] || "bg-gray-500/20 text-gray-400"}`}>
           {idea.category}
         </div>
 
         <div className="absolute top-6 right-20 text-sm bg-[#1f2937] text-[#26F2D0] px-4 py-2 rounded-full">
-          {idea.createdByBranch} · {formatYear(idea.createdByYear)}     
-              </div><div className="flex flex-col items-center mt-12 mb-6">
-  <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10
-                  flex items-center justify-center shadow-inner mb-4">
-    <img
-      src={categoryIcons[idea.category] || "/icons/others.png"}
-      className="w-12 h-12 object-contain"
-      alt=""
-    />
-  </div>
+          {idea.createdByBranch} · {formatYear(idea.createdByYear)}
+        </div>
 
-  <h2 className="font-bold text-2xl text-center">{idea.title}</h2>
-</div>
-        {/* <h2 className="font-bold text-2xl mt-16 mb-6 text-center">{idea.title}</h2> */}
+        <div className="flex flex-col items-center mt-12 mb-6">
+          <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10
+                          flex items-center justify-center shadow-inner mb-4">
+            <img
+              src={categoryIcons[idea.category] || "/icons/others.png"}
+              className="w-12 h-12 object-contain"
+              alt=""
+            />
+          </div>
+          <h2 className="font-bold text-2xl text-center">{idea.title}</h2>
+        </div>
 
         <p className="text-gray-300 text-lg leading-relaxed mb-8">{idea.description}</p>
 
@@ -623,12 +907,18 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
 
         <div className="flex justify-between text-lg text-gray-400 mb-8">
           <div>
-<span className="font-medium">{isMyIdea ? "✮ Your Idea" : `by ${idea.createdByName}`}</span>
+            <span className="font-medium">{isMyIdea ? "✮ Your Idea" : `by ${idea.createdByName}`}</span>
             <p className="text-sm text-gray-500">{formattedDate}</p>
           </div>
-          <div className="flex gap-8">
-            <span>💬 {idea.comments?.length || 0} comments</span>
-            <span>👍 {idea.likes || 0} likes</span>
+          <div className="flex gap-6 items-center">
+            <span className="flex items-center gap-2">
+              <MessageCircle size={18} /> {idea.comments?.length || 0} comments
+            </span>
+            <span className="flex items-center gap-2">
+              <ThumbsUp size={18} fill={hasLiked ? "#26F2D0" : "none"}
+                className={hasLiked ? "text-[#26F2D0]" : ""} />
+              {idea.likes || 0} likes
+            </span>
           </div>
         </div>
 
@@ -640,24 +930,26 @@ export default function IdeaCard({ idea, student, ideas, setIdeas }) {
           <button
             onClick={handleLike}
             disabled={hasLiked}
-            className={`px-6 py-2 rounded-full font-medium transition-all ${
+            className={`flex items-center gap-2 px-6 py-2 rounded-full font-medium transition-all ${
               hasLiked
                 ? "bg-[#26F2D0]/10 text-gray-500 cursor-not-allowed"
                 : "bg-[#26F2D0]/20 hover:bg-[#26F2D0]/30 text-[#26F2D0]"
             }`}
           >
-            {hasLiked ? "✅ Liked" : "👍 Like"} ({idea.likes || 0})
+            <ThumbsUp size={16} fill={hasLiked ? "#26F2D0" : "none"} />
+            {hasLiked ? "Liked" : "Like"} ({idea.likes || 0})
           </button>
 
-      {!isMyIdea && (
-        <button
-          onClick={handleEmail}
-          className="px-6 py-2 rounded-full font-medium transition-all
-                    bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400"
-        >
-          📧 Email {idea.createdByName}
-        </button>
-)}
+          {!isMyIdea && (
+            <button
+              onClick={handleEmail}
+              className="flex items-center gap-2 px-6 py-2 rounded-full font-medium transition-all
+                         bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400"
+            >
+              <Mail size={16} />
+              Email {idea.createdByName}
+            </button>
+          )}
         </div>
       </div>
     </div>

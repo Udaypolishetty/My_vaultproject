@@ -396,50 +396,206 @@
 
 // export default Navbar;
 
+
+// import { useState, useEffect } from "react";
+// import { NavLink, useNavigate } from "react-router-dom";
+
+// const Navbar = () => {
+//   const [open, setOpen] = useState(false);
+//   const [unread, setUnread] = useState(0);
+//   const navigate = useNavigate();
+
+//   const [token, setToken] = useState(() => sessionStorage.getItem("token"));
+//   const [myId, setMyId] = useState(() => sessionStorage.getItem("id"));
+
+//   // ✅ listen for login event — updates token/myId after login
+//   useEffect(() => {
+//     const handleLogin = () => {
+//       setToken(sessionStorage.getItem("token"));
+//       setMyId(sessionStorage.getItem("id"));
+//     };
+//     window.addEventListener("userLoggedIn", handleLogin);
+//     return () => window.removeEventListener("userLoggedIn", handleLogin);
+//   }, []);
+
+//   // ✅ SSE connects when token becomes available
+//   useEffect(() => {
+//     if (!myId || !token) return;
+
+//     checkUnread();
+
+//     const evtSource = new EventSource(
+//       `http://localhost:8081/api/notifications/stream?token=${token}`
+//     );
+
+//     evtSource.addEventListener("notification", () => {
+//       setUnread(prev => prev + 1);
+//     });
+
+//     evtSource.onerror = () => evtSource.close();
+
+//     const handleRead = () => setUnread(0);
+//     window.addEventListener("notificationsRead", handleRead);
+
+//     return () => {
+//       evtSource.close();
+//       window.removeEventListener("notificationsRead", handleRead);
+//     };
+//   }, [token, myId]);
+
+//   const checkUnread = async () => {
+//     try {
+//       const t = sessionStorage.getItem("token");
+//       const id = sessionStorage.getItem("id");
+//       if (!t || !id) return;
+//       const res = await fetch("http://localhost:8081/api/notifications/unread-count", {
+//         headers: { Authorization: `Bearer ${t}` }
+//       });
+//       if (!res.ok) return;
+//       const data = await res.json();
+//       setUnread(data.count);
+//     } catch (err) {
+//       console.error("Navbar notif check failed:", err);
+//     }
+//   };
+
+//   const closeMenu = () => setOpen(false);
+
+//   const linkClasses = ({ isActive }) =>
+//     isActive ? "text-white font-semibold" : "text-gray-400 hover:text-white";
+
+//   const handleLogout = () => {
+//     sessionStorage.clear();
+//     setToken(null);
+//     setMyId(null);
+//     setUnread(0);
+//     closeMenu();
+//     navigate("/");
+//   };
+
+//   return (
+//     <nav className="fixed top-0 w-full bg-[#0f0f0f] border-b border-white/5 text-white shadow-lg z-50">
+//       <div className="flex items-center justify-between px-6 py-4">
+
+//         <h1 className="text-2xl font-bold text-white">Campus Vault</h1>
+
+//         <ul className="hidden md:flex flex-1 justify-center space-x-8 text-lg items-center">
+//           <li><NavLink to="home" end className={linkClasses}>Home</NavLink></li>
+//           <li><NavLink to="resources" className={linkClasses}>Resources</NavLink></li>
+//           <li><NavLink to="connect" className={linkClasses}>Connect</NavLink></li>
+//           <li><NavLink to="about" className={linkClasses}>About</NavLink></li>
+//           <li><NavLink to="upload" className={linkClasses}>Upload</NavLink></li>
+//           <li><NavLink to="dashboard" className={linkClasses}>Dashboard</NavLink></li>
+
+//           {unread > 0 && (
+//             <li>
+//               <button
+//                 onClick={() => navigate("dashboard", { state: { tab: "activity" } })}
+//                 className="relative w-8 h-8 flex items-center justify-center
+//                            rounded-xl bg-white/5 hover:bg-white/10
+//                            border border-white/10 transition-all"
+//               >
+//                 <span className="text-base">🔔</span>
+//                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#26F2D0] text-black
+//                                  text-xs font-bold rounded-full flex items-center justify-center">
+//                   {unread > 9 ? "9+" : unread}
+//                 </span>
+//               </button>
+//             </li>
+//           )}
+//         </ul>
+
+//         <div className="hidden md:flex items-center gap-3">
+//           <button
+//             onClick={handleLogout}
+//             className="text-gray-400 hover:text-red-400 transition text-sm"
+//           >
+//             Logout
+//           </button>
+//         </div>
+
+//         <button
+//           className="md:hidden text-3xl focus:outline-none"
+//           onClick={() => setOpen(!open)}
+//         >
+//           ☰
+//         </button>
+//       </div>
+
+//       {open && (
+//         <ul className="md:hidden bg-[#0b0b0b] text-gray-400 text-center space-y-4 py-4 text-lg border-t border-white/10">
+//           <li><NavLink to="home" end className={linkClasses} onClick={closeMenu}>Home</NavLink></li>
+//           <li><NavLink to="resources" className={linkClasses} onClick={closeMenu}>Resources</NavLink></li>
+//           <li><NavLink to="connect" className={linkClasses} onClick={closeMenu}>Connect</NavLink></li>
+//           <li><NavLink to="about" className={linkClasses} onClick={closeMenu}>About</NavLink></li>
+//           <li><NavLink to="upload" className={linkClasses} onClick={closeMenu}>Upload</NavLink></li>
+//           <li><NavLink to="dashboard" className={linkClasses} onClick={closeMenu}>Dashboard</NavLink></li>
+//           {unread > 0 && (
+//             <li>
+//               <button
+//                 onClick={() => {
+//                   navigate("dashboard", { state: { tab: "activity" } });
+//                   closeMenu();
+//                 }}
+//                 className="text-[#26F2D0] text-sm font-medium"
+//               >
+//                 🔔 {unread} new notification{unread > 1 ? "s" : ""}
+//               </button>
+//             </li>
+//           )}
+//           <li>
+//             <button onClick={handleLogout} className="text-red-400 hover:text-red-300 transition-colors">
+//               Logout
+//             </button>
+//           </li>
+//         </ul>
+//       )}
+//     </nav>
+//   );
+// };
+
+// export default Navbar;
+
 import { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ watch route changes
 
-  // ✅ read at component level as state
-  const [token] = useState(() => sessionStorage.getItem("token"));
-  const [myId] = useState(() => sessionStorage.getItem("id"));
+ useEffect(() => {
+  const token = sessionStorage.getItem("token");
+  const myId = sessionStorage.getItem("id");
+  if (!token || !myId) return;
 
-  useEffect(() => {
-    if (!myId || !token) return;
+  checkUnread();
 
-    checkUnread();
+  const evtSource = new EventSource(
+    `http://localhost:8081/api/notifications/stream?token=${token}`
+  );
 
-    const evtSource = new EventSource(
-      `http://localhost:8081/api/notifications/stream?token=${token}`
-    );
+  evtSource.addEventListener("notification", () => {
+    setUnread(prev => prev + 1);
+  });
 
-    evtSource.addEventListener("notification", () => {
-      setUnread(prev => prev + 1);
-    });
+  evtSource.onerror = () => evtSource.close();
 
-    evtSource.onerror = () => {
-      evtSource.close();
-    };
+  const handleRead = () => setUnread(0);
+  window.addEventListener("notificationsRead", handleRead);
 
-    const handleRead = () => setUnread(0);
-    window.addEventListener("notificationsRead", handleRead);
-
-    return () => {
-      evtSource.close();
-      window.removeEventListener("notificationsRead", handleRead);
-    };
-  }, [token, myId]);
+  return () => {
+    evtSource.close();
+    window.removeEventListener("notificationsRead", handleRead);
+  };
+}, [location.pathname.split("/")[1]]); // ✅ only reconnect when base path changes
 
   const checkUnread = async () => {
     try {
       const token = sessionStorage.getItem("token");
       const myId = sessionStorage.getItem("id");
       if (!token || !myId) return;
-
       const res = await fetch("http://localhost:8081/api/notifications/unread-count", {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -458,6 +614,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     sessionStorage.clear();
+    setUnread(0);
     closeMenu();
     navigate("/");
   };
@@ -465,7 +622,6 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 w-full bg-[#0f0f0f] border-b border-white/5 text-white shadow-lg z-50">
       <div className="flex items-center justify-between px-6 py-4">
-
         <h1 className="text-2xl font-bold text-white">Campus Vault</h1>
 
         <ul className="hidden md:flex flex-1 justify-center space-x-8 text-lg items-center">
@@ -495,18 +651,12 @@ const Navbar = () => {
         </ul>
 
         <div className="hidden md:flex items-center gap-3">
-          <button
-            onClick={handleLogout}
-            className="text-gray-400 hover:text-red-400 transition text-sm"
-          >
+          <button onClick={handleLogout} className="text-gray-400 hover:text-red-400 transition text-sm">
             Logout
           </button>
         </div>
 
-        <button
-          className="md:hidden text-3xl focus:outline-none"
-          onClick={() => setOpen(!open)}
-        >
+        <button className="md:hidden text-3xl focus:outline-none" onClick={() => setOpen(!open)}>
           ☰
         </button>
       </div>
@@ -522,10 +672,7 @@ const Navbar = () => {
           {unread > 0 && (
             <li>
               <button
-                onClick={() => {
-                  navigate("dashboard", { state: { tab: "activity" } });
-                  closeMenu();
-                }}
+                onClick={() => { navigate("dashboard", { state: { tab: "activity" } }); closeMenu(); }}
                 className="text-[#26F2D0] text-sm font-medium"
               >
                 🔔 {unread} new notification{unread > 1 ? "s" : ""}

@@ -15,4 +15,5 @@ public class Announcement {
     private String imageUrl; // ✅ added
     private long timestamp;
     private String postedBy;
+    private boolean pinned = false; // ✅ new
 }

@@ -216,6 +216,7 @@ const Access = () => {
       sessionStorage.setItem("name", data.name);
       sessionStorage.setItem("id", data.id);
       sessionStorage.setItem("Email", data.email);
+      window.dispatchEvent(new Event("userLoggedIn")); // ✅ add this
 
       navigate(`/profile/${data.id}/home`);
 

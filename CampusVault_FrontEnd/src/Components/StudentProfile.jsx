@@ -294,6 +294,7 @@ console.log("Login raw response:", raw); // ✅ add this
     sessionStorage.setItem("Email", data.email);
     sessionStorage.setItem("name", data.name);
     sessionStorage.setItem("id", data.id);
+    window.dispatchEvent(new Event("userLoggedIn"));
 
       navigate(`/profile/${data.id}/home`);
     } catch (err) {

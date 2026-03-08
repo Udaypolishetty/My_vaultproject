@@ -375,43 +375,43 @@ public class IdeaService {
         return mapToResponse(ideaRepository.save(idea));
     }
 
-    public IdeaResponse likeIdea(String ideaId, String rollNumber) {
-        Idea idea = ideaRepository.findById(ideaId)
-                .orElseThrow(() -> new NotFoundException("Idea not found: " + ideaId));
+   public IdeaResponse likeIdea(String ideaId, String rollNumber) {
+    Idea idea = ideaRepository.findById(ideaId)
+            .orElseThrow(() -> new NotFoundException("Idea not found: " + ideaId));
 
-        if (idea.getLikedBy() == null) idea.setLikedBy(new ArrayList<>());
+    if (idea.getLikedBy() == null) idea.setLikedBy(new ArrayList<>());
 
-        if (idea.getLikedBy().contains(rollNumber)) {
-            throw new ForbiddenException("You have already liked this idea");
-        }
+    if (idea.getLikedBy().contains(rollNumber)) {
+        throw new ForbiddenException("You have already liked this idea");
+    }
 
-        idea.getLikedBy().add(rollNumber);
-        idea.setLikes(idea.getLikes() + 1);
+    idea.getLikedBy().add(rollNumber);
+    idea.setLikes(idea.getLikes() + 1);
 
-        IdeaResponse response = mapToResponse(ideaRepository.save(idea));
+    IdeaResponse response = mapToResponse(ideaRepository.save(idea));
 
-        // ✅ notify idea owner — don't notify if you like your own idea
-        try {
-                // ✅ safer null check
-        if (idea.getCreatedByRollNumber() != null && 
+    // ✅ notify only at milestones — not every like
+    try {
+        if (idea.getCreatedByRollNumber() != null &&
             !idea.getCreatedByRollNumber().equals(rollNumber)) {
-            StudentProfile liker = studentProfileRepository.findByRollNumber(rollNumber)
-                    .orElse(null);
-            if (liker != null) {
+
+            int likes = idea.getLikes();
+
+            if (likes == 5 || likes == 10 || likes == 25 || likes == 50) {
+
                 notificationService.create(
                     idea.getCreatedByRollNumber(),
-                    liker.getName() + " liked your idea \"" + idea.getTitle() + "\"",
+                    "🎉 Your idea \"" + idea.getTitle() + "\" reached " + likes + " likes!",
                     "IDEA_LIKE"
                 );
             }
-}
-        } catch (Exception e) {
-            System.err.println("Notification failed: " + e.getMessage());
         }
-
-        return response;
+    } catch (Exception e) {
+        System.err.println("Notification failed: " + e.getMessage());
     }
 
+    return response;
+}
     public IdeaResponse mapToResponse(Idea idea) {
         return new IdeaResponse(
                 idea.getId(),

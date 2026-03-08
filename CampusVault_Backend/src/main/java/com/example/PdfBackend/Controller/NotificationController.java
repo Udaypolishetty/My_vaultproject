@@ -118,4 +118,11 @@ public class NotificationController {
     public void markAllRead(Authentication auth) {
         notificationService.markAllRead(auth.getName());
     }
+     // ✅ manual delete
+    @DeleteMapping("/{id}")
+    public void deleteNotification(
+            @PathVariable String id,
+            Authentication auth) {
+        notificationService.deleteNotification(id, auth.getName());
+    }
 }

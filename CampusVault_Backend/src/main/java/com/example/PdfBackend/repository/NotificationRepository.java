@@ -16,4 +16,9 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     boolean existsByRecipientRollNumberAndMessageAndCreatedAtAfter(
         String rollNumber, String message, LocalDateTime after
     );
+    // ✅ for manual delete
+    void deleteByIdAndRecipientRollNumber(String id, String rollNumber);
+
+    // ✅ for auto cleanup
+    List<Notification> findByCreatedAtBefore(LocalDateTime cutoff);
 }

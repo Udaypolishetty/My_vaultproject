@@ -1090,6 +1090,8 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ModeratorIdeaReview from "./ModeratorIdeaReview";
+import IdeaAdminCard from "./Components/IdeaAdminCard";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("students");
@@ -1296,9 +1298,10 @@ export default function AdminDashboard() {
     if (activeTab === "ideas") fetchIdeas();
     if (activeTab === "clubs") fetchClubs();
     if (activeTab === "announcements") fetchAnnouncements();
+    
   }, [activeTab]);
 
-  const tabs = ["students", "moderators", "ideas", "clubs", "announcements"];
+  const tabs = ["students", "moderators", "ideas", "clubs", "announcements","review"];
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white">
@@ -1503,29 +1506,21 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ===== IDEAS ===== */}
-        {activeTab === "ideas" && !loading && (
-          <div>
-            <h2 className="text-xl font-bold mb-4">All Ideas ({ideas.length})</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {ideas.map(idea => (
-                <div key={idea._id} className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-white">{idea.title}</h3>
-                    <button
-                      onClick={() => deleteIdea(idea._id)}
-                      className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs ml-2"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                  <p className="text-gray-400 text-sm mb-2">{idea.description}</p>
-                  <p className="text-gray-500 text-xs">by {idea.name} • {idea.branch}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+    {/* ===== IDEAS ===== */}
+{activeTab === "ideas" && !loading && (
+  <div>
+    <h2 className="text-xl font-bold mb-4">All Ideas ({ideas.length})</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      {ideas.map(idea => (
+        <IdeaAdminCard
+          key={idea.id || idea._id}
+          idea={idea}
+          onDelete={deleteIdea}
+        />
+      ))}
+    </div>
+  </div>
+)}
 
         {/* ===== CLUBS ===== */}
         {activeTab === "clubs" && !loading && (
@@ -1727,6 +1722,11 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+        {activeTab === "review" && (
+  <div className="p-8">
+    <ModeratorIdeaReview token={token} />
+  </div>
+)}
 
       </div>
     </div>

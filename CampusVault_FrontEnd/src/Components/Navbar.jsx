@@ -629,7 +629,7 @@ const Navbar = () => {
           <li><NavLink to="resources" className={linkClasses}>Resources</NavLink></li>
           <li><NavLink to="connect" className={linkClasses}>Connect</NavLink></li>
           <li><NavLink to="about" className={linkClasses}>About</NavLink></li>
-          <li><NavLink to="upload" className={linkClasses}>Upload</NavLink></li>
+          {/* <li><NavLink to="upload" className={linkClasses}>Upload</NavLink></li> */}
           <li><NavLink to="dashboard" className={linkClasses}>Dashboard</NavLink></li>
 
           {unread > 0 && (
@@ -667,7 +667,7 @@ const Navbar = () => {
           <li><NavLink to="resources" className={linkClasses} onClick={closeMenu}>Resources</NavLink></li>
           <li><NavLink to="connect" className={linkClasses} onClick={closeMenu}>Connect</NavLink></li>
           <li><NavLink to="about" className={linkClasses} onClick={closeMenu}>About</NavLink></li>
-          <li><NavLink to="upload" className={linkClasses} onClick={closeMenu}>Upload</NavLink></li>
+          {/* <li><NavLink to="upload" className={linkClasses} onClick={closeMenu}>Upload</NavLink></li> */}
           <li><NavLink to="dashboard" className={linkClasses} onClick={closeMenu}>Dashboard</NavLink></li>
           {unread > 0 && (
             <li>

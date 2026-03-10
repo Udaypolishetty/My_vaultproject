@@ -393,6 +393,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/ideas").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ideas/**").permitAll()
                         .requestMatchers("/api/ideas/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/ideas/*/status").hasAnyRole("MODERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/clubs/all").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/clubs/count").permitAll()
                         .requestMatchers("/api/clubs/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")

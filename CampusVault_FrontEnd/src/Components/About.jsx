@@ -277,8 +277,8 @@ const About = () => {
 
         <div className="flex flex-col md:flex-row gap-8 justify-center">
           {[
-            { name: "Uday Polishetty", role: "Full Stack Developer", url: "https://www.linkedin.com/in/uday-polishetty-bb7026261" },
-            { name: "Maruthi Vemula", role: "Full Stack Developer", url: "https://www.linkedin.com/in/vemulamaruthi/" }
+            { name: "Uday Polishetty", role: "Connect", url: "https://www.linkedin.com/in/uday-polishetty-bb7026261" },
+            { name: "Maruthi Vemula", role: "Connect", url: "https://www.linkedin.com/in/vemulamaruthi/" }
           ].map((person, i) => (
             <a
               key={i}

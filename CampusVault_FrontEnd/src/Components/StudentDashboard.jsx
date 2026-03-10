@@ -1070,6 +1070,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import ModeratorIdeaReview from "./ModeratorIdeaReview";
 
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -1242,6 +1243,11 @@ export default function StudentDashboard() {
           <button className={tabClass("upload")} onClick={() => setActiveTab("upload")}>
             Upload
           </button>
+          {isModerator && (
+    <button className={tabClass("review")} onClick={() => setActiveTab("review")}>
+      💡 Review Ideas
+    </button>
+  )}
         </div>
 
         {/* ===== PROFILE TAB ===== */}
@@ -1418,6 +1424,11 @@ export default function StudentDashboard() {
             )}
           </div>
         )}
+          {activeTab === "review" && isModerator && (
+          <div className="pb-10">
+            <ModeratorIdeaReview token={token} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1465,6 +1476,8 @@ function ModeratorUploadPanel({ token }) {
       setPosting(false);
     }
   };
+
+
 
   return (
     <div className="max-w-xl">

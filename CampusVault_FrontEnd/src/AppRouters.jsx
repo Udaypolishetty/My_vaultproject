@@ -57,6 +57,8 @@ import Connect from "./Components/Connect";
 import NavbarLayout from "./NavbarLayout";
 import AdminDashboard from "./Components/AdminDashboard"; // ✅ import added
 import StudentDashboard from "./Components/StudentDashboard";
+import PublicIdeaPage from "./Components/PublicIdeaPage";
+
 
 function AppRouters() {
   return (
@@ -65,6 +67,9 @@ function AppRouters() {
 
       {/* ✅ Admin route — outside profile, at top level */}
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+      {/* ✅ Public idea page — no auth needed */}
+    <Route path="/idea/:id" element={<PublicIdeaPage />} />
 
       <Route path="/profile" element={<AppLayout />}>
         <Route index element={<StudentProfile />} />

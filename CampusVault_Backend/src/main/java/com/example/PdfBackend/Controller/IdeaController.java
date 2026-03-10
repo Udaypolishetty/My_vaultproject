@@ -58,6 +58,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import com.example.PdfBackend.DTO.IdeaDto.IdeaStatusRequest;
 
 import java.util.List;
 
@@ -129,5 +130,24 @@ public ResponseEntity<Void> deleteIdea(
         @AuthenticationPrincipal UserDetails userDetails) {
     ideaService.deleteIdea(id, userDetails.getUsername());
     return ResponseEntity.ok().build();
+}
+
+// ✅ Phase 3 — update idea status (moderator/admin only)
+@PatchMapping("/{id}/status")
+public ResponseEntity<IdeaResponse> updateStatus(
+        @PathVariable String id,
+        @RequestBody IdeaStatusRequest request,
+        @AuthenticationPrincipal UserDetails userDetails) {
+    return ResponseEntity.ok(
+        ideaService.updateStatus(id, request.getStatus(), request.getModeratorNote(), userDetails.getUsername())
+    );
+}
+
+// ✅ GET SINGLE IDEA BY ID — public, no auth needed
+@GetMapping("/{id}")
+public ResponseEntity<Idea> getIdeaById(@PathVariable String id) {
+    return ideaService.getIdeaById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
 }
 }

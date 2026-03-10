@@ -279,4 +279,11 @@ public class Idea {
     private List<String> likedBy = new ArrayList<>();
     private List<Comment> comments = new ArrayList<>();
     private String createdByRollNumber;
+
+
+        // ✅ Phase 1 — Idea status system
+    private String status = "OPEN"; // OPEN, UNDER_REVIEW, ON_HOLD, IMPLEMENTED, REJECTED
+    private String moderatorNote;   // reason/message from moderator
+    private String reviewedBy;      // moderator's name who changed status
+    private LocalDateTime reviewedAt; // when status was changed
 }

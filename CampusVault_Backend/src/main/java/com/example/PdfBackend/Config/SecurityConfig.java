@@ -412,6 +412,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/buzz/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/buzz").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/buzz/*/resolve").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                        .requestMatchers("/api/warnings/my").authenticated()
+                        .requestMatchers("/api/warnings/issue").hasRole("ADMIN")
+                        .requestMatchers("/api/warnings/suggest").hasAnyRole("ADMIN", "MODERATOR")
+                        .requestMatchers("/api/warnings/suggestions").hasRole("ADMIN")
+                        .requestMatchers("/api/warnings/{id}/approve").hasRole("ADMIN")
+                        .requestMatchers("/api/warnings/{id}").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

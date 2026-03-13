@@ -286,4 +286,10 @@ public class Idea {
     private String moderatorNote;   // reason/message from moderator
     private String reviewedBy;      // moderator's name who changed status
     private LocalDateTime reviewedAt; // when status was changed
+
+    private boolean archived = false;
+    private LocalDateTime archivedAt;
+
+    
+
 }

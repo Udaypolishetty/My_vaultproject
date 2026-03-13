@@ -52,6 +52,8 @@ public class IdeaResponse {
     private String createdByName;
     private String createdByBranch;
     private String createdByYear;
+    private String createdById;      // ✅ add this
+    private String createdByEmail;   // ✅ add this too (needed for email button)
     private int likes;
     private List<String> likedBy;
     private List<Comment> comments;
@@ -61,4 +63,7 @@ public class IdeaResponse {
     private String moderatorNote;
     private String reviewedBy;
     private LocalDateTime reviewedAt;
+
+    private boolean archived;
+    private LocalDateTime archivedAt;
 }

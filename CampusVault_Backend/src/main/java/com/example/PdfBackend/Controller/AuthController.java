@@ -3,7 +3,7 @@ package com.example.PdfBackend.Controller;
 import com.example.PdfBackend.DTO.AuthResponse;
 import com.example.PdfBackend.DTO.LoginRequest;
 import com.example.PdfBackend.DTO.RegisterRequest;
-import com.example.PdfBackend.service.AuthService;
+import com.example.PdfBackend.Service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

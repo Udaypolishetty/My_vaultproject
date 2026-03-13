@@ -57,7 +57,7 @@ import Connect from "./Components/Connect";
 import NavbarLayout from "./NavbarLayout";
 import AdminDashboard from "./Components/AdminDashboard"; // ✅ import added
 import StudentDashboard from "./Components/StudentDashboard";
-import PublicIdeaPage from "./Components/PublicIdeaPage";
+import PublicIdeaPage from "./Components/Ideas/PublicIdeaPage";
 
 
 function AppRouters() {

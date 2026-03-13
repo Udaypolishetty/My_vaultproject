@@ -2225,7 +2225,7 @@ import AdminClubs from "./Admin/AdminClubs";
 import AdminAnnouncements from "./Admin/AdminAnnouncements";
 import AdminIdeas from "./Admin/AdminIdeas";
 import AdminWarnings from "./Admin/AdminWarnings";
-import ModeratorIdeaReview from "./ModeratorIdeaReview";
+import ModeratorIdeaReview from "./Ideas/ModeratorIdeaReview";
 
 const TAB_CONFIG = [
   { key: "students",      label: "Students",      icon: <Users size={14} /> },

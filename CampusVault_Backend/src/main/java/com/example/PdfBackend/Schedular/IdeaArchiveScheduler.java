@@ -15,33 +15,47 @@ public class IdeaArchiveScheduler {
 
     private final IdeaRepository ideaRepository;
 
-    @Scheduled(cron = "0 0 2 * * *") // every minute for testing
+    // runs every day at 2AM
+    @Scheduled(cron = "0 0 2 * * *")
     public void archiveOldIdeas() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Idea> allIdeas = ideaRepository.findAll();
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(5);
 
-        for (Idea idea : allIdeas) {
-            if (idea.isArchived()) continue;
+        List<Idea> candidates = ideaRepository.findAll().stream()
+            .filter(idea -> !idea.isArchived())
+            .filter(idea -> {
+                String status = idea.getStatus();
+                return "IMPLEMENTED".equals(status) || "REJECTED".equals(status);
+            })
+            .filter(idea -> idea.getCreatedAt() != null && idea.getCreatedAt().isBefore(cutoff))
+            .toList();
 
-            boolean shouldArchive = false;
-
-                if ("IMPLEMENTED".equals(idea.getStatus()) &&
-            idea.getReviewedAt() != null &&
-            idea.getReviewedAt().isBefore(now.minusDays(5))) {
-            shouldArchive = true;
+        for (Idea idea : candidates) {
+            idea.setArchived(true);
+            idea.setArchivedAt(LocalDateTime.now());
+            ideaRepository.save(idea);
         }
 
-        if ("REJECTED".equals(idea.getStatus()) &&
-            idea.getReviewedAt() != null &&
-            idea.getReviewedAt().isBefore(now.minusDays(5))) {
-            shouldArchive = true;
-        }
+        System.out.println("[Scheduler] Archived " + candidates.size() + " ideas.");
+    }
 
-            if (shouldArchive) {
-                idea.setArchived(true);
-                idea.setArchivedAt(now);
-                ideaRepository.save(idea);
-            }
-        }
+    // runs every day at 2:30AM — hard delete stale archived ideas
+    @Scheduled(cron = "0 30 2 * * *")
+    public void deleteStaleIdeas() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(5);
+
+        List<Idea> toDelete = ideaRepository.findAll().stream()
+            .filter(idea -> idea.isArchived())
+            .filter(idea -> idea.getArchivedAt() != null && idea.getArchivedAt().isBefore(cutoff))
+            .filter(idea -> {
+                // ✅ never delete IMPLEMENTED ideas with likes > 5 — leaderboard legends
+                if ("IMPLEMENTED".equals(idea.getStatus()) && idea.getLikes() > 5) {
+                    return false;
+                }
+                return true;
+            })
+            .toList();
+
+        ideaRepository.deleteAll(toDelete);
+        System.out.println("[Scheduler] Hard deleted " + toDelete.size() + " stale ideas.");
     }
 }

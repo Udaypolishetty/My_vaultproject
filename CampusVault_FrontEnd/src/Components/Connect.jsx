@@ -245,14 +245,144 @@
 //new with buzz
 
 
-import { useState } from "react";
-import IdeasBoard from "./IdeasBoard";
+// import { useState } from "react";
+// import IdeasBoard from "./IdeasBoard";
+// import Club from "./Clubs/Club";
+// import CampusNews from "./CampusNews";
+// import CampusBuzz from "./CampusBuzz"; // ✅ new
+
+// export default function Connect() {
+//   const [activeTab, setActiveTab] = useState("ideas");
+
+//   return (
+//     <div className="min-h-screen bg-[#0f0f0f] text-white pt-4 px-4 md:px-10 overflow-x-hidden">
+
+//       <div className="mt-6 mb-6 px-2 md:px-6">
+//         <div className="max-w-4xl mx-auto rounded-2xl border border-white/10 bg-white/[0.02]
+//                         bg-gradient-to-r from-[#0b0b0b]/80 to-[#141414]/80
+//                         backdrop-blur-xl p-6 shadow-lg relative
+//                         shadow-[0_20px_40px_rgba(0,212,170,0.08)]
+//                         transition-all duration-300
+//                         hover:-translate-y-1
+//                         hover:shadow-[0_0_40px_rgba(38,242,208,0.25)]
+//                         hover:border-[#26F2D0]/40">
+//           <div className="flex flex-col items-center text-center">
+//             <h2 className="text-xl font-semibold text-white">
+//               Connect with our campus
+//             </h2>
+//             <p className="text-gray-400 text-sm max-w-2xl mt-1">
+//               Share ideas, join clubs, discuss college topics, and collaborate — all in one place.
+//             </p>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Tabs */}
+//       <div className="flex gap-6 mb-8 border-b border-white/20 pb-3 overflow-x-auto">
+//         <button
+//           onClick={() => setActiveTab("ideas")}
+//           className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-[2px] whitespace-nowrap ${
+//             activeTab === "ideas"
+//               ? "border-[#26F2D0] text-[#26F2D0]"
+//               : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
+//           }`}
+//         >
+//           Ideas
+//         </button>
+
+//         <button
+//           onClick={() => setActiveTab("clubs")}
+//           className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-[2px] whitespace-nowrap ${
+//             activeTab === "clubs"
+//               ? "border-[#26F2D0] text-[#26F2D0]"
+//               : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
+//           }`}
+//         >
+//           Clubs
+//         </button>
+
+//         <button
+//           onClick={() => setActiveTab("news")}
+//           className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-[2px] whitespace-nowrap ${
+//             activeTab === "news"
+//               ? "border-[#26F2D0] text-[#26F2D0]"
+//               : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
+//           }`}
+//         >
+//           Campus News
+//         </button>
+
+//         {/* ✅ new tab */}
+//         <button
+//           onClick={() => setActiveTab("buzz")}
+//           className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-[2px] whitespace-nowrap ${
+//             activeTab === "buzz"
+//               ? "border-[#26F2D0] text-[#26F2D0]"
+//               : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
+//           }`}
+//         >
+//           📢 Campus Buzz
+//         </button>
+//       </div>
+
+//       {activeTab === "ideas" && <IdeasBoard />}
+//       {activeTab === "clubs" && <Club />}
+//       {activeTab === "news" && <CampusNews />}
+//       {activeTab === "buzz" && <CampusBuzz />} {/* ✅ */}
+//     </div>
+//   );
+// }
+
+
+
+import { useState, useEffect } from "react";
+import IdeasBoard from "./Ideas/IdeasBoard";
 import Club from "./Clubs/Club";
 import CampusNews from "./CampusNews";
-import CampusBuzz from "./CampusBuzz"; // ✅ new
+import CampusBuzz from "./CampusBuzz";
 
 export default function Connect() {
   const [activeTab, setActiveTab] = useState("ideas");
+  const [buzzDot, setBuzzDot] = useState(false);
+
+  const token = sessionStorage.getItem("token");
+
+  // ✅ check if there are new buzz posts since last visit
+  useEffect(() => {
+    const checkNewBuzz = async () => {
+      const lastVisit = sessionStorage.getItem("lastBuzzVisit");
+      if (!lastVisit) { setBuzzDot(true); return; }
+      try {
+        const res = await fetch("http://localhost:8081/api/buzz", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const posts = await res.json();
+        const hasNew = posts.some(p =>
+          new Date(p.createdAt).getTime() > parseInt(lastVisit)
+        );
+        setBuzzDot(hasNew);
+        // ✅ also tell Navbar about new buzz
+        if (hasNew) window.dispatchEvent(new Event("newBuzz"));
+      } catch (err) {
+        console.error("Buzz check failed:", err);
+      }
+    };
+    checkNewBuzz();
+  }, []);
+
+  const handleBuzzTabClick = () => {
+    setActiveTab("buzz");
+    setBuzzDot(false); // ✅ clear dot when tab opened
+    window.dispatchEvent(new Event("buzzRead")); // ✅ clear navbar dot
+  };
+
+  const tabClass = (tab) =>
+    `px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-[2px] whitespace-nowrap
+    ${activeTab === tab
+      ? "border-[#26F2D0] text-[#26F2D0]"
+      : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
+    }`;
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white pt-4 px-4 md:px-10 overflow-x-hidden">
@@ -260,16 +390,13 @@ export default function Connect() {
       <div className="mt-6 mb-6 px-2 md:px-6">
         <div className="max-w-4xl mx-auto rounded-2xl border border-white/10 bg-white/[0.02]
                         bg-gradient-to-r from-[#0b0b0b]/80 to-[#141414]/80
-                        backdrop-blur-xl p-6 shadow-lg relative
+                        backdrop-blur-xl p-6 shadow-lg
                         shadow-[0_20px_40px_rgba(0,212,170,0.08)]
-                        transition-all duration-300
-                        hover:-translate-y-1
+                        transition-all duration-300 hover:-translate-y-1
                         hover:shadow-[0_0_40px_rgba(38,242,208,0.25)]
                         hover:border-[#26F2D0]/40">
           <div className="flex flex-col items-center text-center">
-            <h2 className="text-xl font-semibold text-white">
-              Connect with our campus
-            </h2>
+            <h2 className="text-xl font-semibold text-white">Connect with our campus</h2>
             <p className="text-gray-400 text-sm max-w-2xl mt-1">
               Share ideas, join clubs, discuss college topics, and collaborate — all in one place.
             </p>
@@ -279,56 +406,33 @@ export default function Connect() {
 
       {/* Tabs */}
       <div className="flex gap-6 mb-8 border-b border-white/20 pb-3 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab("ideas")}
-          className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-[2px] whitespace-nowrap ${
-            activeTab === "ideas"
-              ? "border-[#26F2D0] text-[#26F2D0]"
-              : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
-          }`}
-        >
+        <button className={tabClass("ideas")} onClick={() => setActiveTab("ideas")}>
           Ideas
         </button>
-
-        <button
-          onClick={() => setActiveTab("clubs")}
-          className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-[2px] whitespace-nowrap ${
-            activeTab === "clubs"
-              ? "border-[#26F2D0] text-[#26F2D0]"
-              : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
-          }`}
-        >
+        <button className={tabClass("clubs")} onClick={() => setActiveTab("clubs")}>
           Clubs
         </button>
-
-        <button
-          onClick={() => setActiveTab("news")}
-          className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-[2px] whitespace-nowrap ${
-            activeTab === "news"
-              ? "border-[#26F2D0] text-[#26F2D0]"
-              : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
-          }`}
-        >
+        
+        {/* ✅ Buzz tab with red dot */}
+          <button className={tabClass("buzz")} onClick={handleBuzzTabClick}>
+          <span className="relative inline-flex items-center gap-1">
+            📢 Campus Buzz
+            {buzzDot && (
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            )}
+          </span>
+        </button>
+        <button className={tabClass("news")} onClick={() => setActiveTab("news")}>
           Campus News
         </button>
 
-        {/* ✅ new tab */}
-        <button
-          onClick={() => setActiveTab("buzz")}
-          className={`px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-[2px] whitespace-nowrap ${
-            activeTab === "buzz"
-              ? "border-[#26F2D0] text-[#26F2D0]"
-              : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
-          }`}
-        >
-          📢 Campus Buzz
-        </button>
+      
       </div>
 
       {activeTab === "ideas" && <IdeasBoard />}
       {activeTab === "clubs" && <Club />}
       {activeTab === "news" && <CampusNews />}
-      {activeTab === "buzz" && <CampusBuzz />} {/* ✅ */}
+      {activeTab === "buzz" && <CampusBuzz />}
     </div>
   );
 }

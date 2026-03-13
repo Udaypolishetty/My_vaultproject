@@ -2,14 +2,12 @@ package com.example.PdfBackend.Service;
 
 import com.example.PdfBackend.CustomException.NotFoundException;
 import com.example.PdfBackend.DTO.WarningRequest;
-import com.example.PdfBackend.model.Role;
 import com.example.PdfBackend.model.StudentProfile;
 import com.example.PdfBackend.model.Warning;
 import com.example.PdfBackend.repository.StudentProfileRepository;
 import com.example.PdfBackend.repository.WarningRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,7 +35,9 @@ public class WarningService {
         warning.setSeverity(request.getSeverity());
         warning.setIssuedBy(issuer.getName());
         warning.setIssuedAt(LocalDateTime.now());
+        warning.setCreatedAt(LocalDateTime.now());
         warning.setSuggestion(false);
+        warning.setRead(false);
 
         warningRepository.save(warning);
 
@@ -73,7 +73,9 @@ public class WarningService {
         warning.setSuggestion(true);
         warning.setSuggestedBy(moderator.getName());
         warning.setIssuedAt(LocalDateTime.now());
+        warning.setCreatedAt(LocalDateTime.now());
         warning.setApproved(false);
+        warning.setRead(false);
 
         return warningRepository.save(warning);
     }
@@ -91,7 +93,6 @@ public class WarningService {
         warning.setIssuedBy(admin.getName());
         warningRepository.save(warning);
 
-        // ✅ notify student after approval
         String emoji = switch (warning.getSeverity()) {
             case "HIGH"   -> "🚨";
             case "MEDIUM" -> "⚠️";
@@ -107,14 +108,24 @@ public class WarningService {
         return warning;
     }
 
-    // ✅ Get warnings for a student
+    // ✅ Get warnings for a student (only approved/issued, not pending suggestions)
     public List<Warning> getWarningsForStudent(String rollNumber) {
-        return warningRepository.findByRecipientRollNumber(rollNumber);
+        return warningRepository.findByRecipientRollNumber(rollNumber)
+                .stream()
+                .filter(w -> !w.isSuggestion())
+                .toList();
+    }
+
+    // ✅ Mark all warnings as read for a student
+    public void markAllRead(String rollNumber) {
+        List<Warning> warnings = warningRepository.findByRecipientRollNumber(rollNumber);
+        warnings.forEach(w -> w.setRead(true));
+        warningRepository.saveAll(warnings);
     }
 
     // ✅ Get all pending suggestions for admin
     public List<Warning> getPendingSuggestions() {
-        return warningRepository.findByIsSuggestionTrue();
+        return warningRepository.findBySuggestionTrue();
     }
 
     // ✅ Delete warning

@@ -1331,9 +1331,9 @@
 
 
 import React, { useEffect, useState } from "react";
-import IdeaForm from "./IdeaForm";
-import IdeaCard from "./IdeaCard";
-import IdeaRulesModal from "./IdeaRulesModal";
+import IdeaForm from "./Dashboard/Ideas/IdeaForm";
+import IdeaCard from "./Dashboard/Ideas/IdeaCard";
+import IdeaRulesModal from "./Dashboard/Ideas/IdeaRulesModal";
 import { Trophy, Flame, LayoutGrid } from "lucide-react";
 
 export default function IdeasBoard() {

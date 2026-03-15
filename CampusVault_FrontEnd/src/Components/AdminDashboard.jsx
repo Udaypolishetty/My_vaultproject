@@ -2216,6 +2216,265 @@
 
 
 
+// import { useEffect, useState } from "react";
+// import { useNavigate } from "react-router-dom";
+// import { LogOut, Users, Shield, Lightbulb, Building, Megaphone, Search, ShieldAlert } from "lucide-react";
+// import AdminStudents from "./Admin/AdminStudents";
+// import AdminModerators from "./Admin/AdminModerators";
+// import AdminClubs from "./Admin/AdminClubs";
+// import AdminAnnouncements from "./Admin/AdminAnnouncements";
+// import AdminIdeas from "./Admin/AdminIdeas";
+// import AdminWarnings from "./Admin/AdminWarnings";
+// import ModeratorIdeaReview from "./Ideas/ModeratorIdeaReview";
+
+// const TAB_CONFIG = [
+//   { key: "students",      label: "Students",      icon: <Users size={14} /> },
+//   { key: "moderators",    label: "Moderators",     icon: <Shield size={14} /> },
+//   { key: "ideas",         label: "Ideas",          icon: <Lightbulb size={14} /> },
+//   { key: "clubs",         label: "Clubs",          icon: <Building size={14} /> },
+//   { key: "announcements", label: "Announcements",  icon: <Megaphone size={14} /> },
+//   { key: "review",        label: "Review",         icon: <Search size={14} /> },
+//   { key: "warnings",      label: "Warnings",       icon: <ShieldAlert size={14} /> },
+// ];
+
+// export default function AdminDashboard() {
+//   const [activeTab, setActiveTab] = useState("students");
+//   const [students, setStudents] = useState([]);
+//   const [moderators, setModerators] = useState([]);
+//   const [ideas, setIdeas] = useState([]);
+//   const [clubs, setClubs] = useState([]);
+//   const [announcements, setAnnouncements] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const navigate = useNavigate();
+
+//   const token = sessionStorage.getItem("token");
+//   const headers = {
+//     Authorization: `Bearer ${token}`,
+//     "Content-Type": "application/json"
+//   };
+
+//   const handleLogout = () => { sessionStorage.clear(); navigate("/"); };
+
+//   const fetchStudents = async () => {
+//     setLoading(true);
+//     const res = await fetch("http://localhost:8081/api/admin/students", { headers });
+//     setStudents(await res.json());
+//     setLoading(false);
+//   };
+
+//   const fetchModerators = async () => {
+//     setLoading(true);
+//     const res = await fetch("http://localhost:8081/api/admin/moderators", { headers });
+//     setModerators(await res.json());
+//     setLoading(false);
+//   };
+
+//   const fetchIdeas = async () => {
+//     setLoading(true);
+//     const res = await fetch("http://localhost:8081/api/ideas", { headers });
+//     setIdeas(await res.json());
+//     setLoading(false);
+//   };
+
+//   const fetchClubs = async () => {
+//     setLoading(true);
+//     const res = await fetch("http://localhost:8081/api/clubs/all", { headers });
+//     setClubs(await res.json());
+//     setLoading(false);
+//   };
+
+//   const fetchAnnouncements = async () => {
+//     setLoading(true);
+//     const res = await fetch("http://localhost:8081/api/announcements", { headers });
+//     setAnnouncements(await res.json());
+//     setLoading(false);
+//   };
+
+//   useEffect(() => {
+//     if (activeTab === "students")      fetchStudents();
+//     if (activeTab === "moderators")    fetchModerators();
+//     if (activeTab === "ideas")         fetchIdeas();
+//     if (activeTab === "clubs")         fetchClubs();
+//     if (activeTab === "announcements") fetchAnnouncements();
+//   }, [activeTab]);
+
+//   // ===== handlers =====
+//   const deleteStudent = async (id) => {
+//     const res = await fetch(`http://localhost:8081/api/admin/students/${id}`, {
+//       method: "DELETE", headers
+//     });
+//     if (res.ok) setStudents(prev => prev.filter(s => s.id !== id));
+//   };
+
+//   const assignModerator = async (rollNumber) => {
+//     await fetch(`http://localhost:8081/api/admin/students/${rollNumber}/assign-moderator`, {
+//       method: "PATCH", headers
+//     });
+//     fetchModerators();
+//   };
+
+//   const revokeModerator = async (rollNumber) => {
+//     await fetch(`http://localhost:8081/api/admin/students/${rollNumber}/revoke-moderator`, {
+//       method: "PATCH", headers
+//     });
+//     fetchModerators();
+//   };
+
+//   const deleteAnnouncement = async (id) => {
+//     const res = await fetch(`http://localhost:8081/api/announcements/${id}`, {
+//       method: "DELETE", headers
+//     });
+//     if (res.ok) setAnnouncements(prev => prev.filter(a => a.id !== id));
+//   };
+
+//   const pinAnnouncement = async (id) => {
+//     const res = await fetch(`http://localhost:8081/api/announcements/${id}/pin`, {
+//       method: "PATCH", headers
+//     });
+//     if (res.ok) {
+//       const updated = await res.json();
+//       setAnnouncements(prev =>
+//         prev.map(a => a.id === updated.id ? updated : a)
+//             .sort((a, b) => {
+//               if (a.pinned && !b.pinned) return -1;
+//               if (!a.pinned && b.pinned) return 1;
+//               return b.timestamp - a.timestamp;
+//             })
+//       );
+//     }
+//   };
+
+//   const saveAnnouncementEdit = async (id, form) => {
+//     const res = await fetch(`http://localhost:8081/api/announcements/${id}`, {
+//       method: "PUT", headers, body: JSON.stringify(form)
+//     });
+//     if (res.ok) {
+//       const updated = await res.json();
+//       setAnnouncements(prev => prev.map(a => a.id === updated.id ? updated : a));
+//     }
+//   };
+
+//   const postAnnouncement = async (form) => {
+//     const res = await fetch("http://localhost:8081/api/announcements", {
+//       method: "POST", headers, body: JSON.stringify(form)
+//     });
+//     const saved = await res.json();
+//     setAnnouncements(prev => [saved, ...prev]);
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] text-white">
+
+//       {/* Header */}
+//       <div className="bg-[#0b0b0b]/90 backdrop-blur-sm border-b border-white/10
+//                       px-8 py-6 shadow-2xl flex items-center justify-between">
+//         <h1 className="text-3xl font-black bg-gradient-to-r from-[#26F2D0] to-[#00d4ff]
+//                        bg-clip-text text-transparent drop-shadow-lg">
+//           ⚙️ Admin Dashboard
+//         </h1>
+//         <button
+//           onClick={handleLogout}
+//           className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700
+//                      hover:from-red-700 hover:to-red-900 text-white px-6 py-3 rounded-xl
+//                      font-medium shadow-lg hover:scale-105 active:scale-95 transition-all"
+//         >
+//           <LogOut size={16} /> Logout
+//         </button>
+//       </div>
+
+//       {/* Tabs */}
+//       <div className="flex gap-1 px-8 pt-8 pb-4 border-b border-white/10 overflow-x-auto
+//                       bg-[#0f0f0f]/50 backdrop-blur-sm rounded-2xl mx-4 -mt-4 shadow-xl">
+//         {TAB_CONFIG.map(({ key, label, icon }) => (
+//           <button
+//             key={key}
+//             onClick={() => setActiveTab(key)}
+//             className={`relative flex items-center gap-2 px-5 py-3 rounded-2xl font-semibold
+//                         whitespace-nowrap transition-all duration-300 shadow-lg
+//               ${activeTab === key
+//                 ? key === "warnings"
+//                   ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-red-500/30 hover:scale-105"
+//                   : "bg-gradient-to-r from-[#26F2D0] to-[#00d4ff] text-black shadow-[#26F2D0]/50 hover:scale-105"
+//                 : "bg-[#1a1a1a]/80 text-gray-300 hover:bg-white/10 hover:text-white hover:scale-[1.02]"
+//               }`}
+//           >
+//             {icon}
+//             {label}
+//             {activeTab === key && (
+//               <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-16 h-1 rounded-full shadow-lg
+//                 ${key === "warnings"
+//                   ? "bg-gradient-to-r from-red-400 to-red-600"
+//                   : "bg-gradient-to-r from-[#26F2D0] to-[#00d4ff]"
+//                 }`} />
+//             )}
+//           </button>
+//         ))}
+//       </div>
+
+//       {/* Content */}
+//       <div className="p-8">
+//         {loading && (
+//           <div className="flex justify-center mt-20">
+//             <div className="w-10 h-10 border-3 border-[#26F2D0] border-t-transparent
+//                             rounded-full animate-spin" />
+//           </div>
+//         )}
+
+//         {activeTab === "students" && (
+//           <AdminStudents students={students} loading={loading} onDelete={deleteStudent} />
+//         )}
+
+//         {activeTab === "moderators" && (
+//           <AdminModerators
+//             moderators={moderators}
+//             loading={loading}
+//             onAssign={assignModerator}
+//             onRevoke={revokeModerator}
+//           />
+//         )}
+
+//         {activeTab === "ideas" && (
+//           <AdminIdeas
+//             ideas={ideas}
+//             loading={loading}
+//             onDelete={(id) => setIdeas(prev => prev.filter(i => (i.id || i._id) !== id))}
+//           />
+//         )}
+
+//         {activeTab === "clubs" && (
+//           <AdminClubs
+//             clubs={clubs}
+//             loading={loading}
+//             onDelete={(id) => setClubs(prev => prev.filter(c => c.id !== id))}
+//           />
+//         )}
+
+//         {activeTab === "announcements" && (
+//           <AdminAnnouncements
+//             announcements={announcements}
+//             loading={loading}
+//             onDelete={deleteAnnouncement}
+//             onPin={pinAnnouncement}
+//             onSaveEdit={saveAnnouncementEdit}
+//             onPost={postAnnouncement}
+//           />
+//         )}
+
+//         {activeTab === "review" && (
+//           <ModeratorIdeaReview token={token} isAdmin={true} />
+//         )}
+
+//         {/* ✅ NEW — Warnings tab */}
+//         {activeTab === "warnings" && (
+//           <AdminWarnings token={token} students={students} />
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, Users, Shield, Lightbulb, Building, Megaphone, Search, ShieldAlert } from "lucide-react";
@@ -2226,6 +2485,7 @@ import AdminAnnouncements from "./Admin/AdminAnnouncements";
 import AdminIdeas from "./Admin/AdminIdeas";
 import AdminWarnings from "./Admin/AdminWarnings";
 import ModeratorIdeaReview from "./Ideas/ModeratorIdeaReview";
+import AdminNotificationDropdown from "./Admin/AdminNotificationDropdown";
 
 const TAB_CONFIG = [
   { key: "students",      label: "Students",      icon: <Users size={14} /> },
@@ -2298,7 +2558,6 @@ export default function AdminDashboard() {
     if (activeTab === "announcements") fetchAnnouncements();
   }, [activeTab]);
 
-  // ===== handlers =====
   const deleteStudent = async (id) => {
     const res = await fetch(`http://localhost:8081/api/admin/students/${id}`, {
       method: "DELETE", headers
@@ -2365,21 +2624,26 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] text-white">
 
-      {/* Header */}
+
+      {/* Header — add pt-16 to clear navbar height */}
       <div className="bg-[#0b0b0b]/90 backdrop-blur-sm border-b border-white/10
-                      px-8 py-6 shadow-2xl flex items-center justify-between">
+                      px-8 py-6 shadow-2xl flex items-center justify-between py-6">
         <h1 className="text-3xl font-black bg-gradient-to-r from-[#26F2D0] to-[#00d4ff]
                        bg-clip-text text-transparent drop-shadow-lg">
           ⚙️ Admin Dashboard
         </h1>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700
-                     hover:from-red-700 hover:to-red-900 text-white px-6 py-3 rounded-xl
-                     font-medium shadow-lg hover:scale-105 active:scale-95 transition-all"
-        >
-          <LogOut size={16} /> Logout
-        </button>
+       <div className="flex items-center gap-3">
+  <AdminNotificationDropdown token={token} />
+  <button
+    onClick={handleLogout}
+    className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700
+               hover:from-red-700 hover:to-red-900 text-white px-6 py-3 rounded-xl
+               font-medium shadow-lg hover:scale-105 active:scale-95 transition-all"
+  >
+    <LogOut size={16} /> Logout
+  </button>
+</div>
+        
       </div>
 
       {/* Tabs */}
@@ -2423,48 +2687,26 @@ export default function AdminDashboard() {
         {activeTab === "students" && (
           <AdminStudents students={students} loading={loading} onDelete={deleteStudent} />
         )}
-
         {activeTab === "moderators" && (
-          <AdminModerators
-            moderators={moderators}
-            loading={loading}
-            onAssign={assignModerator}
-            onRevoke={revokeModerator}
-          />
+          <AdminModerators moderators={moderators} loading={loading}
+            onAssign={assignModerator} onRevoke={revokeModerator} />
         )}
-
         {activeTab === "ideas" && (
-          <AdminIdeas
-            ideas={ideas}
-            loading={loading}
-            onDelete={(id) => setIdeas(prev => prev.filter(i => (i.id || i._id) !== id))}
-          />
+          <AdminIdeas ideas={ideas} loading={loading}
+            onDelete={(id) => setIdeas(prev => prev.filter(i => (i.id || i._id) !== id))} />
         )}
-
         {activeTab === "clubs" && (
-          <AdminClubs
-            clubs={clubs}
-            loading={loading}
-            onDelete={(id) => setClubs(prev => prev.filter(c => c.id !== id))}
-          />
+          <AdminClubs clubs={clubs} loading={loading}
+            onDelete={(id) => setClubs(prev => prev.filter(c => c.id !== id))} />
         )}
-
         {activeTab === "announcements" && (
-          <AdminAnnouncements
-            announcements={announcements}
-            loading={loading}
-            onDelete={deleteAnnouncement}
-            onPin={pinAnnouncement}
-            onSaveEdit={saveAnnouncementEdit}
-            onPost={postAnnouncement}
-          />
+          <AdminAnnouncements announcements={announcements} loading={loading}
+            onDelete={deleteAnnouncement} onPin={pinAnnouncement}
+            onSaveEdit={saveAnnouncementEdit} onPost={postAnnouncement} />
         )}
-
         {activeTab === "review" && (
           <ModeratorIdeaReview token={token} isAdmin={true} />
         )}
-
-        {/* ✅ NEW — Warnings tab */}
         {activeTab === "warnings" && (
           <AdminWarnings token={token} students={students} />
         )}

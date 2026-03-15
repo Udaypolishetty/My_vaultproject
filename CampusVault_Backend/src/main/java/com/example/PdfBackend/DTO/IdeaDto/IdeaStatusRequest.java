@@ -6,4 +6,6 @@ import lombok.Data;
 public class IdeaStatusRequest {
     private String status;
     private String moderatorNote;
+    private String showcaseImageUrl;
+    private String showcaseLink;
 }

@@ -110,38 +110,217 @@
 //mallu new
 
 
+// import { useState, useEffect } from "react";
+
+// const Home = () => {
+//   const [count, setCount] = useState(0);
+//   const [ideasCount, setIdeasCount] = useState(0);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     // 🔥 FETCH STUDENT COUNT
+//     fetch("http://localhost:8081/student/count")
+//       .then((res) => {
+//         if (!res.ok) throw new Error("Failed to fetch count");
+//         return res.json();
+//       })
+//       .then((data) => setCount(data))
+//       .catch((err) => console.error("Count fetch error:", err))
+//       .finally(() => setLoading(false));
+
+//     // 🔥 FETCH IDEAS COUNT
+//     fetch("http://localhost:8081/api/ideas")
+//       .then((res) => {
+//         if (!res.ok) throw new Error("Failed to fetch ideas");
+//         return res.json();
+//       })
+//       .then((data) => setIdeasCount(Array.isArray(data) ? data.length : 0))
+//       .catch((err) => console.error("Ideas fetch error:", err));
+//   }, []);
+
+//   return (
+//     <section className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center text-center px-6 bg-[#181818] text-white pt-8">
+
+//       {/* Main heading */}
+//       <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-8">
+//         Sharing{" "}
+//         <span className="text-[#457B9D]">Resources</span>.
+//         <br />
+//         Building{" "}
+//         <span className="text-[#F4A261]">Community</span>.
+//       </h1>
+
+//       {/* Description */}
+//       <p className="text-gray-400 max-w-2xl mb-12 text-base md:text-lg">
+//         Access resources from above and connect with fellow students to share ideas and build a strong campus community.
+//       </p>
+
+//       {/* Stats */}
+//       <div className="flex justify-center">
+//         <div className="grid grid-cols-2 gap-6 max-w-xl w-full">
+//           <div className="bg-[#232323] rounded-xl p-6 text-center border border-white/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+//             <h2 className="text-2xl font-bold">
+//               {loading ? "—" : `${count}+`}
+//             </h2>
+//             <p className="text-gray-400 text-sm mt-1">Active Members</p>
+//           </div>
+
+//           <div className="bg-[#232323] rounded-xl p-6 text-center border border-white/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+//             <h2 className="text-2xl font-bold">
+//               {/* ✅ Real ideas count from backend */}
+//               {ideasCount > 0 ? `${ideasCount}+` : "—"}
+//             </h2>
+//             <p className="text-gray-400 text-sm mt-1">Ideas Shared</p>
+//           </div>
+//         </div>
+//       </div>
+
+//     </section>
+//   );
+// };
+
+// export default Home;
+
+
+
 import { useState, useEffect } from "react";
+import { Trophy, ExternalLink, Trash2 } from "lucide-react";
+
+const CATEGORY_ICONS = {
+  Tech: "/techh.png",
+  Academic: "/academic.png",
+  "Campus Pulse": "/campuspulse.png",
+  Cultural: "/cultural.png",
+};
+
+const CATEGORY_COLORS = {
+  Tech: "from-blue-500/20 to-blue-400/5 border-blue-400/20",
+  Academic: "from-green-500/20 to-green-400/5 border-green-400/20",
+  "Campus Pulse": "from-red-500/20 to-red-400/5 border-red-400/20",
+  Cultural: "from-yellow-500/20 to-yellow-400/5 border-yellow-400/20",
+};
+
+const getLinkLabel = (url) => {
+  if (!url) return "View";
+  if (url.includes("youtube") || url.includes("youtu.be")) return "▶ YouTube";
+  if (url.includes("instagram")) return "📸 Instagram";
+  if (url.includes("drive.google")) return "📁 Drive";
+  if (url.includes("linkedin")) return "💼 LinkedIn";
+  return "🔗 View";
+};
+
+const ShowcaseDeleteButton = ({ ideaId, token, onDeleted }) => {
+  const [confirm, setConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+    setDeleting(true);
+    setErrorMsg("");
+    try {
+      const res = await fetch(`http://localhost:8081/api/ideas/${ideaId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        onDeleted(ideaId);
+      } else if (res.status === 403) {
+        setConfirm(false);
+        setErrorMsg("Seems you are not the one who implemented this idea.");
+        setTimeout(() => setErrorMsg(""), 3000);
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  if (confirm) {
+    return (
+      <div className="relative">
+        <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+          <span className="text-xs text-gray-400">Remove?</span>
+          <button onClick={handleDelete} disabled={deleting}
+            className="text-xs text-red-400 font-semibold px-2 py-0.5
+                       bg-red-400/10 rounded-full hover:bg-red-400/20 transition
+                       disabled:opacity-50">
+            {deleting ? "..." : "Yes"}
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); setConfirm(false); }}
+            className="text-xs text-gray-500 hover:text-white px-2 py-0.5
+                       bg-white/5 rounded-full transition">
+            No
+          </button>
+        </div>
+        {errorMsg && (
+          <div className="absolute top-8 right-0 w-52 bg-[#1a1a1a] border border-red-500/30
+                          text-red-400 text-xs rounded-xl px-3 py-2 shadow-lg z-20">
+            {errorMsg}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <button onClick={(e) => { e.stopPropagation(); setConfirm(true); }}
+        className="p-1.5 rounded-lg text-gray-600 hover:text-red-400
+                   hover:bg-red-400/10 transition-all"
+        title="Remove from showcase">
+        <Trash2 size={13} />
+      </button>
+      {errorMsg && (
+        <div className="absolute top-8 right-0 w-52 bg-[#1a1a1a] border border-red-500/30
+                        text-red-400 text-xs rounded-xl px-3 py-2 shadow-lg z-20">
+          {errorMsg}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Home = () => {
   const [count, setCount] = useState(0);
   const [ideasCount, setIdeasCount] = useState(0);
+  const [showcase, setShowcase] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const token = sessionStorage.getItem("token");
+  const role = sessionStorage.getItem("role");
+  const isModerator = role === "MODERATOR" || role === "ADMIN";
+
   useEffect(() => {
-    // 🔥 FETCH STUDENT COUNT
     fetch("http://localhost:8081/student/count")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch count");
-        return res.json();
-      })
-      .then((data) => setCount(data))
-      .catch((err) => console.error("Count fetch error:", err))
+      .then(res => res.ok ? res.json() : 0)
+      .then(data => setCount(data))
+      .catch(err => console.error("Count fetch error:", err))
       .finally(() => setLoading(false));
 
-    // 🔥 FETCH IDEAS COUNT
     fetch("http://localhost:8081/api/ideas")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch ideas");
-        return res.json();
-      })
-      .then((data) => setIdeasCount(Array.isArray(data) ? data.length : 0))
-      .catch((err) => console.error("Ideas fetch error:", err));
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setIdeasCount(Array.isArray(data) ? data.length : 0))
+      .catch(err => console.error("Ideas fetch error:", err));
+
+    fetch("http://localhost:8081/api/ideas/showcase")
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setShowcase(Array.isArray(data) ? data : []))
+      .catch(err => console.error("Showcase fetch error:", err));
   }, []);
 
-  return (
-    <section className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center text-center px-6 bg-[#181818] text-white pt-8">
+  const formatDate = (dt) => {
+    if (!dt) return "";
+    return new Date(dt).toLocaleDateString("en-IN", {
+      month: "short", year: "numeric"
+    });
+  };
 
-      {/* Main heading */}
+  return (
+    <section className="min-h-[calc(100vh-64px)] flex flex-col items-center text-center
+                        px-6 bg-[#181818] text-white pt-16 pb-20">
+
       <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-8">
         Sharing{" "}
         <span className="text-[#457B9D]">Resources</span>.
@@ -150,33 +329,389 @@ const Home = () => {
         <span className="text-[#F4A261]">Community</span>.
       </h1>
 
-      {/* Description */}
       <p className="text-gray-400 max-w-2xl mb-12 text-base md:text-lg">
-        Access resources from above and connect with fellow students to share ideas and build a strong campus community.
+        Access resources from above and connect with fellow students to share ideas
+        and build a strong campus community.
       </p>
 
       {/* Stats */}
-      <div className="flex justify-center">
+      <div className="flex justify-center mb-16 w-full">
         <div className="grid grid-cols-2 gap-6 max-w-xl w-full">
-          <div className="bg-[#232323] rounded-xl p-6 text-center border border-white/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
-            <h2 className="text-2xl font-bold">
-              {loading ? "—" : `${count}+`}
-            </h2>
+          <div className="bg-[#232323] rounded-xl p-6 text-center border border-white/10
+                          shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+            <h2 className="text-2xl font-bold">{loading ? "—" : `${count}+`}</h2>
             <p className="text-gray-400 text-sm mt-1">Active Members</p>
           </div>
-
-          <div className="bg-[#232323] rounded-xl p-6 text-center border border-white/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
-            <h2 className="text-2xl font-bold">
-              {/* ✅ Real ideas count from backend */}
-              {ideasCount > 0 ? `${ideasCount}+` : "—"}
-            </h2>
+          <div className="bg-[#232323] rounded-xl p-6 text-center border border-white/10
+                          shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+            <h2 className="text-2xl font-bold">{ideasCount > 0 ? `${ideasCount}+` : "—"}</h2>
             <p className="text-gray-400 text-sm mt-1">Ideas Shared</p>
           </div>
         </div>
       </div>
 
+      {/* Showcase */}
+      {showcase.length > 0 && (
+        <div className="w-full max-w-5xl">
+          <div className="flex items-center gap-3 mb-6 justify-center">
+            <Trophy size={20} className="text-yellow-400" />
+            <h2 className="text-xl font-bold text-white">Ideas That Made It Happen</h2>
+            <Trophy size={20} className="text-yellow-400" />
+          </div>
+          <p className="text-gray-500 text-sm mb-8 -mt-3">
+            Student ideas that were reviewed and implemented by the campus team
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-left">
+            {showcase.map(idea => {
+              const gradientClass = CATEGORY_COLORS[idea.category]
+                || "from-gray-500/20 to-gray-400/5 border-gray-400/20";
+
+              // ✅ show class name for class proposals, student name otherwise
+              const proposedBy = idea.classProposal
+                ? `🏛️ ${idea.proposalClass}`
+                : `💡 ${idea.createdByName}`;
+
+              const proposedBySubtext = idea.classProposal
+                ? `Class Proposal · ${idea.category}`
+                : `${idea.createdByBranch} · ${idea.createdByYear}`;
+
+              return (
+                <div key={idea.id}
+                  className={`relative bg-gradient-to-br ${gradientClass} border rounded-2xl
+                              overflow-hidden transition-all duration-300
+                              hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(38,242,208,0.1)]`}>
+
+                  {/* ✅ moderator delete — top right */}
+                  {isModerator && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <ShowcaseDeleteButton
+                        ideaId={idea.id}
+                        token={token}
+                        onDeleted={(id) => setShowcase(prev => prev.filter(i => i.id !== id))}
+                      />
+                    </div>
+                  )}
+
+                  {/* Image or icon */}
+                  {idea.showcaseImageUrl ? (
+                    <div className="relative h-44 overflow-hidden">
+                      <img src={idea.showcaseImageUrl} alt={idea.title}
+                        className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <span className="absolute bottom-3 left-3 text-xs px-2 py-0.5
+                                       bg-green-500/80 text-white rounded-full font-medium">
+                        ✅ Implemented
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="h-32 flex items-center justify-center bg-white/[0.03]
+                                    border-b border-white/5">
+                      <img src={CATEGORY_ICONS[idea.category] || "/others.png"}
+                        className="w-16 h-16 object-contain opacity-60" alt="" />
+                    </div>
+                  )}
+
+                  {/* Card content */}
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <p className="text-white font-bold text-sm leading-snug flex-1">
+                        {idea.title}
+                      </p>
+                      {idea.showcaseLink && (
+                        <a href={idea.showcaseLink} target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          className="shrink-0 flex items-center gap-1 px-2 py-1
+                                     bg-white/10 hover:bg-[#26F2D0]/20 text-gray-400
+                                     hover:text-[#26F2D0] rounded-lg text-xs transition-all
+                                     border border-white/10 hover:border-[#26F2D0]/30
+                                     whitespace-nowrap"
+                          title={idea.showcaseLink}>
+                          {getLinkLabel(idea.showcaseLink)}
+                          <ExternalLink size={10} />
+                        </a>
+                      )}
+                    </div>
+
+                    <p className="text-gray-400 text-xs line-clamp-2 mb-3">
+                      {idea.description}
+                    </p>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        {/* ✅ class proposal shows class name, regular shows student name */}
+                        <p className="text-xs text-gray-300 font-medium">{proposedBy}</p>
+                        <p className="text-xs text-gray-500">{proposedBySubtext}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-[#26F2D0] font-bold">
+                          👍 {idea.likes || 0} likes
+                        </p>
+                        {idea.reviewedAt && (
+                          <p className="text-xs text-gray-600">{formatDate(idea.reviewedAt)}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </section>
   );
 };
 
 export default Home;
+
+
+
+// import { useState, useEffect, useRef } from "react";
+// import { 
+//   Trophy, 
+//   ExternalLink, 
+//   Trash2, 
+//   Code, 
+//   Lightbulb, // Fixed: Capital 'L'
+//   Sparkles, 
+//   Rocket, 
+//   Zap, 
+//   Orbit 
+// } from "lucide-react";
+// import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+
+// // Configuration for category styling
+// const CATEGORY_STYLES = {
+//   Tech: "from-cyan-500/20 to-blue-600/10 border-cyan-500/30 text-cyan-400",
+//   Academic: "from-emerald-500/20 to-teal-600/10 border-emerald-500/30 text-emerald-400",
+//   "Campus Pulse": "from-rose-500/20 to-red-600/10 border-rose-500/30 text-rose-400",
+//   Cultural: "from-amber-500/20 to-orange-600/10 border-amber-500/30 text-amber-400",
+// };
+
+// // Background Floating Element with Mouse Parallax
+// const FloatingElement = ({ icon: Icon, x, y, size, duration, delay }) => {
+//   return (
+//     <motion.div
+//       initial={{ opacity: 0 }}
+//       animate={{ 
+//         opacity: [0.05, 0.15, 0.05],
+//         y: [0, -30, 0],
+//         rotate: [0, 45, 0],
+//         x: [0, 15, 0]
+//       }}
+//       transition={{ 
+//         duration, 
+//         repeat: Infinity, 
+//         delay, 
+//         ease: "easeInOut" 
+//       }}
+//       className="absolute pointer-events-none hidden md:block"
+//       style={{ left: x, top: y }}
+//     >
+//       <Icon size={size} strokeWidth={1} className="text-white" />
+//     </motion.div>
+//   );
+// };
+
+// const Home = () => {
+//   const [count, setCount] = useState(0);
+//   const [ideasCount, setIdeasCount] = useState(0);
+//   const [showcase, setShowcase] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   const token = sessionStorage.getItem("token");
+//   const role = sessionStorage.getItem("role");
+//   const isModerator = role === "MODERATOR" || role === "ADMIN";
+
+//   // Data Fetching
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         const [studentRes, ideasRes, showcaseRes] = await Promise.all([
+//           fetch("http://localhost:8081/student/count"),
+//           fetch("http://localhost:8081/api/ideas"),
+//           fetch("http://localhost:8081/api/ideas/showcase")
+//         ]);
+        
+//         if (studentRes.ok) setCount(await studentRes.json());
+//         if (ideasRes.ok) {
+//           const ideas = await ideasRes.json();
+//           setIdeasCount(Array.isArray(ideas) ? ideas.length : 0);
+//         }
+//         if (showcaseRes.ok) {
+//           const data = await showcaseRes.json();
+//           setShowcase(Array.isArray(data) ? data : []);
+//         }
+//       } catch (err) {
+//         console.error("Data fetch error:", err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     fetchData();
+//   }, []);
+
+//   const formatDate = (dt) => !dt ? "" : new Date(dt).toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+
+//   return (
+//     <div className="relative min-h-screen bg-[#030303] text-white selection:bg-indigo-500/30 overflow-x-hidden">
+      
+//       {/* 1. ANIMATED BACKGROUND LAYER */}
+//       <div className="fixed inset-0 z-0">
+//         {/* Animated Mesh Gradients */}
+//         <div className="absolute top-[-10%] left-[-10%] w-[70%] h-[70%] bg-indigo-600/10 blur-[150px] rounded-full animate-pulse" />
+//         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-orange-600/10 blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+        
+//         {/* Floating Icons Loop */}
+//         <FloatingElement icon={Code} x="10%" y="20%" size={40} duration={8} delay={0} />
+//         <FloatingElement icon={Sparkles} x="85%" y="15%" size={30} duration={10} delay={1} />
+//         <FloatingElement icon={Rocket} x="75%" y="70%" size={50} duration={12} delay={2} />
+//         <FloatingElement icon={Orbit} x="15%" y="80%" size={45} duration={9} delay={0.5} />
+//         <FloatingElement icon={Zap} x="50%" y="40%" size={25} duration={7} delay={3} />
+//       </div>
+
+//       {/* 2. MAIN CONTENT AREA */}
+//       <main className="relative z-10 flex flex-col items-center pt-24 pb-32 px-6 max-w-7xl mx-auto">
+        
+//         {/* Hero Section */}
+//         <motion.div 
+//           initial={{ opacity: 0, y: 30 }}
+//           animate={{ opacity: 1, y: 0 }}
+//           transition={{ duration: 0.8, ease: "easeOut" }}
+//           className="text-center mb-16"
+//         >
+//           {/* <motion.div
+//             initial={{ scale: 0.9, opacity: 0 }}
+//             animate={{ scale: 1, opacity: 1 }}
+//             transition={{ delay: 0.2 }}
+//             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-xs font-bold uppercase tracking-widest mb-6"
+//           >
+//             <span className="relative flex h-2 w-2">
+//               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+//               <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+//             </span>
+//             Campus Vault v2.0
+//           </motion.div> */}
+
+//           <h1 className="text-5xl md:text-8xl font-black tracking-tight leading-[0.9] mb-8">
+//             RESOURCES <br /> 
+//             <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-orange-400 bg-clip-text text-transparent italic">
+//               UNLOCKED.
+//             </span>
+//           </h1>
+
+//           <p className="text-gray-400 max-w-xl mx-auto text-lg md:text-xl font-medium leading-relaxed">
+//             The central hub for student innovation. Share resources, 
+//             track campus ideas, and build the future.
+//           </p>
+//         </motion.div>
+
+//         {/* Stats Grid */}
+//         <div className="grid grid-cols-2 gap-4 md:gap-8 w-full max-w-3xl mb-24">
+//           {[
+//             { label: "Community Members", val: count, color: "text-indigo-400" },
+//             { label: "Projects Shared", val: ideasCount, color: "text-orange-400" }
+//           ].map((stat, i) => (
+//             <motion.div
+//               key={i}
+//               whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.05)" }}
+//               className="p-8 rounded-[2rem] bg-white/[0.02] border border-white/10 backdrop-blur-2xl text-center transition-colors"
+//             >
+//               <div className={`text-4xl md:text-6xl font-black mb-2 ${stat.color}`}>
+//                 {loading ? "..." : `${stat.val}+`}
+//               </div>
+//               <div className="text-gray-500 uppercase text-xs font-bold tracking-widest">{stat.label}</div>
+//             </motion.div>
+//           ))}
+//         </div>
+
+//         {/* Showcase Grid */}
+//         {showcase.length > 0 && (
+//           <div className="w-full">
+//             <div className="flex flex-col items-center mb-16 text-center">
+//               <h2 className="text-3xl md:text-5xl font-bold mb-4">Wall of Fame</h2>
+//               <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-orange-500 rounded-full" />
+//             </div>
+
+//             <motion.div 
+//               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+//               initial="hidden"
+//               whileInView="show"
+//               viewport={{ once: true }}
+//               variants={{
+//                 hidden: { opacity: 0 },
+//                 show: { opacity: 1, transition: { staggerChildren: 0.15 } }
+//               }}
+//             >
+//               {showcase.map((idea) => (
+//                 <motion.div
+//                   key={idea.id}
+//                   variants={{
+//                     hidden: { opacity: 0, y: 30 },
+//                     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } }
+//                   }}
+//                   className={`group relative rounded-[2rem] border overflow-hidden bg-gradient-to-b ${CATEGORY_STYLES[idea.category] || "from-gray-500/10 to-transparent border-white/10"} flex flex-col h-full hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500`}
+//                 >
+//                   {/* Card Header/Image */}
+//                   <div className="h-52 relative overflow-hidden">
+//                     {idea.showcaseImageUrl ? (
+//                       <img src={idea.showcaseImageUrl} alt="" className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" />
+//                     ) : (
+//                       <div className="w-full h-full bg-black/40 flex items-center justify-center">
+//                         <Trophy size={48} className="opacity-20 group-hover:opacity-100 transition-opacity text-white" />
+//                       </div>
+//                     )}
+//                     <div className="absolute inset-0 bg-gradient-to-t from-[#030303] to-transparent opacity-80" />
+//                     <div className="absolute bottom-4 left-6">
+//                       <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] font-bold uppercase tracking-tighter">
+//                         Implemented
+//                       </span>
+//                     </div>
+//                   </div>
+
+//                   {/* Card Body */}
+//                   <div className="p-8 pt-4 flex flex-col flex-grow">
+//                     <div className="flex justify-between items-start gap-4 mb-4">
+//                       <h3 className="text-xl font-bold group-hover:text-white transition-colors leading-tight">
+//                         {idea.title}
+//                       </h3>
+//                       {idea.showcaseLink && (
+//                         <a href={idea.showcaseLink} target="_blank" className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all">
+//                           <ExternalLink size={18} />
+//                         </a>
+//                       )}
+//                     </div>
+
+//                     <p className="text-gray-400 text-sm leading-relaxed line-clamp-3 mb-8">
+//                       {idea.description}
+//                     </p>
+
+//                     <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
+//                       <div className="flex items-center gap-3">
+//                         <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold border border-white/10">
+//                           {idea.createdByName?.charAt(0) || "U"}
+//                         </div>
+//                         <div className="flex flex-col">
+//                           <span className="text-xs font-bold text-gray-200">{idea.createdByName || "Class Proposal"}</span>
+//                           <span className="text-[10px] text-gray-500 uppercase tracking-widest">{idea.category}</span>
+//                         </div>
+//                       </div>
+//                       <div className="flex flex-col items-end">
+//                         <span className="text-xs font-black text-indigo-400">{idea.likes || 0} LIKES</span>
+//                         <span className="text-[9px] text-gray-600 font-bold uppercase">{formatDate(idea.reviewedAt)}</span>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </motion.div>
+//               ))}
+//             </motion.div>
+//           </div>
+//         )}
+//       </main>
+//     </div>
+//   );
+// };
+
+// export default Home;

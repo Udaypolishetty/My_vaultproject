@@ -1,6 +1,7 @@
 package com.example.PdfBackend.Controller;
 
 import com.example.PdfBackend.DTO.IdeaCommentResponse;
+import com.example.PdfBackend.DTO.IdeaDto.IdeaEditRequest;
 import com.example.PdfBackend.DTO.IdeaDto.IdeaRequest;
 import com.example.PdfBackend.DTO.IdeaDto.IdeaResponse;
 import com.example.PdfBackend.DTO.CommentDto.CommentRequest;
@@ -47,6 +48,22 @@ public class IdeaController {
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(
                 ideaService.createIdea(request, userDetails.getUsername())
+        );
+    }
+
+    // ✅ edit idea — owner only, within 1 hour
+    @PatchMapping("/{id}/edit")
+    public ResponseEntity<IdeaResponse> editIdea(
+            @PathVariable String id,
+            @RequestBody IdeaEditRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(
+                ideaService.editIdea(
+                        id,
+                        request.getTitle(),
+                        request.getDescription(),
+                        userDetails.getUsername()
+                )
         );
     }
 
@@ -98,20 +115,25 @@ public class IdeaController {
                         id,
                         request.getStatus(),
                         request.getModeratorNote(),
-                        userDetails.getUsername()
+                        userDetails.getUsername(),
+                        request.getShowcaseImageUrl(),
+                        request.getShowcaseLink() // ✅ new
                 )
         );
     }
-
     @GetMapping("/archived")
     @PreAuthorize("hasRole('ADMIN')")
     public List<IdeaResponse> getArchivedIdeas() {
         return ideaService.getArchivedIdeas();
     }
 
-    // ✅ leaderboard — includes archived IMPLEMENTED ideas with likes > 5
     @GetMapping("/leaderboard")
     public ResponseEntity<List<Idea>> getLeaderboard() {
         return ResponseEntity.ok(ideaService.getLeaderboard());
+    }
+
+    @GetMapping("/showcase")
+    public ResponseEntity<List<Idea>> getShowcase() {
+        return ResponseEntity.ok(ideaService.getShowcase());
     }
 }

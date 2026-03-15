@@ -694,15 +694,219 @@
 
 
 
+// import { useState, useEffect } from "react";
+// import { NavLink, useNavigate, useLocation } from "react-router-dom";
+
+// const Navbar = () => {
+//   const [open, setOpen] = useState(false);
+//   const [unread, setUnread] = useState(0);
+//   const [buzzDot, setBuzzDot] = useState(false); // ✅ red dot for new buzz
+//   const navigate = useNavigate();
+//   const location = useLocation();
+
+//   useEffect(() => {
+//     const token = sessionStorage.getItem("token");
+//     const myId = sessionStorage.getItem("id");
+//     if (!token || !myId) return;
+
+//     checkUnread();
+//     checkNewBuzz();
+
+//     const evtSource = new EventSource(
+//       `http://localhost:8081/api/notifications/stream?token=${token}`
+//     );
+//     evtSource.addEventListener("notification", () => {
+//       setUnread(prev => prev + 1);
+//     });
+//     evtSource.onerror = () => evtSource.close();
+
+//     const handleRead = () => setUnread(0);
+//     window.addEventListener("notificationsRead", handleRead);
+
+//     // ✅ listen for new buzz event from Connect.jsx
+//     const handleNewBuzz = () => setBuzzDot(true);
+//     window.addEventListener("newBuzz", handleNewBuzz);
+
+//     // ✅ listen for buzz tab opened — clear dot
+//     const handleBuzzRead = () => setBuzzDot(false);
+//     window.addEventListener("buzzRead", handleBuzzRead);
+//     console.log("unread count:", unread);
+
+//     return () => {
+//       evtSource.close();
+//       window.removeEventListener("notificationsRead", handleRead);
+//       window.removeEventListener("newBuzz", handleNewBuzz);
+//       window.removeEventListener("buzzRead", handleBuzzRead);
+//     };
+//   }, [location.pathname.split("/")[1]]);
+
+//   const checkUnread = async () => {
+//     try {
+//       const token = sessionStorage.getItem("token");
+//       if (!token) return;
+//       const res = await fetch("http://localhost:8081/api/notifications/unread-count", {
+//         headers: { Authorization: `Bearer ${token}` }
+//       });
+//       if (!res.ok) return;
+//       const data = await res.json();
+//       setUnread(data.count);
+//     } catch (err) {
+//       console.error("Navbar notif check failed:", err);
+//     }
+//   };
+
+//   // ✅ check for new buzz posts since last visit
+//   const checkNewBuzz = async () => {
+//     try {
+//       const token = sessionStorage.getItem("token");
+//       if (!token) return;
+//       const lastVisit = localStorage.getItem("lastBuzzVisit");
+//       if (!lastVisit) { setBuzzDot(true); return; }
+//       const res = await fetch("http://localhost:8081/api/buzz", {
+//         headers: { Authorization: `Bearer ${token}` }
+//       });
+//       if (!res.ok) return;
+//       const posts = await res.json();
+//       const hasNew = posts.some(p =>
+//         new Date(p.createdAt).getTime() > parseInt(lastVisit)
+//       );
+//       setBuzzDot(hasNew);
+//     } catch (err) {
+//       console.error("Buzz dot check failed:", err);
+//     }
+//   };
+
+//   const closeMenu = () => setOpen(false);
+
+//   const linkClasses = ({ isActive }) =>
+//     isActive ? "text-white font-semibold" : "text-gray-400 hover:text-white";
+
+//   const handleLogout = () => {
+//     sessionStorage.clear();
+//     setUnread(0);
+//     setBuzzDot(false);
+//     closeMenu();
+//     navigate("/");
+//   };
+
+//   return (
+//     <nav className="fixed top-0 w-full bg-[#0f0f0f] border-b border-white/5
+//                     text-white shadow-lg z-50">
+//       <div className="flex items-center justify-between px-6 py-4">
+//         <h1 className="text-2xl font-bold text-white">Campus Vault</h1>
+
+//         <ul className="hidden md:flex flex-1 justify-center space-x-8 text-lg items-center">
+//           <li><NavLink to="home" end className={linkClasses}>Home</NavLink></li>
+//           <li><NavLink to="resources" className={linkClasses}>Resources</NavLink></li>
+
+//           {/* ✅ Connect with red dot if new buzz */}
+//           <li>
+//             <NavLink to="connect" className={linkClasses}>
+//               {({ isActive }) => (
+//                 <span className="relative inline-flex items-center">
+//                   Connect
+//                   {buzzDot && (
+//                     <span className="absolute -top-1 -right-2 w-2 h-2
+//                                      rounded-full bg-red-500 animate-pulse" />
+//                   )}
+//                 </span>
+//               )}
+//             </NavLink>
+//           </li>
+
+//           <li><NavLink to="about" className={linkClasses}>About</NavLink></li>
+//           <li><NavLink to="dashboard" className={linkClasses}>Dashboard</NavLink></li>
+
+//           {unread > 0 && (
+//             <li>
+//               <button
+//                 onClick={() => navigate("dashboard", { state: { tab: "activity" } })}
+//                 className="relative w-8 h-8 flex items-center justify-center
+//                            rounded-xl bg-white/5 hover:bg-white/10
+//                            border border-white/10 transition-all"
+//               >
+//                 <span className="text-base">🔔</span>
+//                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#26F2D0] text-black
+//                                  text-xs font-bold rounded-full flex items-center justify-center">
+//                   {unread > 9 ? "9+" : unread}
+//                 </span>
+//               </button>
+//             </li>
+//           )}
+//         </ul>
+
+//         <div className="hidden md:flex items-center gap-3">
+//           <button onClick={handleLogout}
+//             className="text-gray-400 hover:text-red-400 transition text-sm">
+//             Logout
+//           </button>
+//         </div>
+
+//         <button className="md:hidden text-3xl focus:outline-none"
+//           onClick={() => setOpen(!open)}>☰</button>
+//       </div>
+
+//       {/* Mobile menu */}
+//       {open && (
+//         <ul className="md:hidden bg-[#0b0b0b] text-gray-400 text-center
+//                        space-y-4 py-4 text-lg border-t border-white/10">
+//           <li><NavLink to="home" end className={linkClasses} onClick={closeMenu}>Home</NavLink></li>
+//           <li><NavLink to="resources" className={linkClasses} onClick={closeMenu}>Resources</NavLink></li>
+//           <li>
+//             <NavLink to="connect" className={linkClasses}
+//               onClick={() => { closeMenu(); window.dispatchEvent(new Event("buzzRead")); }}>
+//               <span className="relative inline-flex items-center">
+//                 Connect
+//                 {buzzDot && (
+//                   <span className="absolute -top-1 -right-2 w-2 h-2
+//                                    rounded-full bg-red-500 animate-pulse" />
+//                 )}
+//               </span>
+//             </NavLink>
+//           </li>
+//           <li><NavLink to="about" className={linkClasses} onClick={closeMenu}>About</NavLink></li>
+//           <li><NavLink to="dashboard" className={linkClasses} onClick={closeMenu}>Dashboard</NavLink></li>
+//           {unread > 0 && (
+//             <li>
+//               <button
+//                 onClick={() => { navigate("dashboard", { state: { tab: "activity" } }); closeMenu(); }}
+//                 className="text-[#26F2D0] text-sm font-medium"
+//               >
+//                 🔔 {unread} new notification{unread > 1 ? "s" : ""}
+//               </button>
+//             </li>
+//           )}
+//           <li>
+//             <button onClick={handleLogout}
+//               className="text-red-400 hover:text-red-300 transition-colors">
+//               Logout
+//             </button>
+//           </li>
+//         </ul>
+//       )}
+//     </nav>
+//   );
+// };
+
+// export default Navbar;
+
+
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(0);
-  const [buzzDot, setBuzzDot] = useState(false); // ✅ red dot for new buzz
+  const [buzzDot, setBuzzDot] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const role = sessionStorage.getItem("role");
+  const rollNumber = sessionStorage.getItem("rollNumber");
+  const isAdmin = role === "ADMIN";
+
+  // ✅ base path for nav links — admin stays at /admin/dashboard, students use relative
+  const studentBase = `/profile/${rollNumber}`;
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
@@ -723,11 +927,9 @@ const Navbar = () => {
     const handleRead = () => setUnread(0);
     window.addEventListener("notificationsRead", handleRead);
 
-    // ✅ listen for new buzz event from Connect.jsx
     const handleNewBuzz = () => setBuzzDot(true);
     window.addEventListener("newBuzz", handleNewBuzz);
 
-    // ✅ listen for buzz tab opened — clear dot
     const handleBuzzRead = () => setBuzzDot(false);
     window.addEventListener("buzzRead", handleBuzzRead);
 
@@ -754,12 +956,11 @@ const Navbar = () => {
     }
   };
 
-  // ✅ check for new buzz posts since last visit
   const checkNewBuzz = async () => {
     try {
       const token = sessionStorage.getItem("token");
       if (!token) return;
-      const lastVisit = sessionStorage.getItem("lastBuzzVisit");
+      const lastVisit = localStorage.getItem("lastBuzzVisit");
       if (!lastVisit) { setBuzzDot(true); return; }
       const res = await fetch("http://localhost:8081/api/buzz", {
         headers: { Authorization: `Bearer ${token}` }
@@ -777,15 +978,64 @@ const Navbar = () => {
 
   const closeMenu = () => setOpen(false);
 
-  const linkClasses = ({ isActive }) =>
-    isActive ? "text-white font-semibold" : "text-gray-400 hover:text-white";
-
   const handleLogout = () => {
     sessionStorage.clear();
     setUnread(0);
     setBuzzDot(false);
     closeMenu();
     navigate("/");
+  };
+
+  const handleBellClick = () => {
+    if (isAdmin) {
+      // ✅ admin — just mark read, already on dashboard
+      fetch("http://localhost:8081/api/notifications/mark-read", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` }
+      });
+      setUnread(0);
+    } else {
+      navigate(`${studentBase}/dashboard`, { state: { tab: "activity" } });
+    }
+  };
+
+  const linkClasses = ({ isActive }) =>
+    isActive ? "text-white font-semibold" : "text-gray-400 hover:text-white";
+
+  // ✅ admin only sees Dashboard link pointing to /admin/dashboard
+  // students see all nav links with absolute paths
+  const renderNavLinks = (onClick = null) => {
+    if (isAdmin) {
+      return (
+        <li>
+          <NavLink to="/admin/dashboard" className={linkClasses} onClick={onClick}>
+            Dashboard
+          </NavLink>
+        </li>
+      );
+    }
+
+    return (
+      <>
+        <li><NavLink to={`${studentBase}/home`} className={linkClasses} onClick={onClick}>Home</NavLink></li>
+        <li><NavLink to={`${studentBase}/resources`} className={linkClasses} onClick={onClick}>Resources</NavLink></li>
+        <li>
+          <NavLink to={`${studentBase}/connect`}
+            className={({ isActive }) => isActive ? "text-white font-semibold" : "text-gray-400 hover:text-white"}
+            onClick={() => { onClick?.(); window.dispatchEvent(new Event("buzzRead")); }}>
+            <span className="relative inline-flex items-center">
+              Connect
+              {buzzDot && (
+                <span className="absolute -top-1 -right-2 w-2 h-2
+                                 rounded-full bg-red-500 animate-pulse" />
+              )}
+            </span>
+          </NavLink>
+        </li>
+        <li><NavLink to={`${studentBase}/about`} className={linkClasses} onClick={onClick}>About</NavLink></li>
+        <li><NavLink to={`${studentBase}/dashboard`} className={linkClasses} onClick={onClick}>Dashboard</NavLink></li>
+      </>
+    );
   };
 
   return (
@@ -795,31 +1045,12 @@ const Navbar = () => {
         <h1 className="text-2xl font-bold text-white">Campus Vault</h1>
 
         <ul className="hidden md:flex flex-1 justify-center space-x-8 text-lg items-center">
-          <li><NavLink to="home" end className={linkClasses}>Home</NavLink></li>
-          <li><NavLink to="resources" className={linkClasses}>Resources</NavLink></li>
-
-          {/* ✅ Connect with red dot if new buzz */}
-          <li>
-            <NavLink to="connect" className={linkClasses}>
-              {({ isActive }) => (
-                <span className="relative inline-flex items-center">
-                  Connect
-                  {buzzDot && (
-                    <span className="absolute -top-1 -right-2 w-2 h-2
-                                     rounded-full bg-red-500 animate-pulse" />
-                  )}
-                </span>
-              )}
-            </NavLink>
-          </li>
-
-          <li><NavLink to="about" className={linkClasses}>About</NavLink></li>
-          <li><NavLink to="dashboard" className={linkClasses}>Dashboard</NavLink></li>
+          {renderNavLinks()}
 
           {unread > 0 && (
             <li>
               <button
-                onClick={() => navigate("dashboard", { state: { tab: "activity" } })}
+                onClick={handleBellClick}
                 className="relative w-8 h-8 flex items-center justify-center
                            rounded-xl bg-white/5 hover:bg-white/10
                            border border-white/10 transition-all"
@@ -849,26 +1080,11 @@ const Navbar = () => {
       {open && (
         <ul className="md:hidden bg-[#0b0b0b] text-gray-400 text-center
                        space-y-4 py-4 text-lg border-t border-white/10">
-          <li><NavLink to="home" end className={linkClasses} onClick={closeMenu}>Home</NavLink></li>
-          <li><NavLink to="resources" className={linkClasses} onClick={closeMenu}>Resources</NavLink></li>
-          <li>
-            <NavLink to="connect" className={linkClasses}
-              onClick={() => { closeMenu(); window.dispatchEvent(new Event("buzzRead")); }}>
-              <span className="relative inline-flex items-center">
-                Connect
-                {buzzDot && (
-                  <span className="absolute -top-1 -right-2 w-2 h-2
-                                   rounded-full bg-red-500 animate-pulse" />
-                )}
-              </span>
-            </NavLink>
-          </li>
-          <li><NavLink to="about" className={linkClasses} onClick={closeMenu}>About</NavLink></li>
-          <li><NavLink to="dashboard" className={linkClasses} onClick={closeMenu}>Dashboard</NavLink></li>
+          {renderNavLinks(closeMenu)}
           {unread > 0 && (
             <li>
               <button
-                onClick={() => { navigate("dashboard", { state: { tab: "activity" } }); closeMenu(); }}
+                onClick={() => { handleBellClick(); closeMenu(); }}
                 className="text-[#26F2D0] text-sm font-medium"
               >
                 🔔 {unread} new notification{unread > 1 ? "s" : ""}

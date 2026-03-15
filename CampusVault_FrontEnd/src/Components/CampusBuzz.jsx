@@ -1531,7 +1531,7 @@ export default function CampusBuzz({ onNewPost }) {
 
   useEffect(() => {
     fetchPosts();
-    sessionStorage.setItem("lastBuzzVisit", Date.now().toString());
+    localStorage.setItem("lastBuzzVisit", Date.now().toString());
   }, []);
 
   // ✅ poll every 30 seconds for new posts from others

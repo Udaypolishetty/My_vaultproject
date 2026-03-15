@@ -98,7 +98,7 @@ export default function IdeasLeaderboard({ myId }) {
                 {/* Rank */}
                 <div className="w-10 text-center shrink-0">
                   {isImplemented
-                    ? <span className="text-xl">✅</span>
+                    ? <span className="text-xl">✯</span>
                     : isRejected
                       ? <span className="text-xl">❌</span>
                       : index < 3

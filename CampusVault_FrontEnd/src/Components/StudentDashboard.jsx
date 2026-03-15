@@ -2002,7 +2002,7 @@ export default function StudentDashboard() {
 
         {activeTab === "profile" && (
           <StudentProfile
-            name={name} rollNumber={rollNumber} email={email}
+            name={name} rollNumber={rollNumber} email={email} 
             ideas={ideas} myClub={myClub} joinedClubs={joinedClubs} loading={loading}
           />
         )}

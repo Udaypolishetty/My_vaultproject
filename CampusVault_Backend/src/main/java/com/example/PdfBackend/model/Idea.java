@@ -41,6 +41,10 @@ public class Idea {
     private boolean archived = false;
     private LocalDateTime archivedAt;
 
-    
+      private String showcaseImageUrl;
+       private String showcaseLink;
+
+      private boolean classProposal = false;
+    private String proposalClass; // e.g. "3rd Year CSE" — auto-filled from moderator's profi
 
 }

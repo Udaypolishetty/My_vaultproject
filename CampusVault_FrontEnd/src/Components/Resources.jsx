@@ -526,7 +526,7 @@ const Resources = () => {
         )}
 
         {/* ================= NOTES TAB ================= */}
-        {activeTab === "notes" && (
+        {/* {activeTab === "notes" && (
           <div className="flex flex-col items-center justify-center flex-1 text-center">
             <div className="bg-white border border-[#d6e4f0] shadow-sm rounded-xl p-8 max-w-lg">
               <h3 className="text-2xl font-semibold text-[#1d3557] mb-4">
@@ -536,17 +536,71 @@ const Resources = () => {
                 We're currently working on adding curated notes
                 for each subject and regulation.
               </p>
-              {/* <p className="text-gray-500 text-sm">
-                This feature will allow students to access
-                summarized concepts, important questions,
-                and exam-focused materials.
-              </p> */}
+             
               <div className="mt-6 text-[#1d3557] font-medium">
                 🚀 Coming Soon ...
               </div>
+              <div>
+      
+<div className="mt-6 text-sm text-gray-600">
+  You can access notes from here for now.
+</div>
+
+<a
+  href="https://www.forum.universityupdates.in/threads/jntuh-study-materials-notes-important-questions.33519/#google_vignette"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="mt-2 inline-block text-[#1d3557] font-medium underline hover:text-[#457B9D]"
+>
+  📄 Open Notes Page
+</a>
+              </div>
             </div>
           </div>
-        )}
+        )} */}
+
+        {activeTab === "notes" && (
+  <div className="flex flex-col items-center justify-center flex-1 text-center gap-6">
+
+    {/* BOX 1 — Notes Coming Soon */}
+    <div className="bg-white border border-[#d6e4f0] shadow-sm rounded-xl p-8 max-w-lg">
+      <h3 className="text-2xl font-semibold text-[#1d3557] mb-4">
+        Notes Section 𓂃🖊
+      </h3>
+
+      <p className="text-gray-600 mb-4">
+        We're currently working on adding curated notes for each subject and regulation.
+      </p>
+
+      <div className="text-[#1d3557] font-medium">
+        🚀 Coming Soon ...
+      </div>
+    </div>
+
+
+    {/* BOX 2 — Temporary Access */}
+    <div className="bg-[#f8fbff] border border-[#d6e4f0] shadow-sm rounded-xl p-4 max-w-md">
+      
+      <p className="text-gray-600 mb-1 text-sm">
+        Temporarily!
+        You can access them from the link below for now.
+      </p>
+   <button
+  onClick={() =>
+    window.open(
+      "https://www.forum.universityupdates.in/threads/jntuh-study-materials-notes-important-questions.33519/",
+      "_blank"
+    )
+  }
+  className="mt-3 bg-[#ffffff] text-black px-4 py-2 rounded hover:bg-[#1d3557]"
+>
+  Notes ↗
+</button>
+
+    </div>
+
+  </div>
+)}
 
       </section>
     </div>

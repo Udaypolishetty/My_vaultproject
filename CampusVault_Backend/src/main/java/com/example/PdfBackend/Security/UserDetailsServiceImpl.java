@@ -22,7 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return new User(
                 student.getRollNumber(),
                 student.getPassword(),
-                List.of(new SimpleGrantedAuthority("ROLE_" + student.getRole().name()))
-        );
+List.of(new SimpleGrantedAuthority("ROLE_" + student.getRole().toString()))     
+   );
     }
 }

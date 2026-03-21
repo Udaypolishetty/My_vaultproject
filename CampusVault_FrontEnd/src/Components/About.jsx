@@ -497,12 +497,12 @@ const About = () => {
       {/* ===== TEAM ===== */}
       <section className="py-20 flex flex-col items-center px-6 text-center z-10 relative">
         <p className="tracking-[4px] text-[#26F2D0] text-sm mb-2 uppercase">The Minds Behind</p>
-        <h2 className="text-5xl font-extrabold mb-16">The Architects</h2>
+        <h2 className="text-5xl font-extrabold mb-16">THE TEAM</h2>
 
         <div className="flex flex-col md:flex-row gap-12 justify-center">
           {[
-            { name: "Uday Polishetty", role: "Product Lead", url: "https://www.linkedin.com/in/uday-polishetty-bb7026261" },
-            { name: "Maruthi Vemula", role: "Tech Lead", url: "https://www.linkedin.com/in/vemulamaruthi/" }
+            { name: "Uday Polishetty", role: "Connect", url: "https://www.linkedin.com/in/uday-polishetty-bb7026261" },
+            { name: "Maruthi Vemula", role: "Connect", url: "https://www.linkedin.com/in/vemulamaruthi/" }
           ].map((person, i) => (
             <a
               key={i}

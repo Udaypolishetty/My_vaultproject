@@ -2697,7 +2697,7 @@ export default function AdminDashboard() {
         )}
         {activeTab === "clubs" && (
           <AdminClubs clubs={clubs} loading={loading}
-            onDelete={(id) => setClubs(prev => prev.filter(c => c.id !== id))} />
+            onDelete={(id) => setClubs(prev => prev.filter(c => c.id !== id))}  onRefresh={fetchClubs} />
         )}
         {activeTab === "announcements" && (
           <AdminAnnouncements announcements={announcements} loading={loading}

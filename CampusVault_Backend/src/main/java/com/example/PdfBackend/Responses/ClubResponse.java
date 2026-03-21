@@ -1,49 +1,54 @@
 package com.example.PdfBackend.Responses;
 
+import com.example.PdfBackend.DTO.MemberInfo;
+import com.example.PdfBackend.model.Club;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+@Data
 public class ClubResponse {
-    private String clubId;
+    private String id;
     private String title;
     private String description;
+    private String category;
+    private String logoEmoji;
     private String linkedinUrl;
+    private String createdBy;
     private String createdByName;
+    private LocalDateTime createdAt;
+    private LocalDateTime semesterStartDate;
+    private LocalDateTime semesterEndDate;
+    private String status;
+    private int maxMembers;
 
-    public String getClubId() {
-        return clubId;
-    }
+    private List<String> members;
+    private List<Club.PendingMember> pendingMembers;
+    private List<MemberInfo> memberDetails;
+    private int memberCount;
+    private boolean full;
+    private boolean activityUnlocked;
 
-    public void setClubId(String clubId) {
-        this.clubId = clubId;
-    }
+    private String presidentRoll;
+    private String presidentName;
+    private String vpRoll;
+    private String vpName;
 
-    public String getTitle() {
-        return title;
-    }
+    private List<Club.ClubActivity> activities;
+    private List<Club.ClubAnnouncement> announcements;
+    private List<Club.ClubMessage> messages;
+    private List<Club.ClubBadge> badges;
+    private List<Club.RoleRequest> roleRequests;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    private int completedActivities;
+    private int totalActivities;
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getLinkedinUrl() {
-        return linkedinUrl;
-    }
-
-    public void setLinkedinUrl(String linkedinUrl) {
-        this.linkedinUrl = linkedinUrl;
-    }
-
-    public String getCreatedByName() {
-        return createdByName;
-    }
-
-    public void setCreatedByName(String createdByName) {
-        this.createdByName = createdByName;
-    }
+    // ✅ new restriction fields
+    private int editCount;
+    private int extraActivities;
+    private Map<String, String> memberNicknames;
+    private int presidentAnnouncementsToday;
+    private int vpAnnouncementsToday;
 }

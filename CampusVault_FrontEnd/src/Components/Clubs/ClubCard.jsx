@@ -1,5 +1,5 @@
-import { Users } from "lucide-react";
-import { Bot, Printer, Code2, Cog, Rocket, Star, Trophy, Music2, Mic2, Camera, Heart } from "lucide-react";
+import { Users, Building2, Leaf, Zap, Crown, Trophy, Handshake } from "lucide-react";
+import { Bot, Printer, Code2, Cog, Rocket, Star,  Music2, Mic2, Camera, Heart } from "lucide-react";
 
 const CATEGORY_ACCENT = {
   AI:               { from: "#7c3aed", to: "#4f46e5", glow: "rgba(124,58,237,0.3)" },
@@ -15,8 +15,11 @@ const CATEGORY_ACCENT = {
 };
 
 const BADGE_EMOJI = {
-  EARLY_MEMBER: "🌱", ACTIVE_CONTRIBUTOR: "⚡",
-  CLUB_LEADER: "👑", ALL_STAR: "🏆", TEAM_PLAYER: "🤝",
+  EARLY_MEMBER: <Leaf size={14} />,
+  ACTIVE_CONTRIBUTOR: <Zap size={14} />,
+  CLUB_LEADER: <Crown size={14} />,
+  ALL_STAR: <Trophy size={14} />,
+  TEAM_PLAYER: <Handshake size={14} />,
 };
 
 const CLUB_ICONS = {
@@ -92,8 +95,8 @@ export default function ClubCard({ club, myRoll, onJoin, joining, onClick }) {
             fontSize: "24px",
             boxShadow: `inset 0 2px 4px rgba(0,0,0,0.5), 0 0 12px ${accent.glow}`,
           }}>
-            {CLUB_ICONS[club.category] || <span className="text-2xl">🏛️</span>}
-          </div>
+{CLUB_ICONS[club.category] || <Building2 size={22} />}        
+  </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginBottom: "4px" }}>

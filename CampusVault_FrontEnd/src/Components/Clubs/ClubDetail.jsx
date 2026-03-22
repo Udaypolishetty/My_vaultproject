@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { ArrowLeft, Crown, UserCheck } from "lucide-react";
+import { ArrowLeft, Crown, UserCheck, Users, ClipboardList, Megaphone, MessageSquare, Handshake, Hourglass,Building2 } from "lucide-react";
 import ClubMembers from "./ClubMembers";
 import ClubActivities from "./ClubActivities";
 import ClubAnnouncements from "./ClubAnnouncements";
 import ClubChat from "./ClubChat";
 
 const TABS = [
-  { key: "members",       label: "Members",       emoji: "👥" },
-  { key: "activities",    label: "Activities",     emoji: "📋" },
-  { key: "announcements", label: "Announcements",  emoji: "📢" },
-  { key: "chat",          label: "Chat",           emoji: "💬" },
+  { key: "members", label: "Members", icon: <Users size={14} /> },
+  { key: "activities", label: "Activities", icon: <ClipboardList size={14} /> },
+  { key: "announcements", label: "Announcements", icon: <Megaphone size={14} /> },
+  { key: "chat", label: "Chat", icon: <MessageSquare size={14} /> },
 ];
 
 export default function ClubDetail({ club, myRoll, myName, token, onBack, onUpdate }) {
@@ -68,8 +68,8 @@ export default function ClubDetail({ club, myRoll, myName, token, onBack, onUpda
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10
                           flex items-center justify-center text-3xl shrink-0">
-            {club.logoEmoji || "🏛️"}
-          </div>
+{club.logoEmoji || <Building2 size={24} />}     
+     </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
               <h2 className="font-bold text-white text-lg">{club.title}</h2>
@@ -82,19 +82,19 @@ export default function ClubDetail({ club, myRoll, myName, token, onBack, onUpda
               {isPending && (
                 <span className="text-xs bg-yellow-500/20 text-yellow-400
                                  border border-yellow-500/30 px-2 py-0.5 rounded-full">
-                  Pending ⏳
+                 Pending <Hourglass size={12} />
                 </span>
               )}
               {isPresident && (
                 <span className="text-xs bg-purple-500/20 text-purple-400
                                  border border-purple-500/30 px-2 py-0.5 rounded-full">
-                  👑 President
+                <Crown size={12} /> President
                 </span>
               )}
               {isVp && (
                 <span className="text-xs bg-blue-500/20 text-blue-400
                                  border border-blue-500/30 px-2 py-0.5 rounded-full">
-                  🤝 VP
+                  <Handshake size={12} /> VP
                 </span>
               )}
             </div>
@@ -103,14 +103,14 @@ export default function ClubDetail({ club, myRoll, myName, token, onBack, onUpda
             {/* Stats row */}
             <div className="flex items-center gap-4 mt-3 flex-wrap">
               <span className="text-xs text-gray-500">
-                👥 {club.memberCount}/{club.maxMembers} members
+               <Users size={12} /> {club.memberCount}/{club.maxMembers} members
               </span>
               <span className="text-xs text-gray-500">
-                📋 {completedPct}% activities done
+                <ClipboardList size={12} /> {completedPct}% activities done
               </span>
               {daysLeft !== null && (
                 <span className={`text-xs ${daysLeft < 30 ? "text-red-400" : "text-gray-500"}`}>
-                  ⏳ {daysLeft} days left
+                  <Hourglass size={12} /> {daysLeft} days left
                 </span>
               )}
             </div>
@@ -143,7 +143,7 @@ export default function ClubDetail({ club, myRoll, myName, token, onBack, onUpda
         {(hasPendingRequest || roleRequested) && !hasRoleAlready && (
           <div className="mt-4 pt-4 border-t border-white/10">
             <p className="text-xs text-yellow-400">
-              ⏳ Role request pending — waiting for admin/moderator approval
+              <Hourglass size={12} /> Role request pending — waiting for admin/moderator approval
             </p>
           </div>
         )}
@@ -158,7 +158,7 @@ export default function ClubDetail({ club, myRoll, myName, token, onBack, onUpda
                        ${activeTab === tab.key
                          ? "bg-[#26F2D0]/10 text-[#26F2D0] border-b-2 border-[#26F2D0]"
                          : "text-gray-400 hover:text-white"}`}>
-            {tab.emoji} {tab.label}
+            {tab.icon} {tab.label}
           </button>
         ))}
       </div>

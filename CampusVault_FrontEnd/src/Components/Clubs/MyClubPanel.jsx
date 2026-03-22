@@ -3,8 +3,7 @@ import ClubMembers from "./ClubMembers";
 import ClubActivities from "./ClubActivities";
 import ClubAnnouncements from "./ClubAnnouncements";
 import ClubChat from "./ClubChat";
-import { Crown, UserCheck, Pencil, Check, X } from "lucide-react";
-import { Bot, Printer, Code2, Cog, Rocket, Star, Trophy, Music2, Mic2, Camera, Heart } from "lucide-react";
+import { Crown, UserCheck, Pencil, Check, X, Users, ClipboardList, Hourglass, Handshake, Leaf, Zap, Trophy,Bot,Printer,Code2,Cog,Rocket,Star,Music2,Mic2,Camera,Megaphone,MessageSquare } from "lucide-react";
 
 const CLUB_ICONS = {
     AI:               <Bot size={22} className="text-purple-400" />,
@@ -33,18 +32,18 @@ const CATEGORY_ACCENT = {
 };
 
 const TABS = [
-  { key: "members",       label: "Members",     emoji: "👥" },
-  { key: "activities",    label: "Activities",  emoji: "📋" },
-  { key: "announcements", label: "Board",       emoji: "📢" },
-  { key: "chat",          label: "Chat",        emoji: "💬" },
+  { key: "members", label: "Members", icon: <Users size={14} /> },
+  { key: "activities", label: "Activities", icon: <ClipboardList size={14} /> },
+  { key: "announcements", label: "Board", icon: <Megaphone size={14} /> },
+  { key: "chat", label: "Chat", icon: <MessageSquare size={14} /> },
 ];
 
 const BADGE_CONFIG = {
-  EARLY_MEMBER:       { emoji: "🌱", label: "Early Member" },
-  ACTIVE_CONTRIBUTOR: { emoji: "⚡", label: "Active Contributor" },
-  CLUB_LEADER:        { emoji: "👑", label: "Club Leader" },
-  ALL_STAR:           { emoji: "🏆", label: "All-Star" },
-  TEAM_PLAYER:        { emoji: "🤝", label: "Team Player" },
+  EARLY_MEMBER: { icon: <Leaf size={13} />, label: "Early Member" },
+  ACTIVE_CONTRIBUTOR: { icon: <Zap size={13} />, label: "Active Contributor" },
+  CLUB_LEADER: { icon: <Crown size={13} />, label: "Club Leader" },
+  ALL_STAR: { icon: <Trophy size={13} />, label: "All-Star" },
+  TEAM_PLAYER: { icon: <Handshake size={13} />, label: "Team Player" },
 };
 
 const MAX_EDITS = 3;
@@ -135,7 +134,7 @@ function SingleClubPanel({ club, myRoll, myName, token, onUpdate }) {
             fontSize: "24px",
             boxShadow: `inset 0 2px 6px rgba(0,0,0,0.6), 0 0 16px ${accent.glow}`,
           }}>
-           {CLUB_ICONS[club.category] || <span className="text-2xl">🏛️</span>}
+           {CLUB_ICONS[club.category] || <span className="text-2xl"><Building2 size={20} /></span>}
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -147,14 +146,14 @@ function SingleClubPanel({ club, myRoll, myName, token, onUpdate }) {
                 <span style={{ fontSize: "10px", padding: "2px 7px", borderRadius: "20px",
                   background: "rgba(168,85,247,0.15)", color: "#c084fc",
                   border: "1px solid rgba(168,85,247,0.3)", fontWeight: 600 }}>
-                  👑 President
+                  <Crown size={10} /> 
                 </span>
               )}
               {isVp && (
                 <span style={{ fontSize: "10px", padding: "2px 7px", borderRadius: "20px",
                   background: "rgba(59,130,246,0.15)", color: "#93c5fd",
                   border: "1px solid rgba(59,130,246,0.3)", fontWeight: 600 }}>
-                  🤝 VP
+                  <Handshake size={10} />
                 </span>
               )}
             </div>
@@ -170,7 +169,7 @@ function SingleClubPanel({ club, myRoll, myName, token, onUpdate }) {
                     padding: "6px 8px", fontSize: "12px", color: "white",
                     outline: "none", resize: "none", boxSizing: "border-box"
                   }} />
-                {descError && <p style={{ fontSize: "11px", color: "#f87171", margin: "2px 0 0" }}>⚠️ {descError}</p>}
+                {descError && <p style={{ fontSize: "11px", color: "#f87171", margin: "2px 0 0" }}><AlertTriangle size={11} /> {descError}</p>}
                 <div style={{ display: "flex", gap: "6px", marginTop: "4px" }}>
                   <button onClick={handleSaveDesc} disabled={savingDesc}
                     style={{ display: "flex", alignItems: "center", gap: "3px", padding: "3px 8px",
@@ -208,14 +207,14 @@ function SingleClubPanel({ club, myRoll, myName, token, onUpdate }) {
             {/* Stats */}
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "6px" }}>
               <span style={{ fontSize: "11px", color: "#6b7280" }}>
-                👥 {club.memberCount}/{club.maxMembers}
+                <Users size={11} /> {club.memberCount}/{club.maxMembers}
               </span>
               <span style={{ fontSize: "11px", color: "#6b7280" }}>
-                📋 {completedPct}% done
+               <ClipboardList size={11} /> {completedPct}% done
               </span>
               {daysLeft !== null && (
                 <span style={{ fontSize: "11px", color: daysLeft < 30 ? "#f87171" : "#6b7280" }}>
-                  ⏳ {daysLeft}d left
+                 <Hourglass size={11} /> {daysLeft}d left
                 </span>
               )}
             </div>
@@ -230,7 +229,7 @@ function SingleClubPanel({ club, myRoll, myName, token, onUpdate }) {
                       fontSize: "13px", padding: "2px 5px",
                       background: "rgba(255,255,255,0.05)",
                       border: "1px solid rgba(255,255,255,0.08)", borderRadius: "6px",
-                    }}>{cfg.emoji}</span>
+                    }}>{cfg.icon}</span>
                   ) : null;
                 })}
               </div>
@@ -259,7 +258,7 @@ function SingleClubPanel({ club, myRoll, myName, token, onUpdate }) {
         )}
         {(hasPendingRequest || roleRequested) && !hasRole && (
           <p style={{ fontSize: "11px", color: "#eab308", marginTop: "8px" }}>
-            ⏳ Role request pending — awaiting admin approval
+            <Hourglass size={11} /> Role request pending — awaiting admin approval
           </p>
         )}
       </div>
@@ -280,7 +279,7 @@ function SingleClubPanel({ club, myRoll, myName, token, onUpdate }) {
               borderBottom: activeTab === tab.key ? `2px solid ${accent.from}` : "2px solid transparent",
               cursor: "pointer", whiteSpace: "nowrap", transition: "color 0.2s",
             }}>
-            {tab.emoji} {tab.label}
+            {tab.icon} {tab.label}
           </button>
         ))}
       </div>

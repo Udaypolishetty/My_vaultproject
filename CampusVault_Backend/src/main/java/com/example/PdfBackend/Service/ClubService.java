@@ -30,14 +30,12 @@ public class ClubService {
     private static final int MAX_DAILY_ANNOUNCEMENTS = 2;
     private static final int MAX_CHAT_MESSAGES       = 100;
 
-    // ─── ROLE HELPERS ───────────────────────────────────────────────────────
+    // ─── ROLE HELPERS ────────────────────────────────────────────────
 
     private boolean isAdminOrMod(String rollNumber) {
         return studentRepository.findByRollNumber(rollNumber)
-            .map(s -> {
-                String r = s.getRole() != null ? s.getRole().toString() : "";
-                return r.equals("ADMIN") || r.equals("MODERATOR");
-            }).orElse(false);
+            .map(s -> { String r = s.getRole() != null ? s.getRole().toString() : "";
+                return r.equals("ADMIN") || r.equals("MODERATOR"); }).orElse(false);
     }
 
     private boolean isAdminOnly(String rollNumber) {
@@ -46,234 +44,251 @@ public class ClubService {
             .orElse(false);
     }
 
-    // ─── ACTIVITY SEEDING ───────────────────────────────────────────────────
+    // ─── ACTIVITY SEEDING WITH RISK LEVELS ───────────────────────────
 
-    private List<Club.ClubActivity> seedActivities(String category, String adminRoll, String adminName) {
-        List<String[]> tasks = getTasksForCategory(category);
+    private List<Club.ClubActivity> seedActivities(String category, String adminRoll, String adminName, LocalDateTime semesterStart) {
+        List<Object[]> tasks = getTasksForCategory(category);
         List<Club.ClubActivity> list = new ArrayList<>();
-        for (String[] task : tasks) {
+
+        for (int i = 0; i < tasks.size(); i++) {
+            Object[] task = tasks.get(i);
+            String title       = (String) task[0];
+            String description = (String) task[1];
+            String risk        = (String) task[2];
+
+            int minDays = risk.equals("LOW") ? 7 : risk.equals("MEDIUM") ? 10 : 14;
+            int maxDays = risk.equals("LOW") ? 14 : risk.equals("MEDIUM") ? 20 : 30;
+
             Club.ClubActivity a = new Club.ClubActivity();
             a.setId(UUID.randomUUID().toString());
-            a.setTitle(task[0]);
-            a.setDescription(task[1]);
+            a.setTitle(title);
+            a.setDescription(description);
             a.setAddedBy(adminRoll);
             a.setAddedByName(adminName);
             a.setAutoSeeded(true);
             a.setExtra(false);
             a.setCompleted(false);
-            a.setCreatedAt(LocalDateTime.now().minusHours(25)); // ✅ pre-aged 25hrs so president can complete immediately
+            a.setRiskLevel(risk);
+            a.setMinDaysToComplete(minDays);
+            a.setMaxDaysExpected(maxDays);
+            // ✅ Activity 0 available immediately from semester start
+            // Activities 1+ will have availableFrom set when previous completes
+            a.setAvailableFrom(null);
+            a.setCreatedAt(semesterStart);
             a.setVotes(new ArrayList<>());
             list.add(a);
         }
-        System.out.println("[ClubService] Seeded " + list.size() + " activities for category: " + category);
+
+        System.out.println("[ClubService] Seeded " + list.size() + " activities for: " + category);
         return list;
     }
 
-    private List<String[]> getTasksForCategory(String category) {
+    // ─── TASK DEFINITIONS WITH RISK LEVELS ───────────────────────────
+    // Each entry: { title, description, riskLevel }
+
+    private List<Object[]> getTasksForCategory(String category) {
         if (category == null) return getDefaultTasks();
         switch (category) {
             case "AI": return List.of(
-                new String[]{"Setup Python & ML Environment", "Install Python, pip, Jupyter Notebook and essential ML libraries"},
-                new String[]{"Study Neural Network Basics", "Learn about neurons, layers, activation functions and backpropagation"},
-                new String[]{"Implement Linear Regression", "Build and train a linear regression model from scratch"},
-                new String[]{"Build a Simple Chatbot", "Create a rule-based chatbot using Python"},
-                new String[]{"Explore Datasets on Kaggle", "Find and analyze 3 real-world datasets relevant to your interests"},
-                new String[]{"Train an Image Classifier", "Use a CNN to classify images from CIFAR-10 or MNIST"},
-                new String[]{"Study Natural Language Processing", "Learn tokenization, embeddings and basic NLP pipelines"},
-                new String[]{"Build a Recommendation System", "Implement a collaborative filtering recommendation engine"},
-                new String[]{"Host a Model Demo Session", "Present your trained model to club members"},
-                new String[]{"Kaggle Competition Entry", "Participate in a beginner Kaggle competition as a team"},
-                new String[]{"Study Transformer Architecture", "Deep dive into attention mechanism and BERT/GPT basics"},
-                new String[]{"Build a Sentiment Analyzer", "Train a model to classify positive/negative reviews"},
-                new String[]{"Conduct AI Ethics Discussion", "Discuss bias, fairness and responsible AI in a group session"},
-                new String[]{"Deploy a Model to Cloud", "Deploy your ML model using Hugging Face Spaces or Render"},
-                new String[]{"End of Semester Project Demo", "Present final AI project to the entire club"}
+                new Object[]{"Setup Python & ML Environment", "Install Python, pip, Jupyter Notebook and essential ML libraries", "LOW"},
+                new Object[]{"Study Neural Network Basics", "Learn about neurons, layers, activation functions and backpropagation", "LOW"},
+                new Object[]{"Implement Linear Regression", "Build and train a linear regression model from scratch", "MEDIUM"},
+                new Object[]{"Build a Simple Chatbot", "Create a rule-based chatbot using Python", "MEDIUM"},
+                new Object[]{"Explore Datasets on Kaggle", "Find and analyze 3 real-world datasets relevant to your interests", "LOW"},
+                new Object[]{"Train an Image Classifier", "Use a CNN to classify images from CIFAR-10 or MNIST", "HIGH"},
+                new Object[]{"Study Natural Language Processing", "Learn tokenization, embeddings and basic NLP pipelines", "MEDIUM"},
+                new Object[]{"Build a Recommendation System", "Implement a collaborative filtering recommendation engine", "HIGH"},
+                new Object[]{"Host a Model Demo Session", "Present your trained model to club members", "LOW"},
+                new Object[]{"Kaggle Competition Entry", "Participate in a beginner Kaggle competition as a team", "HIGH"},
+                new Object[]{"Study Transformer Architecture", "Deep dive into attention mechanism and BERT/GPT basics", "MEDIUM"},
+                new Object[]{"Build a Sentiment Analyzer", "Train a model to classify positive/negative reviews", "MEDIUM"},
+                new Object[]{"Conduct AI Ethics Discussion", "Discuss bias, fairness and responsible AI in a group session", "LOW"},
+                new Object[]{"Deploy a Model to Cloud", "Deploy your ML model using Hugging Face Spaces or Render", "HIGH"},
+                new Object[]{"End of Semester Project Demo", "Present final AI project to the entire club", "MEDIUM"}
             );
             case "WEB_DEV": return List.of(
-                new String[]{"HTML & CSS Fundamentals", "Build a static webpage with proper semantic HTML and CSS"},
-                new String[]{"JavaScript Basics Workshop", "Learn variables, functions, DOM manipulation and events"},
-                new String[]{"Build a Portfolio Website", "Create a personal portfolio site and host it on GitHub Pages"},
-                new String[]{"Learn React Fundamentals", "Study components, props, state and hooks"},
-                new String[]{"Build a Todo App with React", "Create a fully functional todo app with CRUD operations"},
-                new String[]{"REST API Basics", "Learn HTTP methods, status codes and how to consume APIs"},
-                new String[]{"Build a Weather App", "Consume a public weather API and display data beautifully"},
-                new String[]{"Database Basics with MongoDB", "Learn collections, documents, CRUD in MongoDB"},
-                new String[]{"Build a Full Stack App", "Create a simple full stack app with React + Node/Spring"},
-                new String[]{"Learn Git & GitHub", "Master branching, pull requests and collaborative workflows"},
-                new String[]{"Responsive Design Workshop", "Make websites look great on all screen sizes using Tailwind"},
-                new String[]{"Authentication Implementation", "Add login/register with JWT to your full stack project"},
-                new String[]{"Deploy to Production", "Deploy frontend to Vercel and backend to Render"},
-                new String[]{"Code Review Session", "Review each other's code and give constructive feedback"},
-                new String[]{"End of Semester Project Demo", "Present complete web project to the club"}
+                new Object[]{"HTML & CSS Fundamentals", "Build a static webpage with proper semantic HTML and CSS", "LOW"},
+                new Object[]{"JavaScript Basics Workshop", "Learn variables, functions, DOM manipulation and events", "LOW"},
+                new Object[]{"Build a Portfolio Website", "Create a personal portfolio site and host it on GitHub Pages", "MEDIUM"},
+                new Object[]{"Learn React Fundamentals", "Study components, props, state and hooks", "MEDIUM"},
+                new Object[]{"Build a Todo App with React", "Create a fully functional todo app with CRUD operations", "MEDIUM"},
+                new Object[]{"REST API Basics", "Learn HTTP methods, status codes and how to consume APIs", "LOW"},
+                new Object[]{"Build a Weather App", "Consume a public weather API and display data beautifully", "MEDIUM"},
+                new Object[]{"Database Basics with MongoDB", "Learn collections, documents, CRUD in MongoDB", "LOW"},
+                new Object[]{"Build a Full Stack App", "Create a simple full stack app with React + Node/Spring", "HIGH"},
+                new Object[]{"Learn Git & GitHub", "Master branching, pull requests and collaborative workflows", "LOW"},
+                new Object[]{"Responsive Design Workshop", "Make websites look great on all screen sizes using Tailwind", "LOW"},
+                new Object[]{"Authentication Implementation", "Add login/register with JWT to your full stack project", "HIGH"},
+                new Object[]{"Deploy to Production", "Deploy frontend to Vercel and backend to Render", "HIGH"},
+                new Object[]{"Code Review Session", "Review each other's code and give constructive feedback", "LOW"},
+                new Object[]{"End of Semester Project Demo", "Present complete web project to the club", "MEDIUM"}
             );
             case "ROBOTICS": return List.of(
-                new String[]{"Introduction to Arduino", "Setup Arduino IDE and blink an LED"},
-                new String[]{"Learn Basic Electronics", "Study resistors, capacitors, transistors and circuits"},
-                new String[]{"Build a Line Follower Robot", "Assemble and program a basic line follower"},
-                new String[]{"Servo Motor Control", "Control servo motors using Arduino PWM signals"},
-                new String[]{"Ultrasonic Sensor Project", "Build an obstacle avoiding robot using HC-SR04"},
-                new String[]{"Introduction to Raspberry Pi", "Setup Raspberry Pi and run basic Python scripts"},
-                new String[]{"Wireless Control via Bluetooth", "Control a robot via Bluetooth from a mobile phone"},
-                new String[]{"3D Print a Robot Part", "Design and 3D print a mechanical component for your robot"},
-                new String[]{"Computer Vision Basics", "Use OpenCV to detect objects with a camera"},
-                new String[]{"Robot Arm Assembly", "Build and program a basic robotic arm"},
-                new String[]{"Autonomous Navigation", "Program a robot to navigate a maze autonomously"},
-                new String[]{"ROS Introduction", "Install Robot Operating System and run a basic simulation"},
-                new String[]{"Inter-Club Demo Day", "Showcase robot to students from other clubs"},
-                new String[]{"Competitive Robotics Practice", "Prepare for inter-college robotics competition"},
-                new String[]{"End of Semester Project Demo", "Present final robotics project to the club"}
+                new Object[]{"Introduction to Arduino", "Setup Arduino IDE and blink an LED", "LOW"},
+                new Object[]{"Learn Basic Electronics", "Study resistors, capacitors, transistors and circuits", "LOW"},
+                new Object[]{"Build a Line Follower Robot", "Assemble and program a basic line follower", "HIGH"},
+                new Object[]{"Servo Motor Control", "Control servo motors using Arduino PWM signals", "MEDIUM"},
+                new Object[]{"Ultrasonic Sensor Project", "Build an obstacle avoiding robot using HC-SR04", "MEDIUM"},
+                new Object[]{"Introduction to Raspberry Pi", "Setup Raspberry Pi and run basic Python scripts", "LOW"},
+                new Object[]{"Wireless Control via Bluetooth", "Control a robot via Bluetooth from a mobile phone", "MEDIUM"},
+                new Object[]{"3D Print a Robot Part", "Design and 3D print a mechanical component for your robot", "HIGH"},
+                new Object[]{"Computer Vision Basics", "Use OpenCV to detect objects with a camera", "HIGH"},
+                new Object[]{"Robot Arm Assembly", "Build and program a basic robotic arm", "HIGH"},
+                new Object[]{"Autonomous Navigation", "Program a robot to navigate a maze autonomously", "HIGH"},
+                new Object[]{"ROS Introduction", "Install Robot Operating System and run a basic simulation", "MEDIUM"},
+                new Object[]{"Inter-Club Demo Day", "Showcase robot to students from other clubs", "LOW"},
+                new Object[]{"Competitive Robotics Practice", "Prepare for inter-college robotics competition", "HIGH"},
+                new Object[]{"End of Semester Project Demo", "Present final robotics project to the club", "MEDIUM"}
             );
             case "ENTREPRENEURSHIP": return List.of(
-                new String[]{"Ideation Workshop", "Generate 10 startup ideas and evaluate feasibility"},
-                new String[]{"Market Research Basics", "Learn how to research target market and competitors"},
-                new String[]{"Build a Business Model Canvas", "Create a BMC for your top startup idea"},
-                new String[]{"Financial Modeling Basics", "Learn revenue models, unit economics and projections"},
-                new String[]{"Startup Pitch Practice", "Prepare and deliver a 3-minute elevator pitch"},
-                new String[]{"Guest Speaker Session", "Invite a local entrepreneur to share their journey"},
-                new String[]{"Build an MVP", "Create a minimum viable product for your idea"},
-                new String[]{"User Interview Practice", "Conduct 5 user interviews and summarize insights"},
-                new String[]{"Legal Basics for Startups", "Study company registration, IP and contracts basics"},
-                new String[]{"Fundraising & Investors", "Learn about angel investors, VCs and startup funding"},
-                new String[]{"Growth Hacking Workshop", "Study customer acquisition and retention strategies"},
-                new String[]{"Social Media Marketing", "Build a social media presence for your startup idea"},
-                new String[]{"Pitch Competition Prep", "Prepare for inter-college startup pitch competition"},
-                new String[]{"Networking Event", "Attend or organize a networking event with industry people"},
-                new String[]{"End of Semester Demo Day", "Present startup progress to club and invited guests"}
+                new Object[]{"Ideation Workshop", "Generate 10 startup ideas and evaluate feasibility", "LOW"},
+                new Object[]{"Market Research Basics", "Learn how to research target market and competitors", "MEDIUM"},
+                new Object[]{"Build a Business Model Canvas", "Create a BMC for your top startup idea", "MEDIUM"},
+                new Object[]{"Financial Modeling Basics", "Learn revenue models, unit economics and projections", "MEDIUM"},
+                new Object[]{"Startup Pitch Practice", "Prepare and deliver a 3-minute elevator pitch", "LOW"},
+                new Object[]{"Guest Speaker Session", "Invite a local entrepreneur to share their journey", "LOW"},
+                new Object[]{"Build an MVP", "Create a minimum viable product for your idea", "HIGH"},
+                new Object[]{"User Interview Practice", "Conduct 5 user interviews and summarize insights", "MEDIUM"},
+                new Object[]{"Legal Basics for Startups", "Study company registration, IP and contracts basics", "LOW"},
+                new Object[]{"Fundraising & Investors", "Learn about angel investors, VCs and startup funding", "LOW"},
+                new Object[]{"Growth Hacking Workshop", "Study customer acquisition and retention strategies", "MEDIUM"},
+                new Object[]{"Social Media Marketing", "Build a social media presence for your startup idea", "MEDIUM"},
+                new Object[]{"Pitch Competition Prep", "Prepare for inter-college startup pitch competition", "HIGH"},
+                new Object[]{"Networking Event", "Attend or organize a networking event with industry people", "MEDIUM"},
+                new Object[]{"End of Semester Demo Day", "Present startup progress to club and invited guests", "HIGH"}
             );
             case "SPORTS": return List.of(
-                new String[]{"Fitness Assessment", "Conduct baseline fitness test for all members"},
-                new String[]{"Team Selection Trials", "Organize trials and finalize team composition"},
-                new String[]{"Strength Training Workshop", "Learn proper form for squats, deadlifts and bench press"},
-                new String[]{"Cardio & Endurance Training", "Complete a 5K run and track improvement over semester"},
-                new String[]{"Sport-Specific Skills Session", "Practice fundamental skills of the club's primary sport"},
-                new String[]{"Nutrition & Diet Workshop", "Learn about sports nutrition and meal planning"},
-                new String[]{"First Aid Training", "Learn basic first aid for sports injuries"},
-                new String[]{"Friendly Match vs Another Club", "Organize an internal friendly match or tournament"},
-                new String[]{"Mental Fitness Session", "Study sports psychology and performance mindset"},
-                new String[]{"Video Analysis Session", "Watch and analyze professional game footage"},
-                new String[]{"Agility & Speed Training", "Complete ladder drills and sprint interval sessions"},
-                new String[]{"Recovery & Injury Prevention", "Learn stretching routines and injury prevention"},
-                new String[]{"Inter-Department Tournament", "Participate in college inter-department tournament"},
-                new String[]{"Coach Feedback Session", "Get feedback from college coach or external trainer"},
-                new String[]{"End of Semester Championship", "Organize end-of-semester championship match"}
+                new Object[]{"Fitness Assessment", "Conduct baseline fitness test for all members", "LOW"},
+                new Object[]{"Team Selection Trials", "Organize trials and finalize team composition", "MEDIUM"},
+                new Object[]{"Strength Training Workshop", "Learn proper form for squats, deadlifts and bench press", "LOW"},
+                new Object[]{"Cardio & Endurance Training", "Complete a 5K run and track improvement over semester", "MEDIUM"},
+                new Object[]{"Sport-Specific Skills Session", "Practice fundamental skills of the club's primary sport", "MEDIUM"},
+                new Object[]{"Nutrition & Diet Workshop", "Learn about sports nutrition and meal planning", "LOW"},
+                new Object[]{"First Aid Training", "Learn basic first aid for sports injuries", "LOW"},
+                new Object[]{"Friendly Match vs Another Club", "Organize an internal friendly match or tournament", "HIGH"},
+                new Object[]{"Mental Fitness Session", "Study sports psychology and performance mindset", "LOW"},
+                new Object[]{"Video Analysis Session", "Watch and analyze professional game footage", "LOW"},
+                new Object[]{"Agility & Speed Training", "Complete ladder drills and sprint interval sessions", "MEDIUM"},
+                new Object[]{"Recovery & Injury Prevention", "Learn stretching routines and injury prevention", "LOW"},
+                new Object[]{"Inter-Department Tournament", "Participate in college inter-department tournament", "HIGH"},
+                new Object[]{"Coach Feedback Session", "Get feedback from college coach or external trainer", "MEDIUM"},
+                new Object[]{"End of Semester Championship", "Organize end-of-semester championship match", "HIGH"}
             );
             case "CULTURAL": return List.of(
-                new String[]{"Introduction & Ice Breaker", "Welcome session with fun cultural exchange activities"},
-                new String[]{"Traditional Dance Workshop", "Learn steps of a traditional dance from your culture"},
-                new String[]{"Music Appreciation Session", "Explore different genres and instruments from world music"},
-                new String[]{"Art Exhibition Planning", "Plan and organize a mini art exhibition"},
-                new String[]{"Drama & Acting Workshop", "Participate in a short acting and improv session"},
-                new String[]{"Photography Walk", "Go on a campus photography walk and share best shots"},
-                new String[]{"Cultural Food Festival", "Organize a small food festival with dishes from different regions"},
-                new String[]{"Poetry & Literature Night", "Share original poems, stories or literary works"},
-                new String[]{"Rangoli & Art Workshop", "Create rangoli or traditional art as a group"},
-                new String[]{"Short Film Making", "Write, shoot and edit a short 3-minute film"},
-                new String[]{"Guest Artist Session", "Invite a local artist, musician or performer"},
-                new String[]{"Flash Mob Practice", "Choreograph and practice a flash mob performance"},
-                new String[]{"Inter-College Cultural Fest Prep", "Prepare entries for inter-college cultural competition"},
-                new String[]{"Cultural Documentary Screening", "Watch and discuss a cultural documentary together"},
-                new String[]{"End of Semester Showcase", "Present all semester work in a grand showcase event"}
+                new Object[]{"Introduction & Ice Breaker", "Welcome session with fun cultural exchange activities", "LOW"},
+                new Object[]{"Traditional Dance Workshop", "Learn steps of a traditional dance from your culture", "MEDIUM"},
+                new Object[]{"Music Appreciation Session", "Explore different genres and instruments from world music", "LOW"},
+                new Object[]{"Art Exhibition Planning", "Plan and organize a mini art exhibition", "MEDIUM"},
+                new Object[]{"Drama & Acting Workshop", "Participate in a short acting and improv session", "MEDIUM"},
+                new Object[]{"Photography Walk", "Go on a campus photography walk and share best shots", "LOW"},
+                new Object[]{"Cultural Food Festival", "Organize a small food festival with dishes from different regions", "HIGH"},
+                new Object[]{"Poetry & Literature Night", "Share original poems, stories or literary works", "LOW"},
+                new Object[]{"Rangoli & Art Workshop", "Create rangoli or traditional art as a group", "LOW"},
+                new Object[]{"Short Film Making", "Write, shoot and edit a short 3-minute film", "HIGH"},
+                new Object[]{"Guest Artist Session", "Invite a local artist, musician or performer", "MEDIUM"},
+                new Object[]{"Flash Mob Practice", "Choreograph and practice a flash mob performance", "HIGH"},
+                new Object[]{"Inter-College Cultural Fest Prep", "Prepare entries for inter-college cultural competition", "HIGH"},
+                new Object[]{"Cultural Documentary Screening", "Watch and discuss a cultural documentary together", "LOW"},
+                new Object[]{"End of Semester Showcase", "Present all semester work in a grand showcase event", "HIGH"}
             );
             case "TOASTMASTERS": return List.of(
-                new String[]{"Ice Breaker Speeches", "Every member delivers a 4-6 minute introductory speech"},
-                new String[]{"Table Topics Practice", "Impromptu 1-2 minute speeches on random topics"},
-                new String[]{"Prepared Speech Session", "Deliver a 5-7 minute speech on a chosen topic"},
-                new String[]{"Evaluation Workshop", "Learn how to give constructive speech evaluations"},
-                new String[]{"Body Language & Gestures", "Study and practice effective non-verbal communication"},
-                new String[]{"Storytelling Workshop", "Learn narrative structure and deliver a story speech"},
-                new String[]{"Debate Session", "Organize a formal debate on a current affairs topic"},
-                new String[]{"Persuasive Speaking", "Prepare and deliver a persuasive speech"},
-                new String[]{"Humorous Speech Contest", "Internal contest for funniest speech"},
-                new String[]{"Business Presentation Skills", "Practice presenting data and reports professionally"},
-                new String[]{"Interview Skills Workshop", "Mock interview practice with feedback"},
-                new String[]{"Public Speaking Fear Session", "Exercises to overcome stage fright"},
-                new String[]{"Inter-Club Speech Contest", "Compete with other college Toastmasters clubs"},
-                new String[]{"Leadership & Facilitation", "Learn how to run meetings and facilitate discussions"},
-                new String[]{"End of Semester Gala", "Grand speech event with awards ceremony"}
+                new Object[]{"Ice Breaker Speeches", "Every member delivers a 4-6 minute introductory speech", "LOW"},
+                new Object[]{"Table Topics Practice", "Impromptu 1-2 minute speeches on random topics", "LOW"},
+                new Object[]{"Prepared Speech Session", "Deliver a 5-7 minute speech on a chosen topic", "MEDIUM"},
+                new Object[]{"Evaluation Workshop", "Learn how to give constructive speech evaluations", "LOW"},
+                new Object[]{"Body Language & Gestures", "Study and practice effective non-verbal communication", "LOW"},
+                new Object[]{"Storytelling Workshop", "Learn narrative structure and deliver a story speech", "MEDIUM"},
+                new Object[]{"Debate Session", "Organize a formal debate on a current affairs topic", "MEDIUM"},
+                new Object[]{"Persuasive Speaking", "Prepare and deliver a persuasive speech", "MEDIUM"},
+                new Object[]{"Humorous Speech Contest", "Internal contest for funniest speech", "LOW"},
+                new Object[]{"Business Presentation Skills", "Practice presenting data and reports professionally", "MEDIUM"},
+                new Object[]{"Interview Skills Workshop", "Mock interview practice with feedback", "MEDIUM"},
+                new Object[]{"Public Speaking Fear Session", "Exercises to overcome stage fright", "LOW"},
+                new Object[]{"Inter-Club Speech Contest", "Compete with other college Toastmasters clubs", "HIGH"},
+                new Object[]{"Leadership & Facilitation", "Learn how to run meetings and facilitate discussions", "MEDIUM"},
+                new Object[]{"End of Semester Gala", "Grand speech event with awards ceremony", "HIGH"}
             );
             case "PHOTOGRAPHY": return List.of(
-                new String[]{"Camera Basics Workshop", "Learn aperture, shutter speed, ISO and white balance"},
-                new String[]{"Composition Rules", "Study rule of thirds, leading lines and framing"},
-                new String[]{"Portrait Photography Session", "Practice portrait photography with natural light"},
-                new String[]{"Landscape Photography Walk", "Campus landscape photography walk and critique"},
-                new String[]{"Street Photography Project", "Capture candid street moments around campus"},
-                new String[]{"Lightroom Editing Basics", "Learn basic photo editing and color grading"},
-                new String[]{"Night Photography Session", "Practice long exposure and night photography"},
-                new String[]{"Photo Story Project", "Create a 10-photo story on a chosen theme"},
-                new String[]{"Product Photography Workshop", "Learn studio-style product photography"},
-                new String[]{"Mobile Photography Tips", "Master smartphone photography techniques"},
-                new String[]{"Photo Exhibition Planning", "Curate and plan an end-of-semester exhibition"},
-                new String[]{"Interview a Subject", "Conduct an environmental portrait interview session"},
-                new String[]{"Drone Photography Basics", "Introduction to aerial photography concepts"},
-                new String[]{"Photo Contest", "Internal photo contest with voting by all members"},
-                new String[]{"End of Semester Exhibition", "Display best semester work in a photo exhibition"}
+                new Object[]{"Camera Basics Workshop", "Learn aperture, shutter speed, ISO and white balance", "LOW"},
+                new Object[]{"Composition Rules", "Study rule of thirds, leading lines and framing", "LOW"},
+                new Object[]{"Portrait Photography Session", "Practice portrait photography with natural light", "MEDIUM"},
+                new Object[]{"Landscape Photography Walk", "Campus landscape photography walk and critique", "MEDIUM"},
+                new Object[]{"Street Photography Project", "Capture candid street moments around campus", "MEDIUM"},
+                new Object[]{"Lightroom Editing Basics", "Learn basic photo editing and color grading", "LOW"},
+                new Object[]{"Night Photography Session", "Practice long exposure and night photography", "HIGH"},
+                new Object[]{"Photo Story Project", "Create a 10-photo story on a chosen theme", "HIGH"},
+                new Object[]{"Product Photography Workshop", "Learn studio-style product photography", "MEDIUM"},
+                new Object[]{"Mobile Photography Tips", "Master smartphone photography techniques", "LOW"},
+                new Object[]{"Photo Exhibition Planning", "Curate and plan an end-of-semester exhibition", "HIGH"},
+                new Object[]{"Interview a Subject", "Conduct an environmental portrait interview session", "MEDIUM"},
+                new Object[]{"Drone Photography Basics", "Introduction to aerial photography concepts", "MEDIUM"},
+                new Object[]{"Photo Contest", "Internal photo contest with voting by all members", "LOW"},
+                new Object[]{"End of Semester Exhibition", "Display best semester work in a photo exhibition", "HIGH"}
             );
             case "TECH_FEST": return List.of(
-                new String[]{"Event Planning Kickoff", "Define fest theme, events list and timeline"},
-                new String[]{"Sponsorship Outreach", "Identify and contact potential sponsors"},
-                new String[]{"Marketing & Posters", "Design and distribute event promotional material"},
-                new String[]{"Registration System Setup", "Build or configure online registration for events"},
-                new String[]{"Venue & Logistics Planning", "Book venues, arrange seating and logistics"},
-                new String[]{"Hackathon Organization", "Plan and organize the fest's main hackathon"},
-                new String[]{"Technical Events Coordination", "Coordinate coding, quiz and debugging events"},
-                new String[]{"Non-Technical Events Setup", "Plan gaming, art and cultural tech events"},
-                new String[]{"Guest Speaker Coordination", "Invite and coordinate industry guest speakers"},
-                new String[]{"Volunteer Management", "Recruit and assign volunteers for each event"},
-                new String[]{"Social Media Campaign", "Run social media countdown and live coverage"},
-                new String[]{"Dry Run & Rehearsal", "Conduct full dry run of all fest events"},
-                new String[]{"Prize & Certificate Arrangement", "Arrange prizes, trophies and certificates"},
-                new String[]{"Live Coverage During Fest", "Manage live updates and documentation during fest"},
-                new String[]{"Post-Fest Wrap Up", "Collect feedback, document learnings and close fest"}
+                new Object[]{"Event Planning Kickoff", "Define fest theme, events list and timeline", "MEDIUM"},
+                new Object[]{"Sponsorship Outreach", "Identify and contact potential sponsors", "HIGH"},
+                new Object[]{"Marketing & Posters", "Design and distribute event promotional material", "MEDIUM"},
+                new Object[]{"Registration System Setup", "Build or configure online registration for events", "HIGH"},
+                new Object[]{"Venue & Logistics Planning", "Book venues, arrange seating and logistics", "HIGH"},
+                new Object[]{"Hackathon Organization", "Plan and organize the fest's main hackathon", "HIGH"},
+                new Object[]{"Technical Events Coordination", "Coordinate coding, quiz and debugging events", "MEDIUM"},
+                new Object[]{"Non-Technical Events Setup", "Plan gaming, art and cultural tech events", "MEDIUM"},
+                new Object[]{"Guest Speaker Coordination", "Invite and coordinate industry guest speakers", "HIGH"},
+                new Object[]{"Volunteer Management", "Recruit and assign volunteers for each event", "MEDIUM"},
+                new Object[]{"Social Media Campaign", "Run social media countdown and live coverage", "MEDIUM"},
+                new Object[]{"Dry Run & Rehearsal", "Conduct full dry run of all fest events", "HIGH"},
+                new Object[]{"Prize & Certificate Arrangement", "Arrange prizes, trophies and certificates", "LOW"},
+                new Object[]{"Live Coverage During Fest", "Manage live updates and documentation during fest", "HIGH"},
+                new Object[]{"Post-Fest Wrap Up", "Collect feedback, document learnings and close fest", "LOW"}
             );
             case "3D_PRINTING": return List.of(
-                new String[]{"3D Printing Basics", "Learn FDM printing process, materials and settings"},
-                new String[]{"CAD Software Introduction", "Get started with Fusion 360 or TinkerCAD"},
-                new String[]{"Design a Simple Object", "Design and print a basic geometric object"},
-                new String[]{"Slicing Software Workshop", "Learn Cura slicer settings for optimal prints"},
-                new String[]{"Print Quality Troubleshooting", "Identify and fix common print failures"},
-                new String[]{"Design a Phone Stand", "Design and print a custom phone stand"},
-                new String[]{"Multi-Part Assembly Project", "Design an object that assembles from multiple parts"},
-                new String[]{"Flexible Filament Printing", "Experiment with TPU flexible material printing"},
-                new String[]{"Post-Processing Workshop", "Learn sanding, painting and finishing techniques"},
-                new String[]{"Functional Part Design", "Design a functional mechanical part or tool"},
-                new String[]{"Miniature Sculpture", "Design and print a detailed miniature sculpture"},
-                new String[]{"Resin Printing Introduction", "Learn SLA/DLP resin printing basics"},
-                new String[]{"Collaborative Build Project", "Design and print a large multi-part group project"},
-                new String[]{"3D Printing Business Ideas", "Explore monetization and startup ideas using 3D printing"},
-                new String[]{"End of Semester Print Exhibition", "Display best prints in a semester exhibition"}
+                new Object[]{"3D Printing Basics", "Learn FDM printing process, materials and settings", "LOW"},
+                new Object[]{"CAD Software Introduction", "Get started with Fusion 360 or TinkerCAD", "LOW"},
+                new Object[]{"Design a Simple Object", "Design and print a basic geometric object", "MEDIUM"},
+                new Object[]{"Slicing Software Workshop", "Learn Cura slicer settings for optimal prints", "LOW"},
+                new Object[]{"Print Quality Troubleshooting", "Identify and fix common print failures", "MEDIUM"},
+                new Object[]{"Design a Phone Stand", "Design and print a custom phone stand", "MEDIUM"},
+                new Object[]{"Multi-Part Assembly Project", "Design an object that assembles from multiple parts", "HIGH"},
+                new Object[]{"Flexible Filament Printing", "Experiment with TPU flexible material printing", "MEDIUM"},
+                new Object[]{"Post-Processing Workshop", "Learn sanding, painting and finishing techniques", "LOW"},
+                new Object[]{"Functional Part Design", "Design a functional mechanical part or tool", "HIGH"},
+                new Object[]{"Miniature Sculpture", "Design and print a detailed miniature sculpture", "HIGH"},
+                new Object[]{"Resin Printing Introduction", "Learn SLA/DLP resin printing basics", "MEDIUM"},
+                new Object[]{"Collaborative Build Project", "Design and print a large multi-part group project", "HIGH"},
+                new Object[]{"3D Printing Business Ideas", "Explore monetization and startup ideas using 3D printing", "LOW"},
+                new Object[]{"End of Semester Print Exhibition", "Display best prints in a semester exhibition", "MEDIUM"}
             );
             default: return getDefaultTasks();
         }
     }
 
-    private List<String[]> getDefaultTasks() {
+    private List<Object[]> getDefaultTasks() {
         return List.of(
-            new String[]{"Club Orientation", "Welcome session and introduction to club goals"},
-            new String[]{"Skill Assessment", "Assess current skill levels of all members"},
-            new String[]{"Workshop 1", "First learning workshop of the semester"},
-            new String[]{"Workshop 2", "Second learning workshop of the semester"},
-            new String[]{"Workshop 3", "Third learning workshop of the semester"},
-            new String[]{"Guest Session", "Invite an expert to share knowledge"},
-            new String[]{"Group Project Kickoff", "Start a collaborative group project"},
-            new String[]{"Mid-Semester Review", "Review progress and adjust goals"},
-            new String[]{"Workshop 4", "Fourth learning workshop of the semester"},
-            new String[]{"Workshop 5", "Fifth learning workshop of the semester"},
-            new String[]{"Project Progress Demo", "Demo current project progress to all members"},
-            new String[]{"Peer Learning Session", "Members teach each other their strongest skills"},
-            new String[]{"Competition Preparation", "Prepare for inter-college competition"},
-            new String[]{"Final Project Completion", "Complete and polish the semester project"},
-            new String[]{"End of Semester Showcase", "Present all semester work in a final showcase"}
+            new Object[]{"Club Orientation", "Welcome session and introduction to club goals", "LOW"},
+            new Object[]{"Skill Assessment", "Assess current skill levels of all members", "LOW"},
+            new Object[]{"Workshop 1", "First learning workshop of the semester", "MEDIUM"},
+            new Object[]{"Workshop 2", "Second learning workshop of the semester", "MEDIUM"},
+            new Object[]{"Workshop 3", "Third learning workshop of the semester", "MEDIUM"},
+            new Object[]{"Guest Session", "Invite an expert to share knowledge", "LOW"},
+            new Object[]{"Group Project Kickoff", "Start a collaborative group project", "HIGH"},
+            new Object[]{"Mid-Semester Review", "Review progress and adjust goals", "LOW"},
+            new Object[]{"Workshop 4", "Fourth learning workshop of the semester", "MEDIUM"},
+            new Object[]{"Workshop 5", "Fifth learning workshop of the semester", "MEDIUM"},
+            new Object[]{"Project Progress Demo", "Demo current project progress to all members", "MEDIUM"},
+            new Object[]{"Peer Learning Session", "Members teach each other their strongest skills", "LOW"},
+            new Object[]{"Competition Preparation", "Prepare for inter-college competition", "HIGH"},
+            new Object[]{"Final Project Completion", "Complete and polish the semester project", "HIGH"},
+            new Object[]{"End of Semester Showcase", "Present all semester work in a final showcase", "MEDIUM"}
         );
     }
 
-    // ─── ADMIN OPERATIONS ───────────────────────────────────────────────────
+    // ─── ADMIN OPERATIONS ────────────────────────────────────────────
 
     public ClubResponse createClub(ClubRequest request, String rollNumber) {
         if (!isAdminOnly(rollNumber)) throw new ForbiddenException("Only admin can create clubs");
-
         StudentProfile admin = studentRepository.findByRollNumber(rollNumber)
             .orElseThrow(() -> new NotFoundException("Admin not found"));
-
         if (clubRepository.existsByTitle(request.getTitle().trim()))
             throw new ForbiddenException("A club with this title already exists");
 
@@ -298,20 +313,16 @@ public class ClubService {
         club.setRoleRequests(new ArrayList<>());
         club.setMemberNicknames(new HashMap<>());
         club.setDailyAnnouncementCount(new HashMap<>());
-
-        // ✅ seed activities inline — no static method dependency
-        List<Club.ClubActivity> seeded = seedActivities(request.getCategory(), rollNumber, admin.getName());
-        club.setActivities(seeded);
+        club.setActivities(seedActivities(request.getCategory(), rollNumber, admin.getName(), LocalDateTime.now()));
 
         Club saved = clubRepository.save(club);
-        System.out.println("[ClubService] Created club: " + saved.getTitle() + " with " + saved.getActivities().size() + " activities");
+        System.out.println("[ClubService] Created: " + saved.getTitle() + " with " + saved.getActivities().size() + " activities");
         return mapToResponse(saved);
     }
 
     public ClubResponse adminEditClub(String clubId, ClubRequest request, String rollNumber) {
         if (!isAdminOrMod(rollNumber)) throw new ForbiddenException("Only admin/moderator can edit clubs");
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
         if (request.getDescription() != null && !request.getDescription().isBlank())
             club.setDescription(request.getDescription().trim());
         if (request.getMaxMembers() != null) club.setMaxMembers(request.getMaxMembers());
@@ -321,39 +332,34 @@ public class ClubService {
 
     public ClubResponse extendMembers(String clubId, int newMax, String rollNumber) {
         if (!isAdminOnly(rollNumber)) throw new ForbiddenException("Only admin can extend members");
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
         club.setMaxMembers(newMax);
         return mapToResponse(clubRepository.save(club));
     }
 
     public ClubResponse dissolveClub(String clubId, String rollNumber) {
         if (!isAdminOnly(rollNumber)) throw new ForbiddenException("Only admin can dissolve clubs");
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
         club.setStatus("DISSOLVED");
         long total = club.getActivities().size();
         long done = club.getActivities().stream().filter(Club.ClubActivity::isCompleted).count();
-        if (total > 0 && done == total)
-            for (String roll : club.getMembers()) awardBadge(club, roll, "ALL_STAR");
-        for (String roll : club.getMembers())
-            notificationService.create(roll,
-                "🎓 Club \"" + club.getTitle() + "\" semester completed. Thank you for participating!",
-                "CLUB_DISSOLVED");
+        if (total > 0 && done == total) for (String r : club.getMembers()) awardBadge(club, r, "ALL_STAR");
+        for (String r : club.getMembers())
+            notificationService.create(r, "🎓 Club \"" + club.getTitle() + "\" semester completed!", "CLUB_DISSOLVED");
         clubRepository.save(club);
         return mapToResponse(club);
     }
 
     public ClubResponse renewSemester(String clubId, String rollNumber) {
         if (!isAdminOnly(rollNumber)) throw new ForbiddenException("Only admin can renew semester");
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
         StudentProfile admin = studentRepository.findByRollNumber(rollNumber)
             .orElseThrow(() -> new NotFoundException("Admin not found"));
+        LocalDateTime now = LocalDateTime.now();
         club.setStatus("ACTIVE");
-        club.setSemesterStartDate(LocalDateTime.now());
-        club.setSemesterEndDate(LocalDateTime.now().plusMonths(6));
-        club.setActivities(seedActivities(club.getCategory(), rollNumber, admin.getName()));
+        club.setSemesterStartDate(now);
+        club.setSemesterEndDate(now.plusMonths(6));
+        club.setActivities(seedActivities(club.getCategory(), rollNumber, admin.getName(), now));
         club.setMembers(new ArrayList<>());
         club.setPendingMembers(new ArrayList<>());
         club.setPresidentRoll(null);
@@ -365,143 +371,128 @@ public class ClubService {
         club.setDailyAnnouncementCount(new HashMap<>());
         club.setThirtyDayWarningSent(false);
         club.setSevenDayWarningSent(false);
-        notificationService.create(rollNumber,
-            "🔄 Club \"" + club.getTitle() + "\" renewed for a new semester!", "CLUB_RENEWED");
+        notificationService.create(rollNumber, "🔄 Club \"" + club.getTitle() + "\" renewed!", "CLUB_RENEWED");
         return mapToResponse(clubRepository.save(club));
     }
 
-
-
-
-   public ClubResponse assignRole(String clubId, String targetRoll, String role, String adminRoll) {
-    if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator can assign roles");
- 
-    Club club = clubRepository.findById(clubId)
-        .orElseThrow(() -> new NotFoundException("Club not found"));
- 
-    if (!club.isAnyMember(targetRoll))
-        throw new ForbiddenException("Student is not a member of this club");
- 
-    // ✅ if student is pending and being made President/VP — auto-confirm them immediately
-    if (club.isPending(targetRoll)) {
-        Club.PendingMember pending = club.getPendingMembers().stream()
-            .filter(p -> p.getRollNumber().equals(targetRoll))
-            .findFirst().orElse(null);
-        if (pending != null) {
-            club.getPendingMembers().remove(pending);
-            club.getMembers().add(targetRoll);
-            notificationService.create(targetRoll,
-                "🎉 You were automatically confirmed as a full member of \"" + club.getTitle() + "\" upon role assignment.",
-                "CLUB_CONFIRMED");
+    public ClubResponse assignRole(String clubId, String targetRoll, String role, String adminRoll) {
+        if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator can assign roles");
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        if (!club.isAnyMember(targetRoll)) throw new ForbiddenException("Student is not a member of this club");
+        if (club.isPending(targetRoll)) {
+            Club.PendingMember pm = club.getPendingMembers().stream()
+                .filter(p -> p.getRollNumber().equals(targetRoll)).findFirst().orElse(null);
+            if (pm != null) { club.getPendingMembers().remove(pm); club.getMembers().add(targetRoll); }
         }
+        if ("PRESIDENT".equals(role)) {
+            club.setPresidentRoll(targetRoll);
+            awardBadge(club, targetRoll, "CLUB_LEADER");
+            notificationService.create(targetRoll, "👑 You are now President of \"" + club.getTitle() + "\"!", "CLUB_ROLE");
+        } else if ("VP".equals(role)) {
+            club.setVpRoll(targetRoll);
+            awardBadge(club, targetRoll, "TEAM_PLAYER");
+            notificationService.create(targetRoll, "🤝 You are now VP of \"" + club.getTitle() + "\"!", "CLUB_ROLE");
+        }
+        club.getRoleRequests().stream()
+            .filter(r -> r.getRequestedBy().equals(targetRoll) && r.getRole().equals(role) && "PENDING".equals(r.getStatus()))
+            .forEach(r -> r.setStatus("APPROVED"));
+        return mapToResponse(clubRepository.save(club));
     }
- 
-    if ("PRESIDENT".equals(role)) {
-        club.setPresidentRoll(targetRoll);
-        awardBadge(club, targetRoll, "CLUB_LEADER");
-        notificationService.create(targetRoll,
-            "👑 You have been assigned as President of \"" + club.getTitle() + "\"!", "CLUB_ROLE");
-    } else if ("VP".equals(role)) {
-        club.setVpRoll(targetRoll);
-        awardBadge(club, targetRoll, "TEAM_PLAYER");
-        notificationService.create(targetRoll,
-            "🤝 You have been assigned as VP of \"" + club.getTitle() + "\"!", "CLUB_ROLE");
-    }
- 
-    club.getRoleRequests().stream()
-        .filter(r -> r.getRequestedBy().equals(targetRoll)
-            && r.getRole().equals(role) && "PENDING".equals(r.getStatus()))
-        .forEach(r -> r.setStatus("APPROVED"));
- 
-    return mapToResponse(clubRepository.save(club));
-}
-
-
-
 
     public ClubResponse adminRemoveMember(String clubId, String targetRoll, String adminRoll) {
         if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator can remove members");
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
         club.getPendingMembers().removeIf(p -> p.getRollNumber().equals(targetRoll));
         club.getMembers().remove(targetRoll);
         if (targetRoll.equals(club.getPresidentRoll())) {
-            if (club.getVpRoll() != null) {
-                String vp = club.getVpRoll();
-                club.setPresidentRoll(vp);
-                club.setVpRoll(null);
-                notificationService.create(vp,
-                    "👑 You are now President of \"" + club.getTitle() + "\" after promotion.", "CLUB_ROLE");
-            } else {
-                club.setPresidentRoll(null);
-            }
-        } else if (targetRoll.equals(club.getVpRoll())) {
-            club.setVpRoll(null);
-        }
-        notificationService.create(targetRoll,
-            "❌ You were removed from \"" + club.getTitle() + "\" by admin.", "CLUB_REMOVED");
+            if (club.getVpRoll() != null) { club.setPresidentRoll(club.getVpRoll()); club.setVpRoll(null); }
+            else club.setPresidentRoll(null);
+        } else if (targetRoll.equals(club.getVpRoll())) club.setVpRoll(null);
+        notificationService.create(targetRoll, "❌ You were removed from \"" + club.getTitle() + "\".", "CLUB_REMOVED");
         return mapToResponse(clubRepository.save(club));
     }
 
     public ClubResponse adminConfirmAll(String clubId, String adminRoll) {
-    if (!isAdminOrMod(adminRoll))
-        throw new ForbiddenException("Only admin/moderator");
-
-    Club club = clubRepository.findById(clubId)
-        .orElseThrow(() -> new NotFoundException("Club not found"));
-
-    if (club.getPendingMembers() == null || club.getPendingMembers().isEmpty())
-        return mapToResponse(club);
-
-    List<Club.PendingMember> pendingList = new ArrayList<>(club.getPendingMembers());
-
-    for (Club.PendingMember p : pendingList) {
-        club.getMembers().add(p.getRollNumber());
-
-        notificationService.create(p.getRollNumber(),
-            "🎉 You are now a confirmed member of \"" + club.getTitle() + "\"!",
-            "CLUB_CONFIRMED");
+        if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator");
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        for (Club.PendingMember p : new ArrayList<>(club.getPendingMembers())) {
+            club.getMembers().add(p.getRollNumber());
+            notificationService.create(p.getRollNumber(), "🎉 You are now confirmed in \"" + club.getTitle() + "\"!", "CLUB_CONFIRMED");
+        }
+        club.getPendingMembers().clear();
+        return mapToResponse(clubRepository.save(club));
     }
 
-    club.getPendingMembers().clear();
+    public ClubResponse adminConfirmOne(String clubId, String targetRoll, String adminRoll) {
+        if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator");
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        Club.PendingMember pm = club.getPendingMembers().stream()
+            .filter(p -> p.getRollNumber().equals(targetRoll)).findFirst()
+            .orElseThrow(() -> new NotFoundException("Not in pending"));
+        club.getPendingMembers().remove(pm);
+        club.getMembers().add(targetRoll);
+        notificationService.create(targetRoll, "🎉 You are now confirmed in \"" + club.getTitle() + "\"!", "CLUB_CONFIRMED");
+        return mapToResponse(clubRepository.save(club));
+    }
 
-    return mapToResponse(clubRepository.save(club));
+    // ✅ Admin complete activity — bypasses all time checks
+    public ClubResponse adminCompleteActivity(String clubId, String activityId, String adminRoll) {
+        if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator");
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        Club.ClubActivity activity = club.getActivities().stream()
+            .filter(a -> a.getId().equals(activityId)).findFirst()
+            .orElseThrow(() -> new NotFoundException("Activity not found"));
+
+
+            int confirmedCount = club.getMembers() != null ? club.getMembers().size() : 0;
+int halfMembers = (int) Math.ceil(club.getMaxMembers() * 0.5);
+
+if (confirmedCount < halfMembers) {
+    throw new ForbiddenException("Not enough confirmed members");
 }
 
-    // ✅ Admin confirms pending members instantly (for testing)
-  public ClubResponse adminConfirmOne(String clubId, String targetRoll, String adminRoll) {
-    if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator");
-    Club club = clubRepository.findById(clubId)
-        .orElseThrow(() -> new NotFoundException("Club not found"));
-    Club.PendingMember pending = club.getPendingMembers().stream()
-        .filter(p -> p.getRollNumber().equals(targetRoll))
-        .findFirst()
-        .orElseThrow(() -> new NotFoundException("Pending member not found"));
-    club.getPendingMembers().remove(pending);
-    club.getMembers().add(targetRoll);
-    notificationService.create(targetRoll,
-        "🎉 You are now a confirmed member of \"" + club.getTitle() + "\"!", "CLUB_CONFIRMED");
-    return mapToResponse(clubRepository.save(club));
+if (club.getPresidentRoll() == null) {
+    throw new ForbiddenException("President not assigned");
 }
+        activity.setCompleted(true);
+        activity.setCompletedAt(LocalDateTime.now());
+        // ✅ unlock next activity
+        unlockNextActivity(club, activity);
+        return mapToResponse(clubRepository.save(club));
+    }
 
-    // ✅ Admin delete activity
+    // ✅ Admin undo activity — resets completion and re-locks next
+    public ClubResponse adminUndoActivity(String clubId, String activityId, String adminRoll) {
+        if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator");
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        List<Club.ClubActivity> acts = club.getActivities();
+        for (int i = 0; i < acts.size(); i++) {
+            if (acts.get(i).getId().equals(activityId)) {
+                acts.get(i).setCompleted(false);
+                acts.get(i).setCompletedAt(null);
+                // re-lock all activities after this one
+                for (int j = i + 1; j < acts.size(); j++) {
+                    acts.get(j).setAvailableFrom(null);
+                    acts.get(j).setCompleted(false);
+                    acts.get(j).setCompletedAt(null);
+                }
+                break;
+            }
+        }
+        return mapToResponse(clubRepository.save(club));
+    }
+
     public ClubResponse adminDeleteActivity(String clubId, String activityId, String adminRoll) {
-        if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator can delete activities");
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
+        if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator");
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
         club.getActivities().removeIf(a -> a.getId().equals(activityId));
         return mapToResponse(clubRepository.save(club));
     }
 
-    // ✅ Admin override complete activity (skip 24hr check)
-    public ClubResponse adminCompleteActivity(String clubId, String activityId, String adminRoll) {
+    public ClubResponse deleteAnnouncement(String clubId, String annId, String adminRoll) {
         if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator");
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
-        club.getActivities().stream()
-            .filter(a -> a.getId().equals(activityId) && !a.isCompleted())
-            .findFirst()
-            .ifPresent(a -> { a.setCompleted(true); a.setCompletedAt(LocalDateTime.now()); });
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        club.getAnnouncements().removeIf(a -> a.getId().equals(annId));
         return mapToResponse(clubRepository.save(club));
     }
 
@@ -510,116 +501,255 @@ public class ClubService {
         clubRepository.deleteById(clubId);
     }
 
-    // ─── MEMBER OPERATIONS ──────────────────────────────────────────────────
+    // ─── MEMBER OPERATIONS ───────────────────────────────────────────
 
     public ClubResponse joinClub(String clubId, String rollNumber) {
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
-        if (club.isAnyMember(rollNumber)) throw new ForbiddenException("You have already joined this club");
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        if (club.isAnyMember(rollNumber)) throw new ForbiddenException("Already joined this club");
         if (club.isFull()) throw new ForbiddenException("This club is full");
-        if (!"ACTIVE".equals(club.getStatus())) throw new ForbiddenException("This club is not accepting members");
+        if (!"ACTIVE".equals(club.getStatus())) throw new ForbiddenException("Not accepting members");
         long joinedCount = clubRepository.findAll().stream().filter(c -> c.isAnyMember(rollNumber)).count();
         if (joinedCount >= 2) throw new ForbiddenException("You can only join up to 2 clubs");
         StudentProfile student = studentRepository.findByRollNumber(rollNumber)
             .orElseThrow(() -> new NotFoundException("Student not found"));
         club.getPendingMembers().add(new Club.PendingMember(rollNumber, student.getName(), LocalDateTime.now()));
         long daysSince = java.time.Duration.between(club.getCreatedAt(), LocalDateTime.now()).toDays();
-        boolean earlyMember = daysSince <= 7;
-        if (earlyMember) awardBadgeQuiet(club, rollNumber, "EARLY_MEMBER");
-        String msg = "✅ You joined \"" + club.getTitle() + "\"! 2-day grace period started."
-            + (earlyMember ? " 🌱 Early Member badge earned!" : "");
+        boolean early = daysSince <= 7;
+        if (early) awardBadgeQuiet(club, rollNumber, "EARLY_MEMBER");
+        String msg = "✅ Joined \"" + club.getTitle() + "\"! 2-day grace period started." + (early ? " 🌱 Early Member badge!" : "");
         notificationService.create(rollNumber, msg, "CLUB_JOIN");
         if (club.getPresidentRoll() != null)
-            notificationService.create(club.getPresidentRoll(),
-                "👋 " + student.getName() + " joined \"" + club.getTitle() + "\". 2 days to remove if needed.",
-                "CLUB_JOIN");
+            notificationService.create(club.getPresidentRoll(), "👋 " + student.getName() + " joined. 2 days to remove.", "CLUB_JOIN");
         clubRepository.save(club);
         return mapToResponse(club);
     }
 
     public ClubResponse presidentRemoveMember(String clubId, String targetRoll, String presidentRoll) {
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
-        if (!presidentRoll.equals(club.getPresidentRoll()))
-            throw new ForbiddenException("Only the President can remove members");
-        if (!club.isPending(targetRoll))
-            throw new ForbiddenException("President can only remove pending members within grace period");
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        if (!presidentRoll.equals(club.getPresidentRoll())) throw new ForbiddenException("Only President can remove members");
+        if (!club.isPending(targetRoll)) throw new ForbiddenException("President can only remove pending members");
         club.getPendingMembers().removeIf(p -> p.getRollNumber().equals(targetRoll));
-        notificationService.create(targetRoll,
-            "❌ You were removed from \"" + club.getTitle() + "\" during grace period.", "CLUB_REMOVED");
+        notificationService.create(targetRoll, "❌ Removed from \"" + club.getTitle() + "\" during grace period.", "CLUB_REMOVED");
         return mapToResponse(clubRepository.save(club));
     }
 
     public void confirmPendingMembers(Club club) {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(2);
         List<Club.PendingMember> toConfirm = club.getPendingMembers().stream()
-            .filter(p -> p.getJoinedAt().isBefore(cutoff))
-            .collect(Collectors.toList());
+            .filter(p -> p.getJoinedAt().isBefore(cutoff)).collect(Collectors.toList());
         for (Club.PendingMember p : toConfirm) {
             club.getMembers().add(p.getRollNumber());
             club.getPendingMembers().remove(p);
-            notificationService.create(p.getRollNumber(),
-                "🎉 You are now a confirmed member of \"" + club.getTitle() + "\"!", "CLUB_CONFIRMED");
+            notificationService.create(p.getRollNumber(), "🎉 Confirmed member of \"" + club.getTitle() + "\"!", "CLUB_CONFIRMED");
         }
         if (!toConfirm.isEmpty()) clubRepository.save(club);
     }
 
     public ClubResponse requestRole(String clubId, String rollNumber, String role) {
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
-        if (!club.isAnyMember(rollNumber))
-            throw new ForbiddenException("You must be a member to request a role");
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        if (!club.isAnyMember(rollNumber)) throw new ForbiddenException("Must be a member to request a role");
         StudentProfile student = studentRepository.findByRollNumber(rollNumber)
             .orElseThrow(() -> new NotFoundException("Student not found"));
         boolean already = club.getRoleRequests().stream()
-            .anyMatch(r -> r.getRequestedBy().equals(rollNumber)
-                && r.getRole().equals(role) && "PENDING".equals(r.getStatus()));
-        if (already) throw new ForbiddenException("You already have a pending request for this role");
+            .anyMatch(r -> r.getRequestedBy().equals(rollNumber) && r.getRole().equals(role) && "PENDING".equals(r.getStatus()));
+        if (already) throw new ForbiddenException("Already have a pending request");
         club.getRoleRequests().add(new Club.RoleRequest(
             UUID.randomUUID().toString(), rollNumber, student.getName(), role, "PENDING", LocalDateTime.now()));
         studentRepository.findAll().stream()
             .filter(s -> { String r = s.getRole() != null ? s.getRole().toString() : ""; return r.equals("ADMIN") || r.equals("MODERATOR"); })
             .forEach(s -> notificationService.create(s.getRollNumber(),
-                "📋 " + student.getName() + " requested " + role + " role in \"" + club.getTitle() + "\"",
-                "CLUB_ROLE_REQUEST"));
+                "📋 " + student.getName() + " requested " + role + " in \"" + club.getTitle() + "\"", "CLUB_ROLE_REQUEST"));
         return mapToResponse(clubRepository.save(club));
     }
 
-    // ─── ACTIVITY OPERATIONS ────────────────────────────────────────────────
+    // ─── ACTIVITY OPERATIONS ─────────────────────────────────────────
+
+    // ✅ Helper: unlock next activity after completion
+    private void unlockNextActivity(Club club, Club.ClubActivity completed) {
+        List<Club.ClubActivity> acts = club.getActivities();
+        for (int i = 0; i < acts.size(); i++) {
+            if (acts.get(i).getId().equals(completed.getId()) && i + 1 < acts.size()) {
+                Club.ClubActivity next = acts.get(i + 1);
+                if (next.getAvailableFrom() == null) {
+                    next.setAvailableFrom(LocalDateTime.now());
+                }
+                break;
+            }
+        }
+    }
+
+public ClubResponse completeActivity(String clubId, String activityId, String rollNumber) {
+    Club club = clubRepository.findById(clubId)
+        .orElseThrow(() -> new NotFoundException("Club not found"));
+ 
+    if (!rollNumber.equals(club.getPresidentRoll()))
+        throw new ForbiddenException("Only the President can mark activities complete");
+ 
+    int confirmedMembers = club.getMembers().size();
+    int needed = (int) Math.ceil(club.getMaxMembers() * 0.5);
+    if (confirmedMembers < needed)
+        throw new ForbiddenException(
+            "Activities locked. Need " + needed + " confirmed members, currently have " + confirmedMembers + "."
+        );
+ 
+    // ✅ find the activity and its index
+    List<Club.ClubActivity> acts = club.getActivities();
+    Club.ClubActivity activity = null;
+    int actIdx = -1;
+    for (int i = 0; i < acts.size(); i++) {
+        if (acts.get(i).getId().equals(activityId)) {
+            activity = acts.get(i);
+            actIdx = i;
+            break;
+        }
+    }
+    if (activity == null) throw new NotFoundException("Activity not found");
+    if (activity.isCompleted()) throw new ForbiddenException("Already completed");
+ 
+    // ✅ SEQUENTIAL CHECK — must complete in order
+    // Every activity before this one must be completed
+    for (int i = 0; i < actIdx; i++) {
+        if (!acts.get(i).isCompleted()) {
+            throw new ForbiddenException(
+                "Complete \"" + acts.get(i).getTitle() + "\" first. Activities must be done in order."
+            );
+        }
+    }
+ 
+    // ✅ AVAILABILITY CHECK — handle old clubs where availableFrom may be null
+    // If availableFrom is null, auto-fix it now (migration fix for old clubs)
+    if (activity.getAvailableFrom() == null) {
+        if (actIdx == 0) {
+            // First activity — available from semester start
+            activity.setAvailableFrom(
+                club.getSemesterStartDate() != null ? club.getSemesterStartDate() : club.getCreatedAt()
+            );
+        } else {
+            // Previous activity was completed — set availableFrom to when it completed
+            Club.ClubActivity prev = acts.get(actIdx - 1);
+            activity.setAvailableFrom(
+                prev.getCompletedAt() != null ? prev.getCompletedAt() : LocalDateTime.now().minusDays(1)
+            );
+        }
+        // save the fix immediately so it persists
+        clubRepository.save(club);
+    }
+ 
+    // ✅ MINIMUM DAYS CHECK — must have waited long enough since availableFrom
+    long daysAvailable = java.time.Duration.between(activity.getAvailableFrom(), LocalDateTime.now()).toDays();
+    int minDays = activity.getMinDaysToComplete() > 0 ? activity.getMinDaysToComplete() : 7;
+ 
+    if (daysAvailable < minDays) {
+        long daysLeft = minDays - daysAvailable;
+        throw new ForbiddenException(
+            "This activity needs " + daysLeft + " more day" + (daysLeft == 1 ? "" : "s") +
+            " before it can be marked complete. " +
+            "It is designed to take " + minDays + "–" + (activity.getMaxDaysExpected() > 0 ? activity.getMaxDaysExpected() : minDays + 7) +
+            " days of real work."
+        );
+    }
+
+    // ✅ ADD BEFORE completion
+int confirmedCount = club.getMembers() != null ? club.getMembers().size() : 0;
+int halfMembers = (int) Math.ceil(club.getMaxMembers() * 0.5);
+
+if (confirmedCount < halfMembers) {
+    throw new ForbiddenException("Not enough confirmed members to unlock activities");
+}
+
+if (club.getPresidentRoll() == null) {
+    throw new ForbiddenException("President not assigned yet");
+}
+ 
+    // ✅ COMPLETE IT
+    activity.setCompleted(true);
+    activity.setCompletedAt(LocalDateTime.now());
+ 
+    // ✅ unlock next activity
+    unlockNextActivity(club, activity);
+ 
+    long completedCount = club.getActivities().stream().filter(Club.ClubActivity::isCompleted).count();
+ 
+    for (String r : club.getMembers())
+        notificationService.create(r,
+            "✅ \"" + activity.getTitle() + "\" completed! (" + completedCount + "/" + club.getActivities().size() + ")",
+            "CLUB_ACTIVITY_DONE");
+ 
+    if (completedCount == 5)
+        for (String r : club.getMembers()) awardBadge(club, r, "ACTIVE_CONTRIBUTOR");
+ 
+    return mapToResponse(clubRepository.save(club));
+}
+
+public void backdateActivitiesForTesting(String clubId, String adminRoll) {
+    if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Admin only");
+    Club club = clubRepository.findById(clubId)
+        .orElseThrow(() -> new NotFoundException("Club not found"));
+ 
+    // backdate semester start by 15 days first
+    LocalDateTime backdatedStart = club.getSemesterStartDate() != null
+        ? club.getSemesterStartDate().minusDays(15)
+        : LocalDateTime.now().minusDays(15);
+    club.setSemesterStartDate(backdatedStart);
+ 
+    // ✅ use index-based loop — indexOf is unreliable on embedded objects
+    List<Club.ClubActivity> acts = club.getActivities();
+    for (int i = 0; i < acts.size(); i++) {
+        Club.ClubActivity a = acts.get(i);
+        // backdate createdAt
+        if (a.getCreatedAt() != null)
+            a.setCreatedAt(a.getCreatedAt().minusDays(15));
+        else
+            a.setCreatedAt(backdatedStart);
+ 
+        // for activity 0: set availableFrom to backdated semester start
+        if (i == 0) {
+            a.setAvailableFrom(backdatedStart);
+        } else if (a.getAvailableFrom() != null) {
+            // backdate existing availableFrom
+            a.setAvailableFrom(a.getAvailableFrom().minusDays(15));
+        }
+        // activities with null availableFrom (locked) stay null — correct
+    }
+ 
+    clubRepository.save(club);
+    System.out.println("[ClubService] Backdated 15 days for testing: " + club.getTitle());
+}
+
+
 
     public ClubResponse addExtraActivity(String clubId, String title, String description, String rollNumber) {
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
-        if (!rollNumber.equals(club.getPresidentRoll()))
-            throw new ForbiddenException("Only the President can add extra activities");
-        if (!club.isActivityUnlocked())
-            throw new ForbiddenException("Activities unlock at 50% membership");
-        if (club.getExtraActivities() >= MAX_EXTRA_ACTIVITIES)
-            throw new ForbiddenException("Maximum " + MAX_EXTRA_ACTIVITIES + " extra activities allowed");
-        StudentProfile student = studentRepository.findByRollNumber(rollNumber)
-            .orElseThrow(() -> new NotFoundException("Student not found"));
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        if (!rollNumber.equals(club.getPresidentRoll())) throw new ForbiddenException("Only President can add activities");
+        if (!club.isActivityUnlocked()) throw new ForbiddenException("Activities locked at 50% membership");
+        if (club.getExtraActivities() >= MAX_EXTRA_ACTIVITIES) throw new ForbiddenException("Maximum 3 extra activities allowed");
+        StudentProfile s = studentRepository.findByRollNumber(rollNumber).orElseThrow(() -> new NotFoundException("Not found"));
         Club.ClubActivity a = new Club.ClubActivity();
         a.setId(UUID.randomUUID().toString());
         a.setTitle(title.trim());
         a.setDescription(description != null ? description.trim() : "");
         a.setAddedBy(rollNumber);
-        a.setAddedByName(student.getName());
+        a.setAddedByName(s.getName());
         a.setExtra(true);
         a.setAutoSeeded(false);
         a.setCompleted(false);
+        a.setRiskLevel("MEDIUM");
+        a.setMinDaysToComplete(10);
+        a.setMaxDaysExpected(20);
+        // extra activities are appended — they unlock after all previous are done
+        a.setAvailableFrom(null); // will be set when previous completes
         a.setCreatedAt(LocalDateTime.now());
         a.setVotes(new ArrayList<>());
         club.getActivities().add(a);
         club.setExtraActivities(club.getExtraActivities() + 1);
-        for (String roll : club.getMembers())
-            if (!roll.equals(rollNumber))
-                notificationService.create(roll, "📋 New activity in \"" + club.getTitle() + "\": " + title, "CLUB_ACTIVITY");
+        for (String r : club.getMembers())
+            if (!r.equals(rollNumber))
+                notificationService.create(r, "📋 New activity in \"" + club.getTitle() + "\": " + title, "CLUB_ACTIVITY");
         return mapToResponse(clubRepository.save(club));
     }
 
     public ClubResponse voteActivity(String clubId, String activityId, String rollNumber) {
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
         if (!club.isAnyMember(rollNumber)) throw new ForbiddenException("Only members can vote");
         Club.ClubActivity activity = club.getActivities().stream()
             .filter(a -> a.getId().equals(activityId)).findFirst()
@@ -628,73 +758,13 @@ public class ClubService {
         else activity.getVotes().add(rollNumber);
         return mapToResponse(clubRepository.save(club));
     }
-public ClubResponse completeActivity(String clubId, String activityId, String rollNumber) {
-    Club club = clubRepository.findById(clubId)
-        .orElseThrow(() -> new NotFoundException("Club not found"));
- 
-    if (!rollNumber.equals(club.getPresidentRoll()))
-        throw new ForbiddenException("Only the President can mark activities as complete");
- 
-    if (!club.isActivityUnlocked())
-        throw new ForbiddenException("Activities locked until 50% members join");
- 
-    Club.ClubActivity activity = club.getActivities().stream()
-        .filter(a -> a.getId().equals(activityId)).findFirst()
-        .orElseThrow(() -> new NotFoundException("Activity not found"));
- 
-    if (activity.isCompleted())
-        throw new ForbiddenException("Already completed");
- 
-    // ✅ must be at least 10 days old for president (admin bypasses via adminCompleteActivity)
-    long daysOld = java.time.Duration.between(activity.getCreatedAt(), LocalDateTime.now()).toDays();
-    if (daysOld < 10)
-        throw new ForbiddenException(
-            "This activity must be at least 10 days old before marking complete. " +
-            (10 - daysOld) + " day(s) remaining."
-        );
- 
-    activity.setCompleted(true);
-    activity.setCompletedAt(LocalDateTime.now());
- 
-    long completedCount = club.getActivities().stream().filter(Club.ClubActivity::isCompleted).count();
- 
-    for (String roll : club.getMembers())
-        notificationService.create(roll,
-            "✅ \"" + activity.getTitle() + "\" completed! (" + completedCount + "/" + club.getActivities().size() + ")",
-            "CLUB_ACTIVITY_DONE");
- 
-    if (completedCount == 5)
-        for (String roll : club.getMembers()) awardBadge(club, roll, "ACTIVE_CONTRIBUTOR");
- 
-    return mapToResponse(clubRepository.save(club));
-}
 
-
-public ClubResponse adminUndoActivity(String clubId, String activityId, String adminRoll) {
-    if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator");
-    Club club = clubRepository.findById(clubId)
-        .orElseThrow(() -> new NotFoundException("Club not found"));
- 
-    club.getActivities().stream()
-        .filter(a -> a.getId().equals(activityId) && a.isCompleted())
-        .findFirst()
-        .ifPresent(a -> {
-            a.setCompleted(false);
-            a.setCompletedAt(null);
-        });
- 
-    return mapToResponse(clubRepository.save(club));
-}
-
-    // ─── PRESIDENT EDIT ──────────────────────────────────────────────────────
+    // ─── PRESIDENT EDIT ──────────────────────────────────────────────
 
     public ClubResponse presidentEditClub(String clubId, String description, String rollNumber) {
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
-        if (!rollNumber.equals(club.getPresidentRoll()))
-            throw new ForbiddenException("Only the President can edit club details");
-        if (club.getEditCount() >= MAX_EDIT_COUNT)
-            throw new ForbiddenException("Maximum " + MAX_EDIT_COUNT + " edits allowed per semester");
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        if (!rollNumber.equals(club.getPresidentRoll())) throw new ForbiddenException("Only President can edit");
+        if (club.getEditCount() >= MAX_EDIT_COUNT) throw new ForbiddenException("Maximum 3 edits per semester");
         if (description != null && !description.trim().isEmpty()) {
             club.setDescription(description.trim());
             club.setEditCount(club.getEditCount() + 1);
@@ -702,171 +772,115 @@ public ClubResponse adminUndoActivity(String clubId, String activityId, String a
         return mapToResponse(clubRepository.save(club));
     }
 
-    // ─── NICKNAME ────────────────────────────────────────────────────────────
-
     public ClubResponse setNickname(String clubId, String targetRoll, String nickname, String presidentRoll) {
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
-        if (!presidentRoll.equals(club.getPresidentRoll()))
-            throw new ForbiddenException("Only the President can set nicknames");
-        if (!club.isAnyMember(targetRoll))
-            throw new ForbiddenException("Student is not a member");
-        if (nickname == null || nickname.trim().isEmpty()) {
-            club.getMemberNicknames().remove(targetRoll);
-        } else {
-            String clean = nickname.trim();
-            if (clean.length() > 20) throw new ForbiddenException("Nickname must be under 20 characters");
-            if (!clean.matches("[a-zA-Z0-9 _-]+"))
-                throw new ForbiddenException("Only letters, numbers, spaces, hyphens and underscores allowed");
-            club.getMemberNicknames().put(targetRoll, clean);
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        if (!presidentRoll.equals(club.getPresidentRoll())) throw new ForbiddenException("Only President can set nicknames");
+        if (!club.isAnyMember(targetRoll)) throw new ForbiddenException("Not a member");
+        if (nickname == null || nickname.trim().isEmpty()) { club.getMemberNicknames().remove(targetRoll); }
+        else {
+            String c = nickname.trim();
+            if (c.length() > 20) throw new ForbiddenException("Max 20 characters");
+            if (!c.matches("[a-zA-Z0-9 _-]+")) throw new ForbiddenException("Invalid characters");
+            club.getMemberNicknames().put(targetRoll, c);
         }
         return mapToResponse(clubRepository.save(club));
     }
 
-    // ─── ANNOUNCEMENTS ───────────────────────────────────────────────────────
+    // ─── ANNOUNCEMENTS ───────────────────────────────────────────────
 
     public ClubResponse addAnnouncement(String clubId, String title, String content, String rollNumber) {
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
         boolean isLeader = rollNumber.equals(club.getPresidentRoll()) || rollNumber.equals(club.getVpRoll());
         if (!isLeader) throw new ForbiddenException("Only President or VP can post announcements");
         String dateKey = LocalDate.now() + ":" + rollNumber;
-        int todayCount = club.getDailyAnnouncementCount().getOrDefault(dateKey, 0);
-        if (todayCount >= MAX_DAILY_ANNOUNCEMENTS)
-            throw new ForbiddenException("Maximum " + MAX_DAILY_ANNOUNCEMENTS + " announcements per day");
-        StudentProfile student = studentRepository.findByRollNumber(rollNumber)
-            .orElseThrow(() -> new NotFoundException("Student not found"));
+        int count = club.getDailyAnnouncementCount().getOrDefault(dateKey, 0);
+        if (count >= MAX_DAILY_ANNOUNCEMENTS) throw new ForbiddenException("Max 2 announcements per day");
+        StudentProfile s = studentRepository.findByRollNumber(rollNumber).orElseThrow(() -> new NotFoundException("Not found"));
         Club.ClubAnnouncement ann = new Club.ClubAnnouncement(
-            UUID.randomUUID().toString(), title.trim(), content.trim(),
-            rollNumber, student.getName(), false, LocalDateTime.now());
+            UUID.randomUUID().toString(), title.trim(), content.trim(), rollNumber, s.getName(), false, LocalDateTime.now());
         club.getAnnouncements().add(0, ann);
-        club.getDailyAnnouncementCount().put(dateKey, todayCount + 1);
-        for (String roll : club.getMembers())
-            if (!roll.equals(rollNumber))
-                notificationService.create(roll, "📢 \"" + club.getTitle() + "\": " + title, "CLUB_ANNOUNCEMENT");
+        club.getDailyAnnouncementCount().put(dateKey, count + 1);
+        for (String r : club.getMembers())
+            if (!r.equals(rollNumber))
+                notificationService.create(r, "📢 \"" + club.getTitle() + "\": " + title, "CLUB_ANNOUNCEMENT");
         return mapToResponse(clubRepository.save(club));
     }
 
-    public ClubResponse pinAnnouncement(String clubId, String annId, String rollNumber) {
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found"));
-        if (!rollNumber.equals(club.getPresidentRoll()))
-            throw new ForbiddenException("Only President can pin announcements");
-        club.getAnnouncements().forEach(a -> a.setPinned(a.getId().equals(annId) && !a.isPinned()));
+public ClubResponse pinAnnouncement(String clubId, String annId, String rollNumber) {
+    Club club = clubRepository.findById(clubId)
+        .orElseThrow(() -> new NotFoundException("Club not found"));
+    boolean canPin = rollNumber.equals(club.getPresidentRoll()) || isAdminOrMod(rollNumber);
+    if (!canPin) throw new ForbiddenException("Only President or Admin can pin announcements");
+    club.getAnnouncements().forEach(a -> a.setPinned(a.getId().equals(annId) && !a.isPinned()));
+    return mapToResponse(clubRepository.save(club));
+}
+
+    // ─── CHAT ─────────────────────────────────────────────────────────
+
+    public ClubResponse sendMessage(String clubId, String content, String rollNumber) {
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        if (!club.hasMember(rollNumber)) throw new ForbiddenException("Only confirmed members can chat");
+        StudentProfile s = studentRepository.findByRollNumber(rollNumber).orElseThrow(() -> new NotFoundException("Not found"));
+        Club.ClubMessage msg = new Club.ClubMessage(UUID.randomUUID().toString(), content.trim(), rollNumber, s.getName(), false, LocalDateTime.now());
+        if (club.getMessages().size() >= MAX_CHAT_MESSAGES) club.getMessages().remove(0);
+        club.getMessages().add(msg);
         return mapToResponse(clubRepository.save(club));
     }
 
-public ClubResponse deleteAnnouncement(String clubId, String annId, String adminRoll) {
-    if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator");
-    Club club = clubRepository.findById(clubId)
-        .orElseThrow(() -> new NotFoundException("Club not found"));
-    club.getAnnouncements().removeIf(a -> a.getId().equals(annId));
-    return mapToResponse(clubRepository.save(club));
-}
-
-    // ─── CHAT ────────────────────────────────────────────────────────────────
-
-  public ClubResponse sendMessage(String clubId, String content, String rollNumber) {
-    Club club = clubRepository.findById(clubId)
-        .orElseThrow(() -> new NotFoundException("Club not found"));
- 
-    // ✅ only confirmed members can chat — not pending
-    if (!club.hasMember(rollNumber))
-        throw new ForbiddenException("You must be a confirmed member to send messages. Please wait for your 2-day grace period to complete.");
- 
-    StudentProfile student = studentRepository.findByRollNumber(rollNumber)
-        .orElseThrow(() -> new NotFoundException("Student not found"));
- 
-    Club.ClubMessage msg = new Club.ClubMessage(
-        UUID.randomUUID().toString(), content.trim(),
-        rollNumber, student.getName(), false, LocalDateTime.now());
- 
-    if (club.getMessages().size() >= MAX_CHAT_MESSAGES) club.getMessages().remove(0);
-    club.getMessages().add(msg);
- 
-    return mapToResponse(clubRepository.save(club));
-}
-
-public ClubResponse deleteMessage(String clubId, String messageId, String rollNumber) {
-    Club club = clubRepository.findById(clubId)
-        .orElseThrow(() -> new NotFoundException("Club not found"));
- 
-    boolean isPresident = rollNumber.equals(club.getPresidentRoll());
-    boolean isAdminUser = isAdminOrMod(rollNumber);
- 
-    // check ownership first
-    Club.ClubMessage msg = club.getMessages().stream()
-        .filter(m -> m.getId().equals(messageId))
-        .findFirst()
-        .orElseThrow(() -> new NotFoundException("Message not found"));
- 
-    if (!msg.getSenderRoll().equals(rollNumber) && !isPresident && !isAdminUser) {
-        throw new ForbiddenException("You can only delete your own messages");
+    public ClubResponse deleteMessage(String clubId, String messageId, String rollNumber) {
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+        boolean isPres = rollNumber.equals(club.getPresidentRoll());
+        boolean isAdm = isAdminOrMod(rollNumber);
+        Club.ClubMessage msg = club.getMessages().stream().filter(m -> m.getId().equals(messageId)).findFirst()
+            .orElseThrow(() -> new NotFoundException("Message not found"));
+        if (!msg.getSenderRoll().equals(rollNumber) && !isPres && !isAdm)
+            throw new ForbiddenException("You can only delete your own messages");
+        club.getMessages().removeIf(m -> m.getId().equals(messageId));
+        return mapToResponse(clubRepository.save(club));
     }
- 
-    // ✅ actually remove from list — not soft delete
-    club.getMessages().removeIf(m -> m.getId().equals(messageId));
- 
-    return mapToResponse(clubRepository.save(club));
-}
 
-    // ─── GETTERS ────────────────────────────────────────────────────────────
+    // ─── GETTERS ──────────────────────────────────────────────────────
 
     public List<ClubResponse> getAllClubs() {
-        return clubRepository.findAll().stream()
-            .peek(this::confirmPendingMembers)
-            .map(this::mapToResponse)
-            .collect(Collectors.toList());
+        return clubRepository.findAll().stream().peek(this::confirmPendingMembers).map(this::mapToResponse).collect(Collectors.toList());
     }
 
     public ClubResponse getClub(String clubId) {
-        Club club = clubRepository.findById(clubId)
-            .orElseThrow(() -> new NotFoundException("Club not found: " + clubId));
+        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found: " + clubId));
         confirmPendingMembers(club);
         return mapToResponse(club);
     }
 
     public long getClubCount() { return clubRepository.count(); }
 
-    // ─── BADGE HELPERS ───────────────────────────────────────────────────────
+    // ─── BADGE HELPERS ────────────────────────────────────────────────
 
     private void awardBadge(Club club, String rollNumber, String badgeType) {
-        boolean has = club.getBadges().stream()
-            .anyMatch(b -> b.getRollNumber().equals(rollNumber) && b.getBadgeType().equals(badgeType));
+        boolean has = club.getBadges().stream().anyMatch(b -> b.getRollNumber().equals(rollNumber) && b.getBadgeType().equals(badgeType));
         if (has) return;
         StudentProfile s = studentRepository.findByRollNumber(rollNumber).orElse(null);
-        club.getBadges().add(new Club.ClubBadge(rollNumber,
-            s != null ? s.getName() : "Unknown", badgeType, LocalDateTime.now()));
-        notificationService.create(rollNumber,
-            "🏅 You earned the " + badgeType.replace("_", " ") + " badge in \"" + club.getTitle() + "\"!",
-            "CLUB_BADGE");
+        club.getBadges().add(new Club.ClubBadge(rollNumber, s != null ? s.getName() : "Unknown", badgeType, LocalDateTime.now()));
+        notificationService.create(rollNumber, "🏅 " + badgeType.replace("_", " ") + " badge in \"" + club.getTitle() + "\"!", "CLUB_BADGE");
     }
 
     private void awardBadgeQuiet(Club club, String rollNumber, String badgeType) {
-        boolean has = club.getBadges().stream()
-            .anyMatch(b -> b.getRollNumber().equals(rollNumber) && b.getBadgeType().equals(badgeType));
+        boolean has = club.getBadges().stream().anyMatch(b -> b.getRollNumber().equals(rollNumber) && b.getBadgeType().equals(badgeType));
         if (has) return;
         StudentProfile s = studentRepository.findByRollNumber(rollNumber).orElse(null);
-        club.getBadges().add(new Club.ClubBadge(rollNumber,
-            s != null ? s.getName() : "Unknown", badgeType, LocalDateTime.now()));
+        club.getBadges().add(new Club.ClubBadge(rollNumber, s != null ? s.getName() : "Unknown", badgeType, LocalDateTime.now()));
     }
 
     private String getEmoji(String category) {
         if (category == null) return "🏛️";
         return switch (category) {
-            case "AI"              -> "🤖";
-            case "3D_PRINTING"    -> "🖨️";
-            case "WEB_DEV"        -> "💻";
-            case "ROBOTICS"       -> "🦾";
-            case "ENTREPRENEURSHIP" -> "🚀";
-            case "TECH_FEST"      -> "🎉";
-            case "SPORTS"         -> "⚽";
-            case "CULTURAL"       -> "🎭";
-            case "TOASTMASTERS"   -> "🎤";
-            case "PHOTOGRAPHY"    -> "📷";
-            default               -> "🏛️";
+            case "AI" -> "🤖"; case "3D_PRINTING" -> "🖨️"; case "WEB_DEV" -> "💻";
+            case "ROBOTICS" -> "🦾"; case "ENTREPRENEURSHIP" -> "🚀"; case "TECH_FEST" -> "🎉";
+            case "SPORTS" -> "⚽"; case "CULTURAL" -> "🎭"; case "TOASTMASTERS" -> "🎤";
+            case "PHOTOGRAPHY" -> "📷"; default -> "🏛️";
         };
     }
+
+    // ─── MAP TO RESPONSE ──────────────────────────────────────────────
 
     private ClubResponse mapToResponse(Club club) {
         ClubResponse res = new ClubResponse();
@@ -899,37 +913,34 @@ public ClubResponse deleteMessage(String clubId, String messageId, String rollNu
         res.setActivityUnlocked(club.isActivityUnlocked());
         res.setMemberNicknames(club.getMemberNicknames());
 
+        // current activity id for frontend highlighting
+        Club.ClubActivity current = club.getCurrentActivity();
+        if (current != null) res.setCurrentActivityId(current.getId());
+
         if (club.getPresidentRoll() != null)
-            studentRepository.findByRollNumber(club.getPresidentRoll())
-                .ifPresent(s -> res.setPresidentName(s.getName()));
+            studentRepository.findByRollNumber(club.getPresidentRoll()).ifPresent(s -> res.setPresidentName(s.getName()));
         if (club.getVpRoll() != null)
-            studentRepository.findByRollNumber(club.getVpRoll())
-                .ifPresent(s -> res.setVpName(s.getName()));
+            studentRepository.findByRollNumber(club.getVpRoll()).ifPresent(s -> res.setVpName(s.getName()));
 
         List<MemberInfo> memberDetails = new ArrayList<>();
-        club.getMembers().stream().map(roll -> {
-            StudentProfile s = studentRepository.findByRollNumber(roll).orElse(null);
-            return new MemberInfo(roll, s != null ? s.getName() : "Unknown",
-                s != null ? s.getYear() : "-", s != null ? s.getBranch() : "-", null);
+        club.getMembers().stream().map(r -> {
+            StudentProfile s = studentRepository.findByRollNumber(r).orElse(null);
+            return new MemberInfo(r, s != null ? s.getName() : "Unknown", s != null ? s.getYear() : "-", s != null ? s.getBranch() : "-", null);
         }).forEach(memberDetails::add);
         club.getPendingMembers().stream().map(p -> {
             StudentProfile s = studentRepository.findByRollNumber(p.getRollNumber()).orElse(null);
-            return new MemberInfo(p.getRollNumber(), p.getName(),
-                s != null ? s.getYear() : "-", s != null ? s.getBranch() : "-", null);
+            return new MemberInfo(p.getRollNumber(), p.getName(), s != null ? s.getYear() : "-", s != null ? s.getBranch() : "-", null);
         }).forEach(memberDetails::add);
         res.setMemberDetails(memberDetails);
 
         res.setTotalActivities(club.getActivities().size());
-        res.setCompletedActivities((int) club.getActivities().stream()
-            .filter(Club.ClubActivity::isCompleted).count());
+        res.setCompletedActivities((int) club.getActivities().stream().filter(Club.ClubActivity::isCompleted).count());
 
         String todayKey = LocalDate.now().toString();
         if (club.getPresidentRoll() != null)
-            res.setPresidentAnnouncementsToday(club.getDailyAnnouncementCount()
-                .getOrDefault(todayKey + ":" + club.getPresidentRoll(), 0));
+            res.setPresidentAnnouncementsToday(club.getDailyAnnouncementCount().getOrDefault(todayKey + ":" + club.getPresidentRoll(), 0));
         if (club.getVpRoll() != null)
-            res.setVpAnnouncementsToday(club.getDailyAnnouncementCount()
-                .getOrDefault(todayKey + ":" + club.getVpRoll(), 0));
+            res.setVpAnnouncementsToday(club.getDailyAnnouncementCount().getOrDefault(todayKey + ":" + club.getVpRoll(), 0));
 
         return res;
     }

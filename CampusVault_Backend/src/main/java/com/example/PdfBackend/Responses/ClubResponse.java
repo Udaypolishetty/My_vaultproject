@@ -23,6 +23,7 @@ public class ClubResponse {
     private LocalDateTime semesterEndDate;
     private String status;
     private int maxMembers;
+    private String currentActivityId;
 
     private List<String> members;
     private List<Club.PendingMember> pendingMembers;

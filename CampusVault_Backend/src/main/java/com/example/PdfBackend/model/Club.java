@@ -30,7 +30,6 @@ public class Club {
     private LocalDateTime semesterEndDate;
 
     private String status = "ACTIVE";
-
     private int maxMembers = 15;
 
     private List<String> members = new ArrayList<>();
@@ -54,7 +53,7 @@ public class Club {
     private boolean thirtyDayWarningSent = false;
     private boolean sevenDayWarningSent = false;
 
-    // ─── COMPUTED HELPERS ───────────────────────────────────────────────────
+    // ─── COMPUTED HELPERS ────────────────────────────────────────────
 
     public boolean isFull() {
         return (members.size() + pendingMembers.size()) >= maxMembers;
@@ -76,24 +75,41 @@ public class Club {
         return members.size() + pendingMembers.size();
     }
 
+    // ✅ BUG FIX: only CONFIRMED members count toward activity unlock
+    // Pending members in grace period should NOT unlock activities
     public boolean isActivityUnlocked() {
-        return totalJoined() >= (int) Math.ceil(maxMembers * 0.5);
+        return members.size() >= (int) Math.ceil(maxMembers * 0.5);
     }
 
-    // ─── INNER CLASSES ──────────────────────────────────────────────────────
+    // ✅ get the single current active activity (first incomplete with previous completed)
+public ClubActivity getCurrentActivity() {
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class PendingMember {
-        private String rollNumber;
-        private String name;
-        private LocalDateTime joinedAt;
+    // 🔒 BLOCK if not unlocked OR no president
+    if (!isActivityUnlocked() || presidentRoll == null) {
+        return null;
     }
 
-    // ✅ FIXED: no boolean fields with "is" prefix — use String/explicit naming
-    @Data
-    @NoArgsConstructor
+    for (int i = 0; i < activities.size(); i++) {
+        ClubActivity a = activities.get(i);
+        if (a.isCompleted()) continue;
+
+        if (i == 0) {
+            return a;
+        }
+
+        if (activities.get(i - 1).isCompleted()) {
+            return a;
+        }
+
+        return null;
+    }
+
+    return null;
+}
+
+    // ─── INNER CLASSES ───────────────────────────────────────────────
+
+    @Data @NoArgsConstructor
     public static class ClubActivity {
         private String id;
         private String title;
@@ -101,16 +117,20 @@ public class Club {
         private String addedBy;
         private String addedByName;
         private boolean completed;
-        private boolean extra;        // ✅ was isExtra — caused Lombok getter conflict
-        private boolean autoSeeded;   // ✅ was isAutoSeeded — caused Lombok getter conflict
+        private boolean extra;
+        private boolean autoSeeded;
+
+        private String riskLevel;
+        private int minDaysToComplete;
+        private int maxDaysExpected;
+        private LocalDateTime availableFrom;
+
         private LocalDateTime completedAt;
         private LocalDateTime createdAt;
         private List<String> votes = new ArrayList<>();
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
+    @Data @NoArgsConstructor @AllArgsConstructor
     public static class ClubAnnouncement {
         private String id;
         private String title;
@@ -121,21 +141,17 @@ public class Club {
         private LocalDateTime createdAt;
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
+    @Data @NoArgsConstructor @AllArgsConstructor
     public static class ClubMessage {
         private String id;
         private String content;
         private String senderRoll;
         private String senderName;
-        private boolean deleted;      // ✅ was deletedBySender — simplified
+        private boolean deleted;
         private LocalDateTime createdAt;
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
+    @Data @NoArgsConstructor @AllArgsConstructor
     public static class ClubBadge {
         private String rollNumber;
         private String name;
@@ -143,9 +159,7 @@ public class Club {
         private LocalDateTime earnedAt;
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
+    @Data @NoArgsConstructor @AllArgsConstructor
     public static class RoleRequest {
         private String id;
         private String requestedBy;
@@ -153,5 +167,12 @@ public class Club {
         private String role;
         private String status;
         private LocalDateTime createdAt;
+    }
+
+    @Data @NoArgsConstructor @AllArgsConstructor
+    public static class PendingMember {
+        private String rollNumber;
+        private String name;
+        private LocalDateTime joinedAt;
     }
 }

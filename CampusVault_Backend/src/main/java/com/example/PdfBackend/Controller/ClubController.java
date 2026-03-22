@@ -268,4 +268,12 @@ public ResponseEntity<ClubResponse> deleteAnnouncement(
         @AuthenticationPrincipal UserDetails userDetails) {
     return ResponseEntity.ok(clubService.deleteAnnouncement(clubId, annId, userDetails.getUsername()));
 }
+
+@PostMapping("/{clubId}/dev-backdate")
+public ResponseEntity<String> backdateActivities(
+        @PathVariable String clubId,
+        @AuthenticationPrincipal UserDetails userDetails) {
+    clubService.backdateActivitiesForTesting(clubId, userDetails.getUsername());
+    return ResponseEntity.ok("Backdated 15 days for testing");
+}
 }

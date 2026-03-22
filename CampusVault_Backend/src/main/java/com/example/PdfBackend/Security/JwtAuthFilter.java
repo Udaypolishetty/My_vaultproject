@@ -39,6 +39,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (jwtUtil.isTokenValid(token)) {
             String rollNumber = jwtUtil.extractRollNumber(token);
             var userDetails = userDetailsService.loadUserByUsername(rollNumber);
+            System.out.println("Authorities for " + rollNumber + ": " + userDetails.getAuthorities());
 
             var authToken = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities()

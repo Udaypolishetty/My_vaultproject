@@ -1,5 +1,5 @@
-import { Users, Building2, Leaf, Zap, Crown, Trophy, Handshake } from "lucide-react";
-import { Bot, Printer, Code2, Cog, Rocket, Star,  Music2, Mic2, Camera, Heart } from "lucide-react";
+import { Users, UserCheck,Building2, Leaf, Zap, Crown, Trophy, Handshake } from "lucide-react";
+import { Bot, Printer, Code2, Cog, Rocket, Star,  Music2, Mic2, Camera, Heart,GraduationCap } from "lucide-react";
 
 const CATEGORY_ACCENT = {
   AI:               { from: "#7c3aed", to: "#4f46e5", glow: "rgba(124,58,237,0.3)" },
@@ -15,7 +15,7 @@ const CATEGORY_ACCENT = {
 };
 
 const BADGE_EMOJI = {
-  EARLY_MEMBER: <Leaf size={14} />,
+  EARLY_MEMBER: <GraduationCap size={14} />,
   ACTIVE_CONTRIBUTOR: <Zap size={14} />,
   CLUB_LEADER: <Crown size={14} />,
   ALL_STAR: <Trophy size={14} />,
@@ -146,7 +146,7 @@ export default function ClubCard({ club, myRoll, onJoin, joining, onClick }) {
                 background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.2)",
                 borderRadius: "8px", padding: "4px 8px",
               }}>
-                <span style={{ fontSize: "11px" }}>👑</span>
+                <span style={{ fontSize: "11px" }}><Crown size={14}></Crown></span>
                 <span style={{ fontSize: "11px", color: "#c084fc" }}>{club.presidentName}</span>
               </div>
             )}
@@ -156,7 +156,7 @@ export default function ClubCard({ club, myRoll, onJoin, joining, onClick }) {
                 background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)",
                 borderRadius: "8px", padding: "4px 8px",
               }}>
-                <span style={{ fontSize: "11px" }}>🤝</span>
+                <span style={{ fontSize: "11px" }}><UserCheck size={14} /></span>
                 <span style={{ fontSize: "11px", color: "#93c5fd" }}>{club.vpName}</span>
               </div>
             )}

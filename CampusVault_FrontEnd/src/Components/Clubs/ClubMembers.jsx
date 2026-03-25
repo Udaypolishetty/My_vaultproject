@@ -341,6 +341,8 @@ export default function ClubMembers({ club, myRoll, token, onUpdate }) {
   const isPresident = myRoll === club.presidentRoll;
   const role = sessionStorage.getItem("role");
   const isAdmin = role === "ADMIN" || role === "MODERATOR";
+  const canRequestPres = !club.presidentRoll;
+const canRequestVp = !club.vpRoll;
 
   const getGraceHoursLeft = (joinedAt) => {
     const elapsed = (Date.now() - new Date(joinedAt).getTime()) / 3600000;
@@ -372,6 +374,27 @@ export default function ClubMembers({ club, myRoll, token, onUpdate }) {
       else alert(await res.text());
     } finally { setRemoving(null); }
   };
+  const handleRequest = async (roleType) => {
+  try {
+    const res = await fetch(`http://localhost:8081/api/clubs/${club.id}/request-role`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ role: roleType })
+    });
+
+    if (res.ok) {
+      onUpdate(await res.json());
+      alert(`✅ Request sent for ${roleType}`);
+    } else {
+      alert(await res.text());
+    }
+  } catch (err) {
+    alert("Something went wrong");
+  }
+};
 
   const handleSaveNick = async (rollNumber) => {
     if (nickValue.length > 20) { setNickError("Max 20 characters"); return; }
@@ -485,6 +508,30 @@ export default function ClubMembers({ club, myRoll, token, onUpdate }) {
           </div>
         </div>
       )}
+
+      {/* ✅ Role Request Buttons (ONLY if roles are empty) */}
+{/* {(canRequestPres || canRequestVp) && (
+  <div className="flex gap-2 mb-4">
+    {canRequestPres && (
+      <button
+        onClick={() => handleRequest("PRESIDENT")}
+        className="px-3 py-1.5 text-xs font-semibold rounded-lg
+                   bg-purple-500/20 text-purple-400 border border-purple-500/30
+                   hover:bg-purple-500/30 transition">
+        👑 Request President
+      </button>
+    )}
+    {canRequestVp && (
+      <button
+        onClick={() => handleRequest("VP")}
+        className="px-3 py-1.5 text-xs font-semibold rounded-lg
+                   bg-blue-500/20 text-blue-400 border border-blue-500/30
+                   hover:bg-blue-500/30 transition">
+        🤝 Request VP
+      </button>
+    )}
+  </div>
+)} */}
 
       {/* Confirmed members */}
       <div>

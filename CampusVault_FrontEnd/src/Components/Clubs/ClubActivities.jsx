@@ -194,6 +194,7 @@ export default function ClubActivities({ club, myRoll, token, onUpdate }) {
   const role      = sessionStorage.getItem("role") || "";
   const isAdmin   = role === "ADMIN" || role === "MODERATOR";
   const isPresident = myRoll === club.presidentRoll;
+  
 
   // ✅ BUG 1 FIX: only CONFIRMED members count toward unlock
   // club.members is the confirmed list, club.pendingMembers is the grace period list
@@ -205,10 +206,17 @@ const isUnlocked = confirmedCount >= halfMembers && !!club.presidentRoll;
   const isMember    = club.members?.includes(myRoll);
   const isPending   = club.pendingMembers?.some(p => p.rollNumber === myRoll);
   const extraLeft   = MAX_EXTRA - (club.extraActivities || 0);
+  const isConfirmedMember = isMember; 
 
   const completedCount = club.activities?.filter(a => a.completed).length || 0;
   const totalCount     = club.activities?.length || 0;
   const progressPct    = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  const playClickSound = () => {
+  const audio = new Audio("/sounds/notify.mp3"); // put file in public/sounds/
+  audio.volume = 0.5;
+  audio.play().catch(() => {});
+};
 
   // ✅ BUG 4 FIX: getDaysLeft uses availableFrom correctly
   // Returns null if no availableFrom (locked), or days remaining as number
@@ -236,13 +244,30 @@ const isUnlocked = confirmedCount >= halfMembers && !!club.presidentRoll;
 
   // ✅ BUG 3 + 4 FIX: handleCompleteClick — ONLY president can call this
   // daysLeft check enforced here too (double safety on top of backend)
-  const handleCompleteClick = (activity) => {
-    if (!isPresident) return; // should never reach here but safety check
+ const handleCompleteClick = (activity) => {
+  if (!isPresident) return;
+
+  // 🔒 BLOCK if NOT unlocked
+  if (!activity.availableFrom) {
+playClickSound();
+setConfirmComplete({
+  ...activity,
+  warning: "LOCKED" // or "TIME"
+});
+return;    return;
+  }
+
     const daysLeft = getDaysLeft(activity);
     if (daysLeft !== null && daysLeft > 0) {
       // Show blocked message — don't open confirm popup
-      alert(`⏳ ${Math.ceil(daysLeft)} more day${Math.ceil(daysLeft) === 1 ? "" : "s"} needed before this activity can be marked complete.\n\nThis activity is designed to take ${activity.minDaysToComplete}–${activity.maxDaysExpected} days.`);
-      return;
+playClickSound();
+requestAnimationFrame(() => {
+  setConfirmComplete({
+    ...activity,
+    warning: "LOCKED" // or TIME
+  });
+});
+return;      return;
     }
     setConfirmComplete(activity);
   };
@@ -369,15 +394,27 @@ const isUnlocked = confirmedCount >= halfMembers && !!club.presidentRoll;
     <div>
       {/* ✅ Confirm complete popup — only shown for president */}
       {confirmComplete && isPresident && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
-          backdropFilter: "blur(8px)", zIndex: 50,
-          display: "flex", alignItems: "center", justifyContent: "center", padding: "16px",
-        }}>
-          <div style={{
-            background: "#1a1a1a", border: "1px solid rgba(38,242,208,0.2)",
-            borderRadius: "20px", padding: "24px", width: "100%", maxWidth: "360px",
-          }}>
+<div style={{
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.6)",
+  backdropFilter: "blur(6px)",
+  zIndex: 50,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "16px",
+  animation: "fadeIn 0.2s ease",
+}}>
+      <div style={{
+        background: "#1a1a1a",
+        border: "1px solid rgba(38,242,208,0.2)",
+        borderRadius: "20px",
+        padding: "20px",
+        width: "100%",
+        maxWidth: "380px",
+        animation: "popupBounce 0.35s ease",
+      }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
               <div style={{
                 width: "44px", height: "44px", borderRadius: "14px",
@@ -408,24 +445,37 @@ const isUnlocked = confirmedCount >= halfMembers && !!club.presidentRoll;
               display: "flex", gap: "8px", alignItems: "flex-start",
             }}>
               <AlertCircle size={13} style={{ color: "#f59e0b", flexShrink: 0, marginTop: "1px" }} />
-              <p style={{ fontSize: "11px", color: "#fcd34d", lineHeight: 1.6 }}>
-                Designed to take <strong>{confirmComplete.minDaysToComplete}–{confirmComplete.maxDaysExpected} days</strong> of real work.
-                Only mark complete if your team genuinely finished it. The next activity unlocks immediately after.
-              </p>
+<p style={{ fontSize: "11px", color: "#fcd34d", lineHeight: 1.6 }}>
+{confirmComplete.warning === "LOCKED" && "🔒 This activity is not unlocked yet."}  {confirmComplete.warning === "TIME" && 
+    `⏳ Requires ${confirmComplete.minDaysToComplete} days before completion.`}
+  {!confirmComplete.warning && 
+    `Designed to take ${confirmComplete.minDaysToComplete}–${confirmComplete.maxDaysExpected} days.`}
+</p>
             </div>
 
             <div style={{ display: "flex", gap: "8px" }}>
               <button onClick={() => setConfirmComplete(null)} style={{
-                flex: 1, padding: "10px", borderRadius: "12px",
+                flex: 1, padding: "14px", borderRadius: "12px",
                 background: "rgba(255,255,255,0.08)", color: "#9ca3af",
                 border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600,
               }}>Cancel</button>
-              <button onClick={handleCompleteConfirm} style={{
-                flex: 1, padding: "10px", borderRadius: "12px",
-                background: "rgba(34,197,94,0.2)", color: "#22c55e",
-                border: "1px solid rgba(34,197,94,0.3)",
-                cursor: "pointer", fontSize: "13px", fontWeight: 700,
-              }}>Yes, Complete ✓</button>
+<button
+  onClick={handleCompleteConfirm}
+  disabled={!!confirmComplete.warning}
+  style={{
+    flex: 1,
+    padding: "14px",
+    borderRadius: "12px",
+    background: confirmComplete.warning ? "rgba(255,255,255,0.1)" : "rgba(34,197,94,0.2)",
+    color: confirmComplete.warning ? "#6b7280" : "#22c55e",
+    border: "1px solid rgba(34,197,94,0.3)",
+    cursor: confirmComplete.warning ? "not-allowed" : "pointer",
+    fontSize: "13px",
+    fontWeight: 700,
+  }}
+>
+  {confirmComplete.warning ? "Blocked" : "Yes, Complete ✓"}
+</button>
             </div>
           </div>
         </div>
@@ -595,21 +645,45 @@ const isUnlocked = confirmedCount >= halfMembers && !!club.presidentRoll;
                         <Lock size={18} style={{ color: "#374151" }} />
                       ) : presidentSeeCircle ? (
                         // President sees circle — clickable only if time met
-                        <button
-                          onClick={() => presidentCanComplete ? handleCompleteClick(activity) : handleCompleteClick(activity)}
-                          disabled={completing === activity.id}
-                          title={presidentCanComplete ? "Mark complete" : `${Math.ceil(daysLeft)}d remaining`}
-                          style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                          {completing === activity.id ? (
-                            <div style={{
-                              width: "18px", height: "18px", borderRadius: "50%",
-                              border: `2px solid ${risk.color}`, borderTopColor: "transparent",
-                              animation: "spin 0.8s linear infinite",
-                            }} />
-                          ) : (
-                            <Circle size={18} style={{ color: presidentCanComplete ? risk.color : "#4b5563" }} />
-                          )}
-                        </button>
+                          <button
+                            onClick={() => {
+                              playClickSound(); // 🔊 sound
+
+                              // 🔒 not unlocked
+                              if (!activity.availableFrom) {
+                                setConfirmComplete({
+                                  ...activity,
+                                  warning: "LOCKED"
+                                });
+                                return;
+                              }
+
+                              // ⏳ time not completed
+                              if (!presidentCanComplete) {
+                                setConfirmComplete({
+                                  ...activity,
+                                  warning: "TIME"
+                                });
+                                return;
+                              }
+
+                              // ✅ valid → normal flow
+                              handleCompleteClick(activity);
+                            }}
+                            disabled={completing === activity.id}
+                            title={presidentCanComplete ? "Mark complete" : `${Math.ceil(daysLeft)}d remaining`}
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                          >
+                            {completing === activity.id ? (
+                              <div style={{
+                                width: "18px", height: "18px", borderRadius: "50%",
+                                border: `2px solid ${risk.color}`, borderTopColor: "transparent",
+                                animation: "spin 0.8s linear infinite",
+                              }} />
+                            ) : (
+                              <Circle size={18} style={{ color: presidentCanComplete ? risk.color : "#4b5563" }} />
+                            )}
+                          </button>
                       ) : (
                         // Regular member / other — just show gray circle, no click
                         <Circle size={18} style={{ color: "#374151" }} />
@@ -668,30 +742,101 @@ const isUnlocked = confirmedCount >= halfMembers && !!club.presidentRoll;
                         </p>
                       )}
 
-                      {/* Timeline row — only for non-locked non-completed */}
-                      {!isLocked && !isCompleted && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginTop: "4px" }}>
-                          {daysLeft !== null && daysLeft > 0 && (
-                            <span style={{ fontSize: "10px", color: "#f59e0b", display: "flex", alignItems: "center", gap: "3px" }}>
-                              <Clock size={9} /> {Math.ceil(daysLeft)}d until ready
-                              {isPresident && <span style={{ color: "#6b7280" }}> (president only)</span>}
-                            </span>
-                          )}
-                          {daysLeft !== null && daysLeft <= 0 && isPresident && (
-                            <span style={{ fontSize: "10px", color: "#22c55e", display: "flex", alignItems: "center", gap: "3px" }}>
-                              <CheckCircle2 size={9} /> Ready to complete
-                            </span>
-                          )}
-                          {isOver && (
-                            <span style={{ fontSize: "10px", color: "#f59e0b", fontWeight: 700, display: "flex", alignItems: "center", gap: "3px" }}>
-                              <AlertCircle size={9} /> {Math.ceil(daysOver)}d overdue
-                            </span>
-                          )}
-                          <span style={{ fontSize: "10px", color: "#374151" }}>
-                            {activity.minDaysToComplete || 7}–{activity.maxDaysExpected || 20}d window
-                          </span>
-                        </div>
-                      )}
+{/* Timeline row — only for non-locked non-completed */}
+{!isLocked && !isCompleted && (
+  <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginTop: "4px" }}>
+    {daysLeft !== null && daysLeft > 0 && (
+      <span style={{ fontSize: "10px", color: "#f59e0b", display: "flex", alignItems: "center", gap: "3px" }}>
+        <Clock size={9} /> {Math.ceil(daysLeft)}d until ready
+        {isPresident && <span style={{ color: "#6b7280" }}> (president only)</span>}
+      </span>
+    )}
+    {daysLeft !== null && daysLeft <= 0 && isPresident && (
+      <span style={{ fontSize: "10px", color: "#22c55e", display: "flex", alignItems: "center", gap: "3px" }}>
+        <CheckCircle2 size={9} /> Ready to complete
+      </span>
+    )}
+    {isOver && (
+      <span style={{ fontSize: "10px", color: "#f59e0b", fontWeight: 700, display: "flex", alignItems: "center", gap: "3px" }}>
+        <AlertCircle size={9} /> {Math.ceil(daysOver)}d overdue
+      </span>
+    )}
+    <span style={{ fontSize: "10px", color: "#374151" }}>
+      {activity.minDaysToComplete || 7}–{activity.maxDaysExpected || 20}d window
+    </span>
+  </div>
+)}
+
+{/* ✅ ADDED: President-only complete button with time warning */}
+{isPresident && isCurrent && !isCompleted && (
+    <div style={{ marginTop: "8px" }}>
+    <button
+onClick={() => {
+  // 🔒 BLOCK if not unlocked
+  if (!activity.availableFrom) {
+playClickSound();
+setConfirmComplete({
+  ...activity,
+  warning: "LOCKED" // or "TIME"
+});
+return;    return;
+  }
+
+  const availableDate = new Date(activity.availableFrom);
+  const daysPassed = Math.floor(
+    (new Date() - availableDate) / (1000 * 60 * 60 * 24)
+  );
+  const minDays = activity.minDaysToComplete || 7;
+
+  if (daysPassed < minDays) {
+playClickSound();
+setConfirmComplete({
+  ...activity,
+  warning: "LOCKED" // or "TIME"
+});
+return;
+    return;
+  }
+
+  handleCompleteClick(activity);
+}}
+      disabled={completing === activity.id}
+      style={{
+        width: "100%",
+        marginTop: "6px",
+        padding: "8px",
+        borderRadius: "10px",
+        background: "rgba(34,197,94,0.2)",
+        color: "#22c55e",
+        border: "1px solid rgba(34,197,94,0.3)",
+        fontSize: "12px",
+        fontWeight: 600,
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "6px",
+        opacity: completing === activity.id ? 0.6 : 1,
+      }}
+    >
+      <CheckCircle2 size={14} /> Mark as Completed
+    </button>
+
+    {/* Time Warning Label */}
+    <p
+      style={{
+        fontSize: "9px",
+        textAlign: "center",
+        marginTop: "4px",
+        color: "#6b7280",
+        textTransform: "uppercase",
+        letterSpacing: "0.5px",
+      }}
+    >
+      Backend locks this for {activity.minDaysToComplete || 7} days
+    </p>
+  </div>
+)}
 
                       {isLocked && (
                         <p style={{ fontSize: "10px", color: "#374151", marginTop: "2px", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -700,8 +845,8 @@ const isUnlocked = confirmedCount >= halfMembers && !!club.presidentRoll;
                       )}
 
                       {/* Vote row — members only */}
-                      {!isLocked && (isMember || isPending) && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "6px" }}>
+{!isLocked && isConfirmedMember && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "6px" }}>
                           <button onClick={() => handleVote(activity.id)} disabled={voting === activity.id}
                             style={{
                               display: "flex", alignItems: "center", gap: "4px",
@@ -776,7 +921,27 @@ const isUnlocked = confirmedCount >= halfMembers && !!club.presidentRoll;
         </p>
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
+<style>{`
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes popupBounce {
+  0% {
+    transform: scale(0.9) translateY(30px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.05) translateY(-6px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+`}</style>    </div>
   );
 }

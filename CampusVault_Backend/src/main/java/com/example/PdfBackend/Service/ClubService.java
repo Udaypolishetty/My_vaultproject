@@ -32,6 +32,12 @@ public class ClubService {
 
     // ─── ROLE HELPERS ────────────────────────────────────────────────
 
+    private void ensurePresident(Club club, String roll) {
+        if (club.getPresidentRoll() == null || !club.getPresidentRoll().equals(roll)) {
+            throw new ForbiddenException("Only president can perform this action");
+        }
+    }
+
     private boolean isAdminOrMod(String rollNumber) {
         return studentRepository.findByRollNumber(rollNumber)
             .map(s -> { String r = s.getRole() != null ? s.getRole().toString() : "";
@@ -43,6 +49,20 @@ public class ClubService {
             .map(s -> s.getRole() != null && s.getRole().toString().equals("ADMIN"))
             .orElse(false);
     }
+
+    // Check if a student is already a leader in any other club
+    private void validateSingleLeadership(String rollNumber) {
+    List<Club> allClubs = clubRepository.findAll();
+    for (Club club : allClubs) {
+        if (rollNumber.equals(club.getPresidentRoll())) {
+            throw new ForbiddenException("Student is already President of " + club.getTitle());
+        }
+        if (rollNumber.equals(club.getVpRoll())) {
+            throw new ForbiddenException("Student is already VP of " + club.getTitle());
+        }
+    }
+}
+
 
     // ─── ACTIVITY SEEDING WITH RISK LEVELS ───────────────────────────
 
@@ -71,8 +91,7 @@ public class ClubService {
             a.setRiskLevel(risk);
             a.setMinDaysToComplete(minDays);
             a.setMaxDaysExpected(maxDays);
-            // ✅ Activity 0 available immediately from semester start
-            // Activities 1+ will have availableFrom set when previous completes
+            // ✅ Activity availableFrom set to null initially
             a.setAvailableFrom(null);
             a.setCreatedAt(semesterStart);
             a.setVotes(new ArrayList<>());
@@ -84,7 +103,6 @@ public class ClubService {
     }
 
     // ─── TASK DEFINITIONS WITH RISK LEVELS ───────────────────────────
-    // Each entry: { title, description, riskLevel }
 
     private List<Object[]> getTasksForCategory(String category) {
         if (category == null) return getDefaultTasks();
@@ -314,6 +332,9 @@ public class ClubService {
         club.setMemberNicknames(new HashMap<>());
         club.setDailyAnnouncementCount(new HashMap<>());
         club.setActivities(seedActivities(request.getCategory(), rollNumber, admin.getName(), LocalDateTime.now()));
+        
+        // 🔒 no activity active initially
+        club.setCurrentActivityId(null); 
 
         Club saved = clubRepository.save(club);
         System.out.println("[ClubService] Created: " + saved.getTitle() + " with " + saved.getActivities().size() + " activities");
@@ -350,6 +371,27 @@ public class ClubService {
         return mapToResponse(club);
     }
 
+    public ClubResponse leaveClub(String clubId, String rollNumber) {
+    Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+    
+    // 1. Remove from members or pending
+    boolean removed = club.getMembers().remove(rollNumber);
+    if (!removed) {
+        club.getPendingMembers().removeIf(p -> p.getRollNumber().equals(rollNumber));
+    }
+
+    // 2. Clear Roles if they were leadership
+    if (rollNumber.equals(club.getPresidentRoll())) {
+        club.setPresidentRoll(null);
+        // Note: Admin will see the "Request President" button again on frontend
+    }
+    if (rollNumber.equals(club.getVpRoll())) {
+        club.setVpRoll(null);
+    }
+
+    return mapToResponse(clubRepository.save(club));
+}
+
     public ClubResponse renewSemester(String clubId, String rollNumber) {
         if (!isAdminOnly(rollNumber)) throw new ForbiddenException("Only admin can renew semester");
         Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
@@ -385,14 +427,33 @@ public class ClubService {
             if (pm != null) { club.getPendingMembers().remove(pm); club.getMembers().add(targetRoll); }
         }
         if ("PRESIDENT".equals(role)) {
+            validateSingleLeadership(targetRoll);
             club.setPresidentRoll(targetRoll);
             awardBadge(club, targetRoll, "CLUB_LEADER");
             notificationService.create(targetRoll, "👑 You are now President of \"" + club.getTitle() + "\"!", "CLUB_ROLE");
+            
+           
         } else if ("VP".equals(role)) {
             club.setVpRoll(targetRoll);
             awardBadge(club, targetRoll, "TEAM_PLAYER");
             notificationService.create(targetRoll, "🤝 You are now VP of \"" + club.getTitle() + "\"!", "CLUB_ROLE");
         }
+
+        // 🔥 FIX: set first activity when president assigned
+int confirmedMembers = club.getMembers().size();
+int needed = (int) Math.ceil(club.getMaxMembers() * 0.5);
+
+if (confirmedMembers >= needed && club.getCurrentActivityId() == null) {
+    if (!club.getActivities().isEmpty()) {
+        Club.ClubActivity first = club.getActivities().get(0);
+
+        if (first.getAvailableFrom() == null) {
+            first.setAvailableFrom(LocalDateTime.now());
+        }
+
+        club.setCurrentActivityId(first.getId());
+    }
+}
         club.getRoleRequests().stream()
             .filter(r -> r.getRequestedBy().equals(targetRoll) && r.getRole().equals(role) && "PENDING".equals(r.getStatus()))
             .forEach(r -> r.setStatus("APPROVED"));
@@ -420,20 +481,51 @@ public class ClubService {
             notificationService.create(p.getRollNumber(), "🎉 You are now confirmed in \"" + club.getTitle() + "\"!", "CLUB_CONFIRMED");
         }
         club.getPendingMembers().clear();
+        // 🔥 unlock first activity after members confirmed
+int confirmedMembers = club.getMembers().size();
+int needed = (int) Math.ceil(club.getMaxMembers() * 0.5);
+
+if (confirmedMembers >= needed && club.getPresidentRoll() != null && club.getCurrentActivityId() == null) {
+    Club.ClubActivity first = club.getActivities().get(0);
+
+    if (first.getAvailableFrom() == null) {
+        first.setAvailableFrom(LocalDateTime.now());
+    }
+
+    club.setCurrentActivityId(first.getId());
+}
         return mapToResponse(clubRepository.save(club));
     }
 
-    public ClubResponse adminConfirmOne(String clubId, String targetRoll, String adminRoll) {
-        if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator");
-        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
-        Club.PendingMember pm = club.getPendingMembers().stream()
-            .filter(p -> p.getRollNumber().equals(targetRoll)).findFirst()
-            .orElseThrow(() -> new NotFoundException("Not in pending"));
-        club.getPendingMembers().remove(pm);
-        club.getMembers().add(targetRoll);
-        notificationService.create(targetRoll, "🎉 You are now confirmed in \"" + club.getTitle() + "\"!", "CLUB_CONFIRMED");
-        return mapToResponse(clubRepository.save(club));
+public ClubResponse adminConfirmOne(String clubId, String rollNumber, String adminRoll) {
+    if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Access Denied");
+
+    Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+
+ 
+
+    // 3. Add to regular members list if not already there
+    if (!club.getMembers().contains(rollNumber)) {
+        club.getMembers().add(rollNumber);
     }
+    
+    // 4. Remove from pending list
+    club.getPendingMembers().removeIf(p -> p.getRollNumber().equals(rollNumber));
+    int confirmedMembers = club.getMembers().size();
+int needed = (int) Math.ceil(club.getMaxMembers() * 0.5);
+
+if (confirmedMembers >= needed && club.getPresidentRoll() != null && club.getCurrentActivityId() == null) {
+    Club.ClubActivity first = club.getActivities().get(0);
+
+    if (first.getAvailableFrom() == null) {
+        first.setAvailableFrom(LocalDateTime.now());
+    }
+
+    club.setCurrentActivityId(first.getId());
+}
+
+    return mapToResponse(clubRepository.save(club));
+}
 
     // ✅ Admin complete activity — bypasses all time checks
     public ClubResponse adminCompleteActivity(String clubId, String activityId, String adminRoll) {
@@ -443,17 +535,6 @@ public class ClubService {
             .filter(a -> a.getId().equals(activityId)).findFirst()
             .orElseThrow(() -> new NotFoundException("Activity not found"));
 
-
-            int confirmedCount = club.getMembers() != null ? club.getMembers().size() : 0;
-int halfMembers = (int) Math.ceil(club.getMaxMembers() * 0.5);
-
-if (confirmedCount < halfMembers) {
-    throw new ForbiddenException("Not enough confirmed members");
-}
-
-if (club.getPresidentRoll() == null) {
-    throw new ForbiddenException("President not assigned");
-}
         activity.setCompleted(true);
         activity.setCompletedAt(LocalDateTime.now());
         // ✅ unlock next activity
@@ -466,6 +547,7 @@ if (club.getPresidentRoll() == null) {
         if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Only admin/moderator");
         Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
         List<Club.ClubActivity> acts = club.getActivities();
+        club.setCurrentActivityId(activityId);
         for (int i = 0; i < acts.size(); i++) {
             if (acts.get(i).getId().equals(activityId)) {
                 acts.get(i).setCompleted(false);
@@ -526,10 +608,10 @@ if (club.getPresidentRoll() == null) {
 
     public ClubResponse presidentRemoveMember(String clubId, String targetRoll, String presidentRoll) {
         Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
-        if (!presidentRoll.equals(club.getPresidentRoll())) throw new ForbiddenException("Only President can remove members");
+        ensurePresident(club, presidentRoll);
         if (!club.isPending(targetRoll)) throw new ForbiddenException("President can only remove pending members");
         club.getPendingMembers().removeIf(p -> p.getRollNumber().equals(targetRoll));
-        notificationService.create(targetRoll, "❌ Removed from \"" + club.getTitle() + "\" during grace period.", "CLUB_REMOVED");
+        notificationService.create(targetRoll, "❌ Removed from \"" + club.getTitle() + "\".", "CLUB_REMOVED");
         return mapToResponse(clubRepository.save(club));
     }
 
@@ -562,6 +644,9 @@ if (club.getPresidentRoll() == null) {
         return mapToResponse(clubRepository.save(club));
     }
 
+
+
+
     // ─── ACTIVITY OPERATIONS ─────────────────────────────────────────
 
     // ✅ Helper: unlock next activity after completion
@@ -572,144 +657,145 @@ if (club.getPresidentRoll() == null) {
                 Club.ClubActivity next = acts.get(i + 1);
                 if (next.getAvailableFrom() == null) {
                     next.setAvailableFrom(LocalDateTime.now());
+                    club.setCurrentActivityId(next.getId());
                 }
                 break;
             }
         }
     }
-
 public ClubResponse completeActivity(String clubId, String activityId, String rollNumber) {
+
     Club club = clubRepository.findById(clubId)
         .orElseThrow(() -> new NotFoundException("Club not found"));
- 
-    if (!rollNumber.equals(club.getPresidentRoll()))
-        throw new ForbiddenException("Only the President can mark activities complete");
- 
+
+    // ✅ ONLY PRESIDENT
+    ensurePresident(club, rollNumber);
+
     int confirmedMembers = club.getMembers().size();
     int needed = (int) Math.ceil(club.getMaxMembers() * 0.5);
-    if (confirmedMembers < needed)
+
+    if (confirmedMembers < needed) {
         throw new ForbiddenException(
-            "Activities locked. Need " + needed + " confirmed members, currently have " + confirmedMembers + "."
+            "Activities locked. Need " + needed + " confirmed members, currently have " + confirmedMembers
         );
- 
-    // ✅ find the activity and its index
+    }
+
+    // ✅ GET ACTIVITIES FIRST (FIX 1)
     List<Club.ClubActivity> acts = club.getActivities();
-    Club.ClubActivity activity = null;
-    int actIdx = -1;
+
+    Club.ClubActivity activity = acts.stream()
+        .filter(a -> a.getId().equals(activityId))
+        .findFirst()
+        .orElseThrow(() -> new NotFoundException("Activity not found"));
+
+    // 🔥 FIX: SET FIRST ACTIVITY BEFORE ANY CHECK
+    if (club.getCurrentActivityId() == null) {
+        if (confirmedMembers >= needed && club.getPresidentRoll() != null) {
+            Club.ClubActivity first = acts.get(0);
+
+            if (first.getAvailableFrom() == null) {
+                first.setAvailableFrom(LocalDateTime.now());
+            }
+
+            club.setCurrentActivityId(first.getId());
+        }
+    }
+
+    // 🔒 BLOCK if NOT unlocked (NOW SAFE)
+    if (activity.getAvailableFrom() == null) {
+        throw new ForbiddenException("This activity is not unlocked yet");
+    }
+
+    // ✅ SEQUENCE CHECK
+    Club.ClubActivity current = club.getCurrentActivity();
+    if (current == null || !current.getId().equals(activityId)) {
+        throw new ForbiddenException("You must complete activities in order");
+    }
+
+    // ✅ PREVIOUS ACTIVITY CHECK
     for (int i = 0; i < acts.size(); i++) {
         if (acts.get(i).getId().equals(activityId)) {
-            activity = acts.get(i);
-            actIdx = i;
+            if (i > 0 && !acts.get(i - 1).isCompleted()) {
+                throw new ForbiddenException("Complete previous activity first");
+            }
             break;
         }
     }
-    if (activity == null) throw new NotFoundException("Activity not found");
-    if (activity.isCompleted()) throw new ForbiddenException("Already completed");
- 
-    // ✅ SEQUENTIAL CHECK — must complete in order
-    // Every activity before this one must be completed
-    for (int i = 0; i < actIdx; i++) {
-        if (!acts.get(i).isCompleted()) {
-            throw new ForbiddenException(
-                "Complete \"" + acts.get(i).getTitle() + "\" first. Activities must be done in order."
-            );
-        }
+
+    if (activity.isCompleted()) {
+        throw new ForbiddenException("Already completed");
     }
- 
-    // ✅ AVAILABILITY CHECK — handle old clubs where availableFrom may be null
-    // If availableFrom is null, auto-fix it now (migration fix for old clubs)
-    if (activity.getAvailableFrom() == null) {
-        if (actIdx == 0) {
-            // First activity — available from semester start
-            activity.setAvailableFrom(
-                club.getSemesterStartDate() != null ? club.getSemesterStartDate() : club.getCreatedAt()
-            );
-        } else {
-            // Previous activity was completed — set availableFrom to when it completed
-            Club.ClubActivity prev = acts.get(actIdx - 1);
-            activity.setAvailableFrom(
-                prev.getCompletedAt() != null ? prev.getCompletedAt() : LocalDateTime.now().minusDays(1)
-            );
-        }
-        // save the fix immediately so it persists
-        clubRepository.save(club);
-    }
- 
-    // ✅ MINIMUM DAYS CHECK — must have waited long enough since availableFrom
-    long daysAvailable = java.time.Duration.between(activity.getAvailableFrom(), LocalDateTime.now()).toDays();
+
+    // ✅ TIME CHECK
+    long daysPassed = java.time.Duration.between(
+        activity.getAvailableFrom(),
+        LocalDateTime.now()
+    ).toDays();
+
     int minDays = activity.getMinDaysToComplete() > 0 ? activity.getMinDaysToComplete() : 7;
- 
-    if (daysAvailable < minDays) {
-        long daysLeft = minDays - daysAvailable;
+    int maxDays = activity.getMaxDaysExpected() > 0 ? activity.getMaxDaysExpected() : 30;
+
+    if (daysPassed > maxDays) {
+        throw new ForbiddenException("Activity expired. Maximum time exceeded.");
+    }
+
+    if (daysPassed < minDays) {
+        long daysLeft = minDays - daysPassed;
         throw new ForbiddenException(
-            "This activity needs " + daysLeft + " more day" + (daysLeft == 1 ? "" : "s") +
-            " before it can be marked complete. " +
-            "It is designed to take " + minDays + "–" + (activity.getMaxDaysExpected() > 0 ? activity.getMaxDaysExpected() : minDays + 7) +
-            " days of real work."
+            "Activity duration not completed. Need " + daysLeft + " more day(s)."
         );
     }
 
-    // ✅ ADD BEFORE completion
-int confirmedCount = club.getMembers() != null ? club.getMembers().size() : 0;
-int halfMembers = (int) Math.ceil(club.getMaxMembers() * 0.5);
-
-if (confirmedCount < halfMembers) {
-    throw new ForbiddenException("Not enough confirmed members to unlock activities");
-}
-
-if (club.getPresidentRoll() == null) {
-    throw new ForbiddenException("President not assigned yet");
-}
- 
-    // ✅ COMPLETE IT
+    // ✅ COMPLETE
     activity.setCompleted(true);
     activity.setCompletedAt(LocalDateTime.now());
- 
-    // ✅ unlock next activity
+
+    // ✅ UNLOCK NEXT
     unlockNextActivity(club, activity);
- 
-    long completedCount = club.getActivities().stream().filter(Club.ClubActivity::isCompleted).count();
- 
-    for (String r : club.getMembers())
+
+    long completedCount = club.getActivities().stream()
+        .filter(Club.ClubActivity::isCompleted)
+        .count();
+
+    for (String r : club.getMembers()) {
         notificationService.create(r,
             "✅ \"" + activity.getTitle() + "\" completed! (" + completedCount + "/" + club.getActivities().size() + ")",
             "CLUB_ACTIVITY_DONE");
- 
-    if (completedCount == 5)
-        for (String r : club.getMembers()) awardBadge(club, r, "ACTIVE_CONTRIBUTOR");
- 
+    }
+
+    if (completedCount == 5) {
+        for (String r : club.getMembers()) {
+            awardBadge(club, r, "ACTIVE_CONTRIBUTOR");
+        }
+    }
+
     return mapToResponse(clubRepository.save(club));
 }
+
 
 public void backdateActivitiesForTesting(String clubId, String adminRoll) {
     if (!isAdminOrMod(adminRoll)) throw new ForbiddenException("Admin only");
     Club club = clubRepository.findById(clubId)
         .orElseThrow(() -> new NotFoundException("Club not found"));
  
-    // backdate semester start by 15 days first
     LocalDateTime backdatedStart = club.getSemesterStartDate() != null
         ? club.getSemesterStartDate().minusDays(15)
         : LocalDateTime.now().minusDays(15);
     club.setSemesterStartDate(backdatedStart);
  
-    // ✅ use index-based loop — indexOf is unreliable on embedded objects
     List<Club.ClubActivity> acts = club.getActivities();
     for (int i = 0; i < acts.size(); i++) {
         Club.ClubActivity a = acts.get(i);
-        // backdate createdAt
         if (a.getCreatedAt() != null)
             a.setCreatedAt(a.getCreatedAt().minusDays(15));
         else
             a.setCreatedAt(backdatedStart);
  
-        // for activity 0: set availableFrom to backdated semester start
         if (i == 0) {
             a.setAvailableFrom(backdatedStart);
         } else if (a.getAvailableFrom() != null) {
-            // backdate existing availableFrom
             a.setAvailableFrom(a.getAvailableFrom().minusDays(15));
         }
-        // activities with null availableFrom (locked) stay null — correct
     }
  
     clubRepository.save(club);
@@ -720,9 +806,13 @@ public void backdateActivitiesForTesting(String clubId, String adminRoll) {
 
     public ClubResponse addExtraActivity(String clubId, String title, String description, String rollNumber) {
         Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
-        if (!rollNumber.equals(club.getPresidentRoll())) throw new ForbiddenException("Only President can add activities");
+        
+        // ✅ ONLY PRESIDENT CHECK
+        ensurePresident(club, rollNumber);
+
         if (!club.isActivityUnlocked()) throw new ForbiddenException("Activities locked at 50% membership");
         if (club.getExtraActivities() >= MAX_EXTRA_ACTIVITIES) throw new ForbiddenException("Maximum 3 extra activities allowed");
+        
         StudentProfile s = studentRepository.findByRollNumber(rollNumber).orElseThrow(() -> new NotFoundException("Not found"));
         Club.ClubActivity a = new Club.ClubActivity();
         a.setId(UUID.randomUUID().toString());
@@ -736,8 +826,7 @@ public void backdateActivitiesForTesting(String clubId, String adminRoll) {
         a.setRiskLevel("MEDIUM");
         a.setMinDaysToComplete(10);
         a.setMaxDaysExpected(20);
-        // extra activities are appended — they unlock after all previous are done
-        a.setAvailableFrom(null); // will be set when previous completes
+        a.setAvailableFrom(null); 
         a.setCreatedAt(LocalDateTime.now());
         a.setVotes(new ArrayList<>());
         club.getActivities().add(a);
@@ -750,7 +839,12 @@ public void backdateActivitiesForTesting(String clubId, String adminRoll) {
 
     public ClubResponse voteActivity(String clubId, String activityId, String rollNumber) {
         Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
-        if (!club.isAnyMember(rollNumber)) throw new ForbiddenException("Only members can vote");
+        
+        // ✅ Member voting restriction
+        if (!club.getMembers().contains(rollNumber)) {
+            throw new ForbiddenException("Only confirmed members can vote");
+        }
+        
         Club.ClubActivity activity = club.getActivities().stream()
             .filter(a -> a.getId().equals(activityId)).findFirst()
             .orElseThrow(() -> new NotFoundException("Activity not found"));
@@ -759,11 +853,14 @@ public void backdateActivitiesForTesting(String clubId, String adminRoll) {
         return mapToResponse(clubRepository.save(club));
     }
 
+
+ 
+
     // ─── PRESIDENT EDIT ──────────────────────────────────────────────
 
     public ClubResponse presidentEditClub(String clubId, String description, String rollNumber) {
         Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
-        if (!rollNumber.equals(club.getPresidentRoll())) throw new ForbiddenException("Only President can edit");
+        ensurePresident(club, rollNumber);
         if (club.getEditCount() >= MAX_EDIT_COUNT) throw new ForbiddenException("Maximum 3 edits per semester");
         if (description != null && !description.trim().isEmpty()) {
             club.setDescription(description.trim());
@@ -774,7 +871,7 @@ public void backdateActivitiesForTesting(String clubId, String adminRoll) {
 
     public ClubResponse setNickname(String clubId, String targetRoll, String nickname, String presidentRoll) {
         Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
-        if (!presidentRoll.equals(club.getPresidentRoll())) throw new ForbiddenException("Only President can set nicknames");
+        ensurePresident(club, presidentRoll);
         if (!club.isAnyMember(targetRoll)) throw new ForbiddenException("Not a member");
         if (nickname == null || nickname.trim().isEmpty()) { club.getMemberNicknames().remove(targetRoll); }
         else {
@@ -786,15 +883,24 @@ public void backdateActivitiesForTesting(String clubId, String adminRoll) {
         return mapToResponse(clubRepository.save(club));
     }
 
+
+ 
+
     // ─── ANNOUNCEMENTS ───────────────────────────────────────────────
 
     public ClubResponse addAnnouncement(String clubId, String title, String content, String rollNumber) {
-        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
-        boolean isLeader = rollNumber.equals(club.getPresidentRoll()) || rollNumber.equals(club.getVpRoll());
-        if (!isLeader) throw new ForbiddenException("Only President or VP can post announcements");
+    Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+    
+    // Only President, VP, or Admin/Mod
+    boolean isLeadership = rollNumber.equals(club.getPresidentRoll()) || rollNumber.equals(club.getVpRoll());
+    if (!isLeadership && !isAdminOrMod(rollNumber)) {
+        throw new ForbiddenException("Members cannot post announcements");
+    }
+
         String dateKey = LocalDate.now() + ":" + rollNumber;
         int count = club.getDailyAnnouncementCount().getOrDefault(dateKey, 0);
         if (count >= MAX_DAILY_ANNOUNCEMENTS) throw new ForbiddenException("Max 2 announcements per day");
+        
         StudentProfile s = studentRepository.findByRollNumber(rollNumber).orElseThrow(() -> new NotFoundException("Not found"));
         Club.ClubAnnouncement ann = new Club.ClubAnnouncement(
             UUID.randomUUID().toString(), title.trim(), content.trim(), rollNumber, s.getName(), false, LocalDateTime.now());
@@ -880,6 +986,8 @@ public ClubResponse pinAnnouncement(String clubId, String annId, String rollNumb
         };
     }
 
+
+  
     // ─── MAP TO RESPONSE ──────────────────────────────────────────────
 
     private ClubResponse mapToResponse(Club club) {
@@ -913,7 +1021,6 @@ public ClubResponse pinAnnouncement(String clubId, String annId, String rollNumb
         res.setActivityUnlocked(club.isActivityUnlocked());
         res.setMemberNicknames(club.getMemberNicknames());
 
-        // current activity id for frontend highlighting
         Club.ClubActivity current = club.getCurrentActivity();
         if (current != null) res.setCurrentActivityId(current.getId());
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Trash2, Plus, Crown, X, Check, Pencil, RotateCcw,
   AlertTriangle, Users, ChevronLeft, ClipboardList,
-  MessageSquare, Search, Eye, RefreshCw, Megaphone
+  MessageSquare, Search, Eye, RefreshCw, Megaphone,Handshake
 } from "lucide-react";
 import { PREDEFINED_CLUBS, STATUS_COLORS, ClubIcon, call } from "./AdminClubShared";
 import AdminClubActivities from "./AdminClubActivities";
@@ -416,7 +416,11 @@ export default function AdminClubs({ clubs, loading, onDelete, onRefresh }) {
             {(club.presidentName || club.vpName) && (
               <div className="flex gap-3 mb-3 text-xs flex-wrap">
                 {club.presidentName && <span className="text-purple-400 flex items-center gap-1"><Crown size={10} /> {club.presidentName}</span>}
-                {club.vpName && <span className="text-blue-400">🤝 {club.vpName}</span>}
+                {club.vpName && (
+  <span className="text-blue-400 flex items-center gap-1">
+    <Handshake size={10} /> {club.vpName}
+  </span>
+)}
               </div>
             )}
 

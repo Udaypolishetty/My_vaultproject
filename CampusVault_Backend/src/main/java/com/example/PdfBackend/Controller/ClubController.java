@@ -276,4 +276,12 @@ public ResponseEntity<String> backdateActivities(
     clubService.backdateActivitiesForTesting(clubId, userDetails.getUsername());
     return ResponseEntity.ok("Backdated 15 days for testing");
 }
+
+// ADD TO ClubController.java
+@PostMapping("/{clubId}/leave")
+public ResponseEntity<ClubResponse> leaveClub(
+        @PathVariable String clubId,
+        @AuthenticationPrincipal UserDetails userDetails) {
+    return ResponseEntity.ok(clubService.leaveClub(clubId, userDetails.getUsername()));
+}
 }

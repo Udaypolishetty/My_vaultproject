@@ -3,7 +3,7 @@ import ClubMembers from "./ClubMembers";
 import ClubActivities from "./ClubActivities";
 import ClubAnnouncements from "./ClubAnnouncements";
 import ClubChat from "./ClubChat";
-import { Crown, UserCheck, Pencil, Check, X, Users, ClipboardList, Hourglass, Handshake, Leaf, Zap, Trophy,Bot,Printer,Code2,Cog,Rocket,Star,Music2,Mic2,Camera,Megaphone,MessageSquare } from "lucide-react";
+import { Crown, UserCheck, Pencil, Check, X, Users, ClipboardList, GraduationCap,Hourglass, Handshake, Leaf, Zap, Trophy,Bot,Printer,Code2,Cog,Rocket,Star,Music2,Mic2,Camera,Megaphone,MessageSquare } from "lucide-react";
 
 const CLUB_ICONS = {
     AI:               <Bot size={22} className="text-purple-400" />,
@@ -39,7 +39,7 @@ const TABS = [
 ];
 
 const BADGE_CONFIG = {
-  EARLY_MEMBER: { icon: <Leaf size={13} />, label: "Early Member" },
+  EARLY_MEMBER: { icon: <GraduationCap size={13} />, label: "Early Member" },
   ACTIVE_CONTRIBUTOR: { icon: <Zap size={13} />, label: "Active Contributor" },
   CLUB_LEADER: { icon: <Crown size={13} />, label: "Club Leader" },
   ALL_STAR: { icon: <Trophy size={13} />, label: "All-Star" },
@@ -56,6 +56,7 @@ function SingleClubPanel({ club, myRoll, myName, token, onUpdate }) {
   const [descValue, setDescValue] = useState(club.description || "");
   const [savingDesc, setSavingDesc] = useState(false);
   const [descError, setDescError] = useState("");
+  const [leaveStep, setLeaveStep] = useState(0);
 
   const accent = CATEGORY_ACCENT[club.category] || { from: "#26F2D0", to: "#0891b2", glow: "rgba(38,242,208,0.2)" };
   const isPresident = myRoll === club.presidentRoll;
@@ -101,6 +102,18 @@ function SingleClubPanel({ club, myRoll, myName, token, onUpdate }) {
     } finally { setSavingDesc(false); }
   };
 
+  const handleLeave = async () => {
+    try {
+        const res = await fetch(`${API_BASE}/api/clubs/${club.id}/leave`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            onUpdate(); // Refresh the UI
+        }
+    } catch (err) { console.error(err); }
+};
+
   return (
     <div style={{
       flex: 1, minWidth: 0,
@@ -111,6 +124,25 @@ function SingleClubPanel({ club, myRoll, myName, token, onUpdate }) {
       boxShadow: `0 0 40px ${accent.glow}, inset 0 1px 0 rgba(255,255,255,0.05)`,
       display: "flex", flexDirection: "column",
     }}>
+
+      <div className="absolute top-4 right-4 z-10">
+    {leaveStep === 0 ? (
+        <button onClick={() => setLeaveStep(1)} className="text-[10px] text-gray-500 hover:text-red-400 uppercase tracking-widest font-bold">
+            Leave Club
+        </button>
+    ) : (
+        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 p-1 rounded-lg">
+            <span className="text-[10px] text-red-400 px-1">{leaveStep === 1 ? "Are you sure?" : "Lose all badges?"}</span>
+            <button 
+                onClick={leaveStep === 1 ? () => setLeaveStep(2) : handleLeave}
+                className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded shadow-lg font-bold"
+            >
+                YES
+            </button>
+            <button onClick={() => setLeaveStep(0)} className="text-gray-400"><X size={12}/></button>
+        </div>
+    )}
+</div>
 
       {/* Top accent line */}
       <div style={{

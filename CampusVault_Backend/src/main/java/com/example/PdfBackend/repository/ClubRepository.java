@@ -32,4 +32,5 @@ public interface ClubRepository extends MongoRepository<Club, String> {
     List<Club> findByStatus(String status);
     long countByMembersContaining(String rollNumber);
     boolean existsByTitle(String title);
+    List<Club> findByMembersContaining(String rollNumber);
 }

@@ -467,9 +467,133 @@
 // export default Home;
 
 
+
+
+
+//old...
+
+// import { useState, useEffect } from "react";
+// import { Trophy } from "lucide-react";
+// import HomeIdeaCard from "./HomeIdeaCard";
+// import HomeAIAdvisor from "./HomeAIAdvisor";
+
+// const Home = () => {
+
+//   const [count, setCount] = useState(0);
+//   const [ideasCount, setIdeasCount] = useState(0);
+//   const [showcase, setShowcase] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   const token = sessionStorage.getItem("token");
+//   const role = sessionStorage.getItem("role");
+
+//   const isModerator = role === "MODERATOR" || role === "ADMIN";
+
+//   useEffect(() => {
+
+//     fetch("http://localhost:8081/student/count")
+//       .then(res => res.json())
+//       .then(data => setCount(data))
+//       .finally(() => setLoading(false));
+
+//     fetch("http://localhost:8081/api/ideas")
+//       .then(res => res.json())
+//       .then(data => setIdeasCount(data.length));
+
+//     fetch("http://localhost:8081/api/ideas/showcase")
+//       .then(res => res.json())
+//       .then(data => setShowcase(data));
+
+//   }, []);
+
+//   const formatDate = (dt) => {
+//     return new Date(dt).toLocaleDateString("en-IN", {
+//       month: "short",
+//       year: "numeric",
+//     });
+//   };
+
+//   return (
+//     <section className="min-h-screen flex flex-col items-center text-center px-6 bg-[#181818] text-white pt-16 pb-20">
+
+//       <h1 className="text-4xl md:text-6xl font-bold mb-8">
+//         Sharing <span className="text-[#457B9D]">Resources</span>.
+//         <br />
+//         Building <span className="text-[#F4A261]">Community</span>.
+//       </h1>
+
+//       {/* Stats */}
+
+//       <div className="grid grid-cols-2 gap-6 max-w-xl w-full mb-16">
+
+//         <div className="bg-[#232323] rounded-xl p-6">
+//           <h2 className="text-2xl font-bold">
+//             {loading ? "—" : `${count}+`}
+//           </h2>
+
+//           <p className="text-gray-400 text-sm">
+//             Active Members
+//           </p>
+//         </div>
+
+//         <div className="bg-[#232323] rounded-xl p-6">
+//           <h2 className="text-2xl font-bold">
+//             {ideasCount}+
+//           </h2>
+
+//           <p className="text-gray-400 text-sm">
+//             Ideas Shared
+//           </p>
+//         </div>
+
+//       </div>
+
+//       {showcase.length > 0 && (
+
+//         <div className="w-full max-w-5xl">
+
+//           <div className="flex items-center gap-3 mb-6 justify-center">
+//             <Trophy size={20} className="text-yellow-400" />
+//             <h2 className="text-xl font-bold">
+//               Ideas That Made It Happen
+//             </h2>
+//           </div>
+
+//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+//          {showcase.map(idea => (
+//   <HomeIdeaCard
+//     key={idea.id}
+//     idea={idea}
+//     token={token}
+//     isModerator={isModerator}
+//     formatDate={formatDate}
+//     onDeleted={(id) =>
+//       setShowcase(prev => prev.filter(i => i.id !== id))
+//     }
+//   />
+  
+// ))}
+//           </div>
+
+//         </div>
+
+//       )}
+// <HomeAIAdvisor token={token} />
+
+//     </section>
+    
+//   );
+// };
+// export default Home;
+
+
+
 import { useState, useEffect } from "react";
 import { Trophy } from "lucide-react";
 import HomeIdeaCard from "./HomeIdeaCard";
+import HomeAIAdvisor from "./HomeAIAdvisor";
+import HomeClub from "./HomeClub";
 
 const Home = () => {
 
@@ -510,37 +634,41 @@ const Home = () => {
   return (
     <section className="min-h-screen flex flex-col items-center text-center px-6 bg-[#181818] text-white pt-16 pb-20">
 
-      <h1 className="text-4xl md:text-6xl font-bold mb-8">
-        Sharing <span className="text-[#457B9D]">Resources</span>.
-        <br />
-        Building <span className="text-[#F4A261]">Community</span>.
-      </h1>
+<h1 className="text-4xl md:text-6xl font-bold mb-4">
+  WELCOME back {sessionStorage.getItem("name") || "Student"}!
+</h1>
 
-      {/* Stats */}
+<p className="text-lg md:text-2xl text-gray-300">
+  Sharing Resources.
+</p>
+<p className="text-lg md:text-2xl text-gray-300 mb-6">
+  Building Community.
+</p>
 
-      <div className="grid grid-cols-2 gap-6 max-w-xl w-full mb-16">
+{/* ✅ AI BUTTON (CENTERED) */}
+<div className="flex justify-center mb-10">
+  <HomeAIAdvisor token={token} />
+</div>
+<div className="grid grid-cols-2 gap-6 max-w-xl w-full mb-16">
 
-        <div className="bg-[#232323] rounded-xl p-6">
-          <h2 className="text-2xl font-bold">
-            {loading ? "—" : `${count}+`}
-          </h2>
+  <div className="bg-[#232323] rounded-xl p-6 border border-white/10">
+    <h2 className="text-2xl font-bold">
+      {loading ? "—" : `${count}+`}
+    </h2>
+    <p className="text-gray-400 text-sm">Active Members</p>
+  </div>
 
-          <p className="text-gray-400 text-sm">
-            Active Members
-          </p>
-        </div>
+  <div className="bg-[#232323] rounded-xl p-6 border border-white/10">
+    <h2 className="text-2xl font-bold">
+      {ideasCount}+
+    </h2>
+    <p className="text-gray-400 text-sm">Ideas Shared</p>
+  </div>
 
-        <div className="bg-[#232323] rounded-xl p-6">
-          <h2 className="text-2xl font-bold">
-            {ideasCount}+
-          </h2>
+</div>
+      {/* ✅ UPDATED STATS + AI LAYOUT */}
 
-          <p className="text-gray-400 text-sm">
-            Ideas Shared
-          </p>
-        </div>
 
-      </div>
 
       {showcase.length > 0 && (
 
@@ -555,24 +683,28 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
-         {showcase.map(idea => (
-  <HomeIdeaCard
-    key={idea.id}
-    idea={idea}
-    token={token}
-    isModerator={isModerator}
-    formatDate={formatDate}
-    onDeleted={(id) =>
-      setShowcase(prev => prev.filter(i => i.id !== id))
-    }
-  />
-))}
+            {showcase.map(idea => (
+              <HomeIdeaCard
+                key={idea.id}
+                idea={idea}
+                token={token}
+                isModerator={isModerator}
+                formatDate={formatDate}
+                onDeleted={(id) =>
+                  setShowcase(prev => prev.filter(i => i.id !== id))
+                }
+              />
+            ))}
+
           </div>
 
         </div>
 
       )}
 
+      {/* ❌ REMOVED OLD POSITION */}
+      {/* <HomeAIAdvisor token={token} /> */}
+    <HomeClub />
     </section>
   );
 };

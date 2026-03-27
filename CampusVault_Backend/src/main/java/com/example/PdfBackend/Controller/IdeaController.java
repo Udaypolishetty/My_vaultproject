@@ -136,4 +136,7 @@ public class IdeaController {
     public ResponseEntity<List<Idea>> getShowcase() {
         return ResponseEntity.ok(ideaService.getShowcase());
     }
+    
+
+
 }

@@ -14,4 +14,5 @@ public interface IdeaRepository extends MongoRepository<Idea, String> {
     boolean existsByCreatedByIdAndCreatedAtBetween(String createdById, LocalDateTime start, LocalDateTime end); // ✅ added
 
      List<Idea> findTop3ByCreatedByRollNumberOrderByCreatedAtDesc(String rollNumber);
+     List<Idea> findByShowcasedTrue();
 }

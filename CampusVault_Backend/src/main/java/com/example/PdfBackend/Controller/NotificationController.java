@@ -6,9 +6,14 @@ import com.example.PdfBackend.Service.NotificationService;
 import com.example.PdfBackend.model.Notification;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 
 import java.util.List;
 import java.util.Map;
@@ -78,5 +83,49 @@ public class NotificationController {
             @PathVariable String id,
             Authentication auth) {
         notificationService.deleteNotification(id, auth.getName());
+    }
+
+@PostMapping("/broadcast")
+public ResponseEntity<Void> broadcast(
+        @RequestBody Map<String, String> body,
+        @AuthenticationPrincipal UserDetails userDetails) {
+
+    notificationService.broadcastToAdmins(
+        body.get("message"),
+        body.get("type")
+    );
+
+    notificationService.broadcastToMods(
+        body.get("message"),
+        body.get("type")
+    );
+
+    return ResponseEntity.ok().build();
+}
+
+
+
+      // ✅ Admins get full message (with contact info)
+    @PostMapping("/broadcast-admin")
+    public ResponseEntity<Void> broadcastAdmin(
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        notificationService.broadcastToAdmins(
+            body.get("message"),
+            body.get("type")
+        );
+        return ResponseEntity.ok().build();
+    }
+ 
+    // ✅ Moderators get limited message (name + roll only)
+    @PostMapping("/broadcast-mod")
+    public ResponseEntity<Void> broadcastMod(
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        notificationService.broadcastToMods(
+            body.get("message"),
+            body.get("type")
+        );
+        return ResponseEntity.ok().build();
     }
 }

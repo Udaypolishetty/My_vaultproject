@@ -763,6 +763,7 @@ import { Trophy, Users, Lightbulb, Layers } from "lucide-react";
 import HomeIdeaCard from "./HomeIdeaCard";
 import HomeAIAdvisor from "./HomeAIAdvisor";
 import HomeClub from "./HomeClub";
+import Footer from "./FooterFiles/Footer"
 
 
 const Home = () => {
@@ -856,196 +857,194 @@ useEffect(() => {
     setShowcase(prev => prev.filter(i => i.id !== id));
   }, []);
 
-  return (
- <section className="min-h-screen flex flex-col items-center text-center px-6 bg-[#181818] text-white pt-16 pb-24 relative overflow-hidden z-10">
-    
-    {/* 🔥 PREMIUM 3D ANIMATED BACKGROUND - Same as About */}
-<style>{`
-  @import url('https://fonts.googleapis.com/css2?family=New+Rocker&display=swap');
-
-  .font-rocker {
-    font-family: 'New Rocker', system-ui;
-    letter-spacing: 0.5px; /* keep tight */
-  }
-
-  @keyframes float-slow {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    33% { transform: translate(30px, -50px) rotate(10deg); }
-    66% { transform: translate(-20px, 20px) rotate(-10deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
-  }
-
-  @keyframes pulse-glow {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(1.2); }
-  }
-
-  .animate-float { animation: float-slow 15s infinite ease-in-out; }
-  .animate-pulse-slow { animation: pulse-glow 8s infinite ease-in-out; }
-
-  @media (max-width: 640px) {
-    .mobile-safe-bg > * { 
-      transform: scale(0.6) !important; 
-      opacity: 0.1 !important; 
-    }
-    .mobile-safe-bg svg { width: 60px !important; height: 60px !important; }
-  }
-`}</style>
 
 
-    {/* ===== 3D DYNAMIC BACKGROUND ===== */}
-    <div className="fixed inset-0 pointer-events-none z-0 mobile-safe-bg">
-      {/* Floating Glass Orb 1 */}
-      <div className="absolute top-[10%] left-[15%] w-64 h-64 bg-[#26F2D0]/20 rounded-full blur-[100px] animate-pulse-slow" />
-      
-      {/* Floating Triangle - Your brand color */}
-      <div className="absolute top-[20%] right-[10%] animate-float" style={{ animationDelay: '0s' }}>
-        <svg width="100" height="100" viewBox="0 0 100 100" fill="none" className="opacity-30">
-          <path d="M50 10L90 80H10L50 10Z" stroke="#26F2D0" strokeWidth="1" fill="url(#grad1)" />
-          <defs>
-            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style={{stopColor:'#26F2D0', stopOpacity:0.5}} />
-              <stop offset="100%" style={{stopColor:'transparent', stopOpacity:0}} />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
+  
+const [line1, setLine1] = useState("");
+const [line2, setLine2] = useState("");
 
-      {/* Floating Orb 2 */}
-      <div className="absolute bottom-[20%] right-[20%] w-80 h-80 bg-[#F4A261]/10 rounded-full blur-[120px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
+useEffect(() => {
+  const text1 = "Sharing   Resources.";
+  const text2 = "Building   Community.";
 
-      {/* 3D Wireframe Cube */}
-      <div className="absolute bottom-[10%] left-[10%] animate-float" style={{ animationDuration: '20s', animationDelay: '4s' }}>
-         <div className="w-20 h-20 border border-[#5DADE2]/40 rotate-45 backdrop-blur-sm bg-white/5 rounded-lg" />
-      </div>
+  let i = 0;
+  let j = 0;
 
-      {/* Floating Rings */}
-      <div className="absolute top-[50%] left-[5%] animate-float opacity-20" style={{ animationDuration: '12s' }}>
-         <div className="w-32 h-32 border-2 border-[#26F2D0] rounded-full border-dashed" />
-      </div>
-    </div>
+  const typeLine1 = setInterval(() => {
+    if (i < text1.length) {
+      setLine1(text1.substring(0, i + 1));
+      i++;
+    } else {
+      clearInterval(typeLine1);
 
-    {/* 🔥 Your existing Hero Section continues here */}
-
-
-
-
-
-      {/* 🔥 Hero Section */}
-      <div className="mb-14 text-center">
-        <h1 className="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight">
-          <span className="bg-gradient-to-r from-[#26F2D0] to-[#5DADE2] text-transparent bg-clip-text">
-            Welcome
-          </span>{" "}
-          {userName}!
-        </h1>
-
-<p className="text-xl md:text-2xl text-gray-300 font-rocker leading-snug">
-  Sharing <span className="text-[#26F2D0]">Resources</span>.
-</p>
-
-<p className="text-xl md:text-2xl text-gray-300 font-rocker leading-snug mt-2">
-  Building <span className="text-[#F4A261]">Community</span>.
-</p>
-
-      </div>
-
-      {/* 🔥 AI BUTTON */}
-      <div className="flex justify-center mb-16">
-        <HomeAIAdvisor token={token} />
-      </div>
-
-      {/* 🔥 PREMIUM STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full mb-24">
-        {/* MEMBERS */}
-        <div className="group bg-gradient-to-br from-[#1f1f1f] to-[#141414]
-          rounded-2xl p-6 border border-white/10
-          hover:scale-[1.03] transition-all duration-300
-          shadow-lg hover:shadow-[0_0_25px_rgba(38,242,208,0.15)]">
-          <div className="flex items-center gap-3 mb-3">
-            <Users className="text-[#26F2D0]" size={20} />
-            <p className="text-gray-400 text-sm">Active Members</p>
-          </div>
-          <h2 className="text-3xl font-bold">
-            {loading ? "—" : `${animatedCount.toLocaleString()}+`}
-          </h2>
-        </div>
-
-        {/* IDEAS */}
-        <div className="group bg-gradient-to-br from-[#1f1f1f] to-[#141414]
-          rounded-2xl p-6 border border-white/10
-          hover:scale-[1.03] transition-all duration-300
-          shadow-lg hover:shadow-[0_0_25px_rgba(244,162,97,0.2)]">
-          <div className="flex items-center gap-3 mb-3">
-            <Lightbulb className="text-[#F4A261]" size={20} />
-            <p className="text-gray-400 text-sm">Ideas Shared</p>
-          </div>
-          <h2 className="text-3xl font-bold">
-            {loading ? "—" : `${animatedIdeas.toLocaleString()}+`}
-          </h2>
-        </div>
-
-        {/* CLUBS */}
-        <div className="group bg-gradient-to-br from-[#1f1f1f] to-[#141414]
-          rounded-2xl p-6 border border-white/10
-          hover:scale-[1.03] transition-all duration-300
-          shadow-lg hover:shadow-[0_0_25px_rgba(93,173,226,0.2)]">
-          <div className="flex items-center gap-3 mb-3">
-            <Layers className="text-[#5DADE2]" size={20} />
-            <p className="text-gray-400 text-sm">Active Clubs</p>
-          </div>
-          <h2 className="text-3xl font-bold">
-            {loading ? "—" : `${animatedClubs.toLocaleString()}+`}
-          </h2>
-        </div>
-      </div>
-
-      {/* 🔥 IDEAS SHOWCASE */}
-{/* 🔥 IDEAS SHOWCASE - FIXED */}
-{showcase.length > 0 && (
-  <div className="w-full max-w-6xl mb-16">
-    <div className="flex flex-col items-center mb-12">
-      <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#26F2D0] to-[#5DADE2] bg-clip-text text-transparent mb-4">
-        Featured Ideas
-      </h2>
-      <p className="text-xl text-gray-400 max-w-2xl">
-        Discover innovative projects and resources shared by our community
-      </p>
-    </div>
-    
-    {/* ✅ ONE SINGLE STACK */}
-    {/* <div className="flex justify-center mb-24">
-      <HomeIdeaCard
-        ideas={showcase.slice(0, 5)}  // Use up to 5 cards
-        token={token}
-        isModerator={isModerator}
-        formatDate={formatDate}
-        onDeleted={(id) =>
-          setShowcase(prev => prev.filter(i => i.id !== id))
+      const typeLine2 = setInterval(() => {
+        if (j < text2.length) {
+          setLine2(text2.substring(0, j + 1));
+          j++;
+        } else {
+          clearInterval(typeLine2);
         }
-      />
-    </div> */}
-
-<div className="w-full flex justify-center mb-24">
-  <HomeIdeaCard
-    ideas={showcase}
-    token={token}
-    isModerator={isModerator}
-    formatDate={formatDate}
-    onDeleted={(id) =>
-      setShowcase(prev => prev.filter(i => i.id !== id))
+     }, Math.random() * 30 + 30); 
     }
-  />
-</div>
-  </div>
-)}
+  }, Math.random() * 30 + 30); 
+
+  return () => clearInterval(typeLine1);
+}, []);
 
 
-      {/* 🔥 CLUBS SECTION */}
-      <div className="w-full max-w-6xl mt-10">
-        <HomeClub isModerator={isModerator} />
-      </div>
-    </section>
+
+  // Replace your entire return() in Home.jsx with this:
+// Only structural changes — all your content stays identical
+
+  return (
+    <>
+
+      <section className="min-h-screen flex flex-col items-center text-center
+                          px-6 bg-[#181818] text-white pt-16 pb-6
+                          relative overflow-hidden z-10">
+        {/* ===== YOUR EXISTING STYLE TAG — keep exactly as is ===== */}
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap');
+          .hero-text {
+            font-family: 'Abril Fatface', serif;
+            color: #e6e6e6;
+            text-shadow:
+              1px 1px 0 #000, 2px 2px 0 #000, 3px 3px 0 #000,
+              4px 4px 0 #000, 5px 5px 0 #000, 6px 6px 0 #000;
+            letter-spacing: 0.5px;
+          }
+          @keyframes float-slow {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -50px) rotate(10deg); }
+            66% { transform: translate(-20px, 20px) rotate(-10deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+          }
+          @keyframes pulse-glow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+          }
+          .animate-float { animation: float-slow 15s infinite ease-in-out; }
+          .animate-pulse-slow { animation: pulse-glow 8s infinite ease-in-out; }
+          @media (max-width: 640px) {
+            .mobile-safe-bg > * { transform: scale(0.6) !important; opacity: 0.1 !important; }
+            .mobile-safe-bg svg { width: 60px !important; height: 60px !important; }
+          }
+        `}</style>
+
+        {/* ===== YOUR EXISTING ANIMATED BACKGROUND — keep exactly as is ===== */}
+        <div className="fixed inset-0 pointer-events-none z-0 mobile-safe-bg">
+          <div className="absolute top-[10%] left-[15%] w-64 h-64 bg-[#26F2D0]/20 rounded-full blur-[100px] animate-pulse-slow" />
+          <div className="absolute top-[20%] right-[10%] animate-float" style={{ animationDelay: '0s' }}>
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" className="opacity-30">
+              <path d="M50 10L90 80H10L50 10Z" stroke="#26F2D0" strokeWidth="1" fill="url(#grad1)" />
+              <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style={{stopColor:'#26F2D0', stopOpacity:0.5}} />
+                  <stop offset="100%" style={{stopColor:'transparent', stopOpacity:0}} />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div className="absolute bottom-[20%] right-[20%] w-80 h-80 bg-[#F4A261]/10 rounded-full blur-[120px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-[10%] left-[10%] animate-float" style={{ animationDuration: '20s', animationDelay: '4s' }}>
+            <div className="w-20 h-20 border border-[#5DADE2]/40 rotate-45 backdrop-blur-sm bg-white/5 rounded-lg" />
+          </div>
+          <div className="absolute top-[50%] left-[5%] animate-float opacity-20" style={{ animationDuration: '12s' }}>
+            <div className="w-32 h-32 border-2 border-[#26F2D0] rounded-full border-dashed" />
+          </div>
+        </div>
+
+        {/* ===== HERO ===== */}
+        <div className="mb-14 text-center">
+          <h1 className="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight">
+            <span className="bg-gradient-to-r from-[#26F2D0] to-[#5DADE2] text-transparent bg-clip-text">
+              Welcome
+            </span>{" "}
+            {userName}!
+          </h1>
+          <p className="text-xl md:text-3xl hero-text leading-tight">
+            {line1.split("Resources")[0]}
+            <span className="text-[#26F2D0] ml-2">
+              {line1.includes("Resources") ? "Resources" : ""}
+            </span>
+            {line1.includes("Resources") && "."}
+          </p>
+          <p className="text-xl md:text-3xl hero-text leading-tight mt-2">
+            {line2.split("Community")[0]}
+            <span className="text-[#F4A261] ml-2">
+              {line2.includes("Community") ? "Community" : ""}
+            </span>
+            {line2.includes("Community") && "."}
+          </p>
+        </div>
+
+        {/* ===== AI BUTTON ===== */}
+        <div className="flex justify-center mb-16">
+          <HomeAIAdvisor token={token} />
+        </div>
+
+        {/* ===== STATS ===== */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full mb-24">
+          <div className="group bg-gradient-to-br from-[#1f1f1f] to-[#141414] rounded-2xl p-6 border border-white/10 hover:scale-[1.03] transition-all duration-300 shadow-lg hover:shadow-[0_0_25px_rgba(38,242,208,0.15)]">
+            <div className="flex items-center gap-3 mb-3">
+              <Users className="text-[#26F2D0]" size={20} />
+              <p className="text-gray-400 text-sm">Active Members</p>
+            </div>
+            <h2 className="text-3xl font-bold">{loading ? "—" : `${animatedCount.toLocaleString()}+`}</h2>
+          </div>
+          <div className="group bg-gradient-to-br from-[#1f1f1f] to-[#141414] rounded-2xl p-6 border border-white/10 hover:scale-[1.03] transition-all duration-300 shadow-lg hover:shadow-[0_0_25px_rgba(244,162,97,0.2)]">
+            <div className="flex items-center gap-3 mb-3">
+              <Lightbulb className="text-[#F4A261]" size={20} />
+              <p className="text-gray-400 text-sm">Ideas Shared</p>
+            </div>
+            <h2 className="text-3xl font-bold">{loading ? "—" : `${animatedIdeas.toLocaleString()}+`}</h2>
+          </div>
+          <div className="group bg-gradient-to-br from-[#1f1f1f] to-[#141414] rounded-2xl p-6 border border-white/10 hover:scale-[1.03] transition-all duration-300 shadow-lg hover:shadow-[0_0_25px_rgba(93,173,226,0.2)]">
+            <div className="flex items-center gap-3 mb-3">
+              <Layers className="text-[#5DADE2]" size={20} />
+              <p className="text-gray-400 text-sm">Active Clubs</p>
+            </div>
+            <h2 className="text-3xl font-bold">{loading ? "—" : `${animatedClubs.toLocaleString()}+`}</h2>
+          </div>
+        </div>
+
+        {/* ===== IDEAS SHOWCASE ===== */}
+        {showcase.length > 0 && (
+          <div className="w-full max-w-6xl mb-16">
+            <div className="flex flex-col items-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-bold font-serif tracking-wide bg-gradient-to-r from-[#26F2D0] to-[#5DADE2] bg-clip-text text-transparent mb-4">
+                Featured Ideas
+              </h2>
+              <div className="flex justify-center mb-4">
+                <div className="h-[3px] w-14 rounded-full bg-gradient-to-r from-transparent via-[#26F2D0] to-[#5DADE2]" />
+              </div>
+              <p className="text-xl text-gray-400 max-w-2xl">
+                Discover innovative ideas and resources shared by our community
+              </p>
+            </div>
+            <div className="w-full flex justify-center mb-10">
+              <HomeIdeaCard
+                ideas={showcase}
+                token={token}
+                isModerator={isModerator}
+                formatDate={formatDate}
+                onDeleted={(id) => setShowcase(prev => prev.filter(i => i.id !== id))}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ===== CLUBS ===== */}
+        <div className="w-full max-w-6xl mt-10">
+          <HomeClub isModerator={isModerator} />
+        </div>
+
+      </section>
+
+      {/* ✅ Footer OUTSIDE section — sits at page bottom */}
+      <Footer />
+
+    </>
   );
 };
 

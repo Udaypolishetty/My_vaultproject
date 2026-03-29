@@ -50,6 +50,7 @@ import About from "./Components/About";
 import Connect from "./Components/Connect";
 import "./index.css";
 import { AnimatePresence, motion } from 'framer-motion';
+import SplashScreen from "./Components/SplashScreen";
 
 
 function App() {
@@ -79,6 +80,11 @@ function App() {
     localStorage.setItem("activeSection", activeSection);
   }, [activeSection]);
 
+
+  const [splashDone, setSplashDone] = useState(false);
+
+  if (!splashDone) return <SplashScreen onDone={() => setSplashDone(true)} />;
+  
   return (
     <div className="bg-[#181818] flex flex-col min-h-screen text-white">
       <Navbar setActiveSection={handleSectionChange} />

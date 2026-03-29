@@ -114,7 +114,11 @@ public class SecurityConfig {
 
                         // ===== NOTIFICATIONS =====
                         .requestMatchers("/api/notifications/stream").permitAll()
-                        .requestMatchers("/api/notifications/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/notifications/broadcast-admin")
+                    .hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/notifications/broadcast-mod")
+                    .hasAnyRole("STUDENT", "MODERATOR", "ADMIN")                   
+             .requestMatchers("/api/notifications/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
 
                         // ===== ANNOUNCEMENTS =====
                         .requestMatchers(HttpMethod.GET,    "/api/announcements").permitAll()

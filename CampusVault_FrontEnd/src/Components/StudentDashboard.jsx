@@ -6,6 +6,7 @@ import ModeratorIdeaReview from "./Ideas/ModeratorIdeaReview";
 import StudentProfile from "./Dashboard/StudentProfiles";
 import StudentActivity from "./Dashboard/StudentActivity";
 import ModeratorUploadPanel from "./Dashboard/ModeratorUploadPanel";
+import Footer from "./FooterFiles/Footer";
 
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -108,8 +109,10 @@ export default function StudentDashboard() {
   const unreadWarnings = warnings.filter(w => !w.read).length;
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white px-4 md:px-10 pt-4">
-
+    <>
+    {/* <div className="min-h-screen bg-[#0f0f0f] text-white px-4 md:px-10 pt-4"> */}
+     <div className="flex flex-col min-h-screen bg-[#0f0f0f] text-white">
+   <div className="flex-1 px-4 md:px-10 pt-4">
       {/* Header */}
       <div className="max-w-4xl mx-auto mb-6">
         <div className="bg-gradient-to-r from-[#0b0b0b] to-[#141414]
@@ -229,7 +232,11 @@ export default function StudentDashboard() {
           </div>
         )}
       </div>
+             </div>
+                   <Footer/>
+
     </div>
+   </>
   );
 }
 

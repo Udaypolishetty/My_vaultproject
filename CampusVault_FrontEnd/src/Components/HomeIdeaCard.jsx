@@ -1010,7 +1010,7 @@
 
 
 
-import { ExternalLink, Trash2, ThumbsUp, Calendar,GraduationCap } from "lucide-react";
+import { ExternalLink, Trash2, ThumbsUp, Calendar,GraduationCap,Lightbulb,Building2,Zap,Flame } from "lucide-react";
 import { useState } from "react";
 
 /* ── Category config ── */
@@ -1152,9 +1152,25 @@ function GlassIdeaCard({ idea, style, isModerator, token, onDeleted, formatDate 
     from: "#26F2D0", to: "#0891b2", glow: "rgba(38,242,208,0.5)",
   };
 
-  const proposedBy = idea.classProposal
-    ? `🏛️ ${idea.proposalClass}`
-    : `💡 ${idea.createdByName}`;
+
+
+
+const proposedBy = idea.classProposal ? (
+  <span className="flex items-center gap-2">
+    <Building2 size={16} />
+    {idea.proposalClass}
+  </span>
+) : (
+  <span className="flex items-center gap-2">
+    <GraduationCap size={16} />
+
+    {idea.createdByName}
+  </span>
+);
+
+
+
+
 
   const proposedBySubtext = idea.classProposal
     ? `Class Proposal · ${idea.category}`
@@ -1165,7 +1181,7 @@ function GlassIdeaCard({ idea, style, isModerator, token, onDeleted, formatDate 
       style={{
         position: "absolute",
         width: 200,
-        height: 240,
+        height: 250,
         borderRadius: 16,
         background: "linear-gradient(160deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 60%, rgba(0,0,0,0.15) 100%)",
         border: "1px solid rgba(255,255,255,0.13)",

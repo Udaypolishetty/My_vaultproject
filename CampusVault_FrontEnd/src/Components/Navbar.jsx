@@ -904,11 +904,12 @@ const Navbar = () => {
   const location = useLocation();
 
   const role = sessionStorage.getItem("role");
-  const rollNumber = sessionStorage.getItem("rollNumber");
+  // const rollNumber = sessionStorage.getItem("rollNumber");
   const isAdmin = role === "ADMIN";
 
   // ✅ base path for nav links — admin stays at /admin/dashboard, students use relative
-  const studentBase = `/profile/${rollNumber}`;
+  const id =sessionStorage.getItem("id");
+  const studentBase = `/profile/${id}`;
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");

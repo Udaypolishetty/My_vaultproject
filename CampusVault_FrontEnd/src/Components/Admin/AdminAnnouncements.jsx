@@ -1,486 +1,3 @@
-// import { useState } from "react";
-
-// export default function AdminAnnouncements({
-//   announcements, loading,
-//   onDelete, onPin, onSaveEdit, onPost
-// }) {
-//   const [editingId, setEditingId] = useState(null);
-//   const [editForm, setEditForm] = useState({ title: "", content: "", category: "" });
-//   const [saving, setSaving] = useState(false);
-//   const [newAnn, setNewAnn] = useState({
-//     title: "", content: "", category: "General", imageUrl: ""
-//   });
-//   const [imageUploading, setImageUploading] = useState(false);
-
-//   const uploadImage = async (file) => {
-//     setImageUploading(true);
-//     const formData = new FormData();
-//     formData.append("file", file);
-//     formData.append("upload_preset", "xk6yja12");
-//     const res = await fetch("https://api.cloudinary.com/v1_1/dn6ot9flx/image/upload", {
-//       method: "POST", body: formData
-//     });
-//     const data = await res.json();
-//     setNewAnn(prev => ({ ...prev, imageUrl: data.secure_url }));
-//     setImageUploading(false);
-//   };
-
-//   const handleSaveEdit = async (id) => {
-//     setSaving(true);
-//     await onSaveEdit(id, editForm);
-//     setEditingId(null);
-//     setSaving(false);
-//   };
-
-//   if (loading) return null;
-
-//   return (
-//     <div>
-//       <h2 className="text-xl font-bold mb-6">Campus Announcements</h2>
-
-//       {/* Post form */}
-//       <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 mb-8">
-//         <h3 className="font-semibold mb-4 text-[#26F2D0]">Post New Announcement</h3>
-//         <div className="space-y-3">
-//           <select
-//             value={newAnn.category}
-//             onChange={e => setNewAnn(p => ({ ...p, category: e.target.value }))}
-//             className="w-full p-3 bg-[#111] border border-white/10 rounded-lg text-white outline-none"
-//           >
-//             <option>General</option>
-//             <option>Event</option>
-//             <option>Academic</option>
-//             <option>Notice</option>
-//           </select>
-//           <input
-//             placeholder="Announcement title"
-//             value={newAnn.title}
-//             onChange={e => setNewAnn(p => ({ ...p, title: e.target.value }))}
-//             className="w-full p-3 bg-[#111] border border-white/10 rounded-lg text-white
-//                        outline-none focus:border-[#26F2D0]"
-//           />
-//           <textarea
-//             placeholder="Announcement content"
-//             rows="3"
-//             value={newAnn.content}
-//             onChange={e => setNewAnn(p => ({ ...p, content: e.target.value }))}
-//             className="w-full p-3 bg-[#111] border border-white/10 rounded-lg text-white
-//                        outline-none focus:border-[#26F2D0] resize-none"
-//           />
-//           <div className="border border-dashed border-white/20 rounded-lg p-4">
-//             <label className="cursor-pointer flex flex-col items-center gap-2
-//                               text-gray-400 hover:text-white transition">
-//               <span className="text-2xl">📷</span>
-//               <span className="text-sm">
-//                 {imageUploading ? "Uploading..." : "Click to upload image"}
-//               </span>
-//               <input type="file" accept="image/*" className="hidden"
-//                 onChange={e => e.target.files[0] && uploadImage(e.target.files[0])} />
-//             </label>
-//             {newAnn.imageUrl && (
-//               <div className="mt-3 relative">
-//                 <img src={newAnn.imageUrl} className="w-full h-40 object-cover rounded-lg" />
-//                 <button
-//                   onClick={() => setNewAnn(p => ({ ...p, imageUrl: "" }))}
-//                   className="absolute top-2 right-2 bg-red-600 text-white rounded-full
-//                              w-6 h-6 text-xs flex items-center justify-center"
-//                 >×</button>
-//               </div>
-//             )}
-//           </div>
-//           <button
-//             onClick={() => {
-//               onPost(newAnn);
-//               setNewAnn({ title: "", content: "", category: "General", imageUrl: "" });
-//             }}
-//             disabled={!newAnn.title || !newAnn.content || imageUploading}
-//             className="bg-[#26F2D0] text-black px-6 py-2 rounded-lg font-semibold
-//                        hover:opacity-90 transition disabled:opacity-50"
-//           >
-//             Post Announcement
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* List */}
-//       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-//         {announcements.map(a => (
-//           <div key={a.id}
-//             className={`border rounded-xl overflow-hidden relative
-//               ${a.pinned
-//                 ? "bg-[#1a1a1a] border-yellow-400/30"
-//                 : "bg-[#1a1a1a] border-white/10"
-//               }`}>
-
-//             {a.pinned && (
-//               <div className="absolute top-2 left-2 z-10 flex items-center gap-1
-//                               bg-yellow-400/20 border border-yellow-400/30 rounded-full px-2 py-0.5">
-//                 <span className="text-xs text-yellow-400">📌 Pinned</span>
-//               </div>
-//             )}
-
-//             {a.imageUrl && <img src={a.imageUrl} className="w-full h-40 object-cover" />}
-
-//             <div className="p-4">
-//               <div className="flex justify-between items-start mb-2 gap-2 flex-wrap">
-//                 <span className="text-xs bg-[#26F2D0]/10 text-[#26F2D0] px-2 py-1 rounded-full shrink-0">
-//                   {a.category}
-//                 </span>
-//                 <div className="flex gap-1">
-//                   <button
-//                     onClick={() => onPin(a.id)}
-//                     className={`px-2 py-1 rounded text-xs transition
-//                       ${a.pinned
-//                         ? "bg-yellow-400/20 text-yellow-400"
-//                         : "bg-white/5 text-gray-400 hover:text-yellow-400"}`}
-//                   >📌</button>
-//                   <button
-//                     onClick={() => {
-//                       setEditingId(a.id);
-//                       setEditForm({ title: a.title, content: a.content, category: a.category });
-//                     }}
-//                     className="bg-white/5 hover:bg-[#26F2D0]/20 text-gray-400
-//                                hover:text-[#26F2D0] px-2 py-1 rounded text-xs transition"
-//                   >✏️</button>
-//                   <button
-//                     onClick={() => onDelete(a.id)}
-//                     className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs"
-//                   >🗑️</button>
-//                 </div>
-//               </div>
-
-//               {editingId === a.id ? (
-//                 <div className="space-y-2 mt-2">
-//                   <select
-//                     value={editForm.category}
-//                     onChange={e => setEditForm(p => ({ ...p, category: e.target.value }))}
-//                     className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-1.5
-//                                text-xs text-white outline-none"
-//                   >
-//                     <option>General</option>
-//                     <option>Event</option>
-//                     <option>Academic</option>
-//                     <option>Notice</option>
-//                   </select>
-//                   <input
-//                     value={editForm.title}
-//                     onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))}
-//                     className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-1.5
-//                                text-xs text-white outline-none"
-//                     placeholder="Title"
-//                   />
-//                   <textarea
-//                     value={editForm.content}
-//                     onChange={e => setEditForm(p => ({ ...p, content: e.target.value }))}
-//                     rows={3}
-//                     className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-1.5
-//                                text-xs text-white outline-none resize-none"
-//                     placeholder="Content"
-//                   />
-//                   <div className="flex gap-2 justify-end">
-//                     <button
-//                       onClick={() => setEditingId(null)}
-//                       className="px-3 py-1 rounded-lg text-xs bg-white/5 text-gray-400
-//                                  hover:text-white transition"
-//                     >Cancel</button>
-//                     <button
-//                       onClick={() => handleSaveEdit(a.id)}
-//                       disabled={saving}
-//                       className="px-3 py-1 rounded-lg text-xs bg-[#26F2D0]/20 text-[#26F2D0]
-//                                  hover:bg-[#26F2D0]/30 disabled:opacity-40 transition"
-//                     >{saving ? "Saving..." : "Save"}</button>
-//                   </div>
-//                 </div>
-//               ) : (
-//                 <>
-//                   <h3 className="font-semibold text-white mt-2">{a.title}</h3>
-//                   <p className="text-gray-400 text-sm mt-1 line-clamp-2">{a.content}</p>
-//                   <p className="text-gray-600 text-xs mt-2">by {a.postedBy}</p>
-//                 </>
-//               )}
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-// import { useState } from "react";
-// import { Pin, Pencil, Trash2, Upload, X, Save, Plus, Megaphone } from "lucide-react";
-
-// export default function AdminAnnouncements({
-//   announcements, loading,
-//   onDelete, onPin, onSaveEdit, onPost
-// }) {
-//   const [editingId, setEditingId] = useState(null);
-//   const [editForm, setEditForm] = useState({ title: "", content: "", category: "" });
-//   const [saving, setSaving] = useState(false);
-//   const [confirmDelete, setConfirmDelete] = useState(null);
-//   const [newAnn, setNewAnn] = useState({
-//     title: "", content: "", category: "General", imageUrl: ""
-//   });
-//   const [imageUploading, setImageUploading] = useState(false);
-
-//   const uploadImage = async (file) => {
-//     setImageUploading(true);
-//     const formData = new FormData();
-//     formData.append("file", file);
-//     formData.append("upload_preset", "xk6yja12");
-//     const res = await fetch("https://api.cloudinary.com/v1_1/dn6ot9flx/image/upload", {
-//       method: "POST", body: formData
-//     });
-//     const data = await res.json();
-//     setNewAnn(prev => ({ ...prev, imageUrl: data.secure_url }));
-//     setImageUploading(false);
-//   };
-
-//   const handleSaveEdit = async (id) => {
-//     setSaving(true);
-//     await onSaveEdit(id, editForm);
-//     setEditingId(null);
-//     setSaving(false);
-//   };
-
-//   if (loading) return null;
-
-//   return (
-//     <div>
-//       <div className="flex items-center gap-2 mb-6">
-//         <Megaphone size={20} className="text-[#26F2D0]" />
-//         <h2 className="text-xl font-bold">Campus Announcements</h2>
-//       </div>
-
-//       {/* Post form */}
-//       <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 mb-8">
-//         <div className="flex items-center gap-2 mb-4">
-//           <Plus size={16} className="text-[#26F2D0]" />
-//           <h3 className="font-semibold text-[#26F2D0]">Post New Announcement</h3>
-//         </div>
-//         <div className="space-y-3">
-//           <select
-//             value={newAnn.category}
-//             onChange={e => setNewAnn(p => ({ ...p, category: e.target.value }))}
-//             className="w-full p-3 bg-[#111] border border-white/10 rounded-lg
-//                        text-white outline-none"
-//           >
-//             <option>General</option>
-//             <option>Event</option>
-//             <option>Academic</option>
-//             <option>Notice</option>
-//           </select>
-//           <input
-//             placeholder="Announcement title"
-//             value={newAnn.title}
-//             onChange={e => setNewAnn(p => ({ ...p, title: e.target.value }))}
-//             className="w-full p-3 bg-[#111] border border-white/10 rounded-lg text-white
-//                        outline-none focus:border-[#26F2D0]"
-//           />
-//           <textarea
-//             placeholder="Announcement content"
-//             rows="3"
-//             value={newAnn.content}
-//             onChange={e => setNewAnn(p => ({ ...p, content: e.target.value }))}
-//             className="w-full p-3 bg-[#111] border border-white/10 rounded-lg text-white
-//                        outline-none focus:border-[#26F2D0] resize-none"
-//           />
-
-//           {/* Image upload */}
-//           <div className="border border-dashed border-white/20 rounded-lg p-4">
-//             <label className="cursor-pointer flex flex-col items-center gap-2
-//                               text-gray-400 hover:text-white transition">
-//               <Upload size={22} className="text-gray-500" />
-//               <span className="text-sm">
-//                 {imageUploading ? "Uploading..." : "Click to upload image"}
-//               </span>
-//               <input type="file" accept="image/*" className="hidden"
-//                 onChange={e => e.target.files[0] && uploadImage(e.target.files[0])} />
-//             </label>
-//             {newAnn.imageUrl && (
-//               <div className="mt-3 relative">
-//                 <img src={newAnn.imageUrl} className="w-full h-40 object-cover rounded-lg" />
-//                 <button
-//                   onClick={() => setNewAnn(p => ({ ...p, imageUrl: "" }))}
-//                   className="absolute top-2 right-2 bg-red-600 text-white rounded-full
-//                              w-6 h-6 flex items-center justify-center hover:bg-red-700 transition"
-//                 >
-//                   <X size={12} />
-//                 </button>
-//               </div>
-//             )}
-//           </div>
-
-//           <button
-//             onClick={() => {
-//               onPost(newAnn);
-//               setNewAnn({ title: "", content: "", category: "General", imageUrl: "" });
-//             }}
-//             disabled={!newAnn.title || !newAnn.content || imageUploading}
-//             className="flex items-center gap-2 bg-[#26F2D0] text-black px-6 py-2
-//                        rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50"
-//           >
-//             <Plus size={16} />
-//             Post Announcement
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* Announcements grid */}
-//       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-//         {announcements.map(a => (
-//           <div key={a.id}
-//             className={`border rounded-xl overflow-hidden relative
-//               ${a.pinned
-//                 ? "bg-[#1a1a1a] border-yellow-400/30"
-//                 : "bg-[#1a1a1a] border-white/10"
-//               }`}>
-
-//             {a.pinned && (
-//               <div className="absolute top-2 left-2 z-10 flex items-center gap-1
-//                               bg-yellow-400/20 border border-yellow-400/30
-//                               rounded-full px-2 py-0.5">
-//                 <Pin size={10} className="text-yellow-400" />
-//                 <span className="text-xs text-yellow-400">Pinned</span>
-//               </div>
-//             )}
-
-//             {a.imageUrl && (
-//               <img src={a.imageUrl} className="w-full h-40 object-cover" />
-//             )}
-
-//             <div className="p-4">
-//               <div className="flex justify-between items-start mb-2 gap-2 flex-wrap">
-//                 <span className="text-xs bg-[#26F2D0]/10 text-[#26F2D0]
-//                                  px-2 py-1 rounded-full shrink-0">
-//                   {a.category}
-//                 </span>
-
-//                 <div className="flex gap-1 items-center">
-//                   {/* Pin button */}
-//                   <button
-//                     onClick={() => onPin(a.id)}
-//                     className={`p-1.5 rounded-lg transition
-//                       ${a.pinned
-//                         ? "bg-yellow-400/20 text-yellow-400"
-//                         : "bg-white/5 text-gray-400 hover:text-yellow-400 hover:bg-yellow-400/10"
-//                       }`}
-//                     title={a.pinned ? "Unpin" : "Pin"}
-//                   >
-//                     <Pin size={13} />
-//                   </button>
-
-//                   {/* Edit button */}
-//                   <button
-//                     onClick={() => {
-//                       setEditingId(a.id);
-//                       setEditForm({ title: a.title, content: a.content, category: a.category });
-//                     }}
-//                     className="p-1.5 rounded-lg bg-white/5 text-gray-400
-//                                hover:bg-[#26F2D0]/20 hover:text-[#26F2D0] transition"
-//                     title="Edit"
-//                   >
-//                     <Pencil size={13} />
-//                   </button>
-
-//                   {/* Inline delete confirmation */}
-//                   {confirmDelete === a.id ? (
-//                     <div className="flex items-center gap-1">
-//                       <span className="text-xs text-gray-400">Sure?</span>
-//                       <button
-//                         onClick={() => { onDelete(a.id); setConfirmDelete(null); }}
-//                         className="text-xs text-red-400 hover:text-red-300 font-semibold
-//                                    px-2 py-0.5 rounded-full bg-red-400/10 transition"
-//                       >
-//                         Yes
-//                       </button>
-//                       <button
-//                         onClick={() => setConfirmDelete(null)}
-//                         className="text-xs text-gray-500 hover:text-white px-2 py-0.5
-//                                    rounded-full bg-white/5 transition"
-//                       >
-//                         No
-//                       </button>
-//                     </div>
-//                   ) : (
-//                     <button
-//                       onClick={() => setConfirmDelete(a.id)}
-//                       className="p-1.5 rounded-lg bg-red-500/10 text-red-400
-//                                  hover:bg-red-500/20 transition"
-//                       title="Delete"
-//                     >
-//                       <Trash2 size={13} />
-//                     </button>
-//                   )}
-//                 </div>
-//               </div>
-
-//               {/* Edit form */}
-//               {editingId === a.id ? (
-//                 <div className="space-y-2 mt-2">
-//                   <select
-//                     value={editForm.category}
-//                     onChange={e => setEditForm(p => ({ ...p, category: e.target.value }))}
-//                     className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-1.5
-//                                text-xs text-white outline-none"
-//                   >
-//                     <option>General</option>
-//                     <option>Event</option>
-//                     <option>Academic</option>
-//                     <option>Notice</option>
-//                   </select>
-//                   <input
-//                     value={editForm.title}
-//                     onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))}
-//                     className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-1.5
-//                                text-xs text-white outline-none"
-//                     placeholder="Title"
-//                   />
-//                   <textarea
-//                     value={editForm.content}
-//                     onChange={e => setEditForm(p => ({ ...p, content: e.target.value }))}
-//                     rows={3}
-//                     className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-1.5
-//                                text-xs text-white outline-none resize-none"
-//                     placeholder="Content"
-//                   />
-//                   <div className="flex gap-2 justify-end">
-//                     <button
-//                       onClick={() => setEditingId(null)}
-//                       className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs
-//                                  bg-white/5 text-gray-400 hover:text-white transition"
-//                     >
-//                       <X size={12} /> Cancel
-//                     </button>
-//                     <button
-//                       onClick={() => handleSaveEdit(a.id)}
-//                       disabled={saving}
-//                       className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs
-//                                  bg-[#26F2D0]/20 text-[#26F2D0] hover:bg-[#26F2D0]/30
-//                                  disabled:opacity-40 transition"
-//                     >
-//                       <Save size={12} />
-//                       {saving ? "Saving..." : "Save"}
-//                     </button>
-//                   </div>
-//                 </div>
-//               ) : (
-//                 <>
-//                   <h3 className="font-semibold text-white mt-2">{a.title}</h3>
-//                   <p className="text-gray-400 text-sm mt-1 line-clamp-2">{a.content}</p>
-//                   <p className="text-gray-600 text-xs mt-2">by {a.postedBy}</p>
-//                 </>
-//               )}
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-
 
 import { useState } from "react";
 import { Pin, Pencil, Trash2, Upload, X, Save, Plus, Megaphone } from "lucide-react";
@@ -498,18 +15,46 @@ export default function AdminAnnouncements({
   });
   const [imageUploading, setImageUploading] = useState(false);
 
-  const uploadImage = async (file) => {
-    setImageUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "xk6yja12");
-    const res = await fetch("https://api.cloudinary.com/v1_1/dn6ot9flx/image/upload", {
-      method: "POST", body: formData
-    });
+const uploadImage = async (file) => {
+  if (!file || file.size === 0) {
+    console.warn("No valid file");
+    return;
+  }
+
+  setImageUploading(true);
+  
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "campus_vault"); // ✅ Your preset name exactly
+
+  try {
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dn6ot9flx/image/upload",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+
+    console.log("Response status:", res.status); // Debug line
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Full error:", errorText);
+      throw new Error(`Upload failed: ${res.status}`);
+    }
+
     const data = await res.json();
+    console.log("Upload success:", data.secure_url); // Debug line
+    
     setNewAnn(prev => ({ ...prev, imageUrl: data.secure_url }));
+  } catch (error) {
+    console.error("Upload error:", error);
+    alert("Upload failed - check console");
+  } finally {
     setImageUploading(false);
-  };
+  }
+};
 
   const handleSaveEdit = async (id) => {
     setSaving(true);
@@ -566,8 +111,18 @@ export default function AdminAnnouncements({
               <span className="text-xs font-medium">
                 {imageUploading ? "Uploading..." : "Upload image"}
               </span>
-              <input type="file" accept="image/*" className="hidden"
-                onChange={e => e.target.files[0] && uploadImage(e.target.files[0])} />
+<input 
+  type="file" 
+  accept="image/*" 
+  className="hidden"
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadImage(file);
+      e.target.value = ""; // Reset input
+    }
+  }}
+/>
             </label>
             {newAnn.imageUrl && (
               <div className="mt-3 relative">

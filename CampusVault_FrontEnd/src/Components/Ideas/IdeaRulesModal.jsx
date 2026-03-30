@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import {Star,Pin,Hourglass,Ban,MessageCircle,School,Lightbulb,CircleX} from "lucide-react"
 export default function IdeaRulesModal({ onClose, onContinue }) {
   const [agreed, setAgreed] = useState(false);
 
@@ -8,48 +8,48 @@ export default function IdeaRulesModal({ onClose, onContinue }) {
       <div className="bg-[#161616] border border-white/10 rounded-2xl p-8 max-w-md w-full">
 
         <div className="text-center mb-6">
-          <p className="text-4xl mb-3">💡</p>
+          <p className="text-4xl mb-3"><Lightbulb size={24}/></p>
           <h3 className="text-xl font-bold text-white">Before You Post</h3>
           <p className="text-gray-400 text-sm mt-1">Please read the guidelines before sharing your idea</p>
         </div>
 <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-6 space-y-3 text-sm text-gray-300">
 
   <div className="flex gap-3">
-    <span className="text-yellow-400">⭐</span>
+    <span className="text-yellow-400"><Star size={14}/></span>
     <p>
       High-quality ideas may be pinned to the top and recognized by faculty for possible implementation.
     </p>
   </div>
 
   <div className="flex gap-3">
-    <span className="text-[#26F2D0]">📌</span>
+    <span className="text-[#26F2D0]"><Pin size={14}/></span>
     <p>Your idea must be relevant to campus life or student development.</p>
   </div>
 
   <div className="flex gap-3">
-    <span className="text-[#26F2D0]">⏳</span>
+    <span className="text-[#26F2D0]"><Hourglass size={14}/></span>
     <p>You can only post one idea every 48 hours.</p>
   </div>
 
   <div className="flex gap-3">
-    <span className="text-[#26F2D0]">🚫</span>
+    <span className="text-[#26F2D0]"><Ban size={14}/></span>
     <p>Duplicate titles are not allowed. Make your idea unique.</p>
   </div>
 
   <div className="flex gap-3">
-    <span className="text-[#26F2D0]">💬</span>
+    <span className="text-[#26F2D0]"><MessageCircle size={14}/></span>
     <p>Each student can post one response per idea — make it count.</p>
   </div>
 
   <div className="flex gap-3">
-    <span className="text-red-400">⚠️</span>
+    <span className="text-red-400"><CircleX size={14}/></span>
     <p className="text-red-300">
       Misuse may result in restrictions on your account.
     </p>
   </div>
 
   <div className="flex gap-3">
-    <span className="text-red-400">🏫</span>
+    <span className="text-red-400"><School size={14}/></span>
     <p className="text-red-300">
       Any inappropriate, abusive, or irrelevant content may be reported directly to the college administration.
     </p>

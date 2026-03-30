@@ -299,7 +299,8 @@ export default function AdminNotificationDropdown({ token }) {
         position: "absolute",
         top: "72px",
         right: "24px",
-        width: "420px",
+        width: "min(420px, 90vw)",
+        maxWidth: "calc(100vw - 48px)",
         maxHeight: "80vh",
         display: "flex",
         flexDirection: "column",
@@ -313,7 +314,7 @@ export default function AdminNotificationDropdown({ token }) {
         {/* Header */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "20px 24px 16px",
+          padding: "16px 20px 12px",
           borderBottom: "1px solid rgba(255,255,255,0.08)",
           flexShrink: 0,
         }}>
@@ -395,7 +396,7 @@ export default function AdminNotificationDropdown({ token }) {
             notifications.map((n, i) => (
               <div key={n.id} style={{
                 display: "flex", alignItems: "flex-start", gap: "14px",
-                padding: "16px 24px",
+                padding: "12px 16px",
                 borderBottom: i < notifications.length - 1
                   ? "1px solid rgba(255,255,255,0.05)" : "none",
                 background: !n.read
@@ -489,7 +490,7 @@ export default function AdminNotificationDropdown({ token }) {
       <button
         ref={bellRef}
         onClick={handleOpen}
-        className="relative w-10 h-10 flex items-center justify-center
+        className="relative w-9 h-9 flex items-center justify-center
                    rounded-xl bg-white/5 hover:bg-white/10
                    border border-white/10 transition-all hover:scale-105"
       >

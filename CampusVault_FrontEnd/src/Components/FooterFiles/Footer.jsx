@@ -145,7 +145,7 @@ export default function Footer() {
           className="text-center text-[10px] tracking-widest uppercase font-mono mt-3"
           style={{ color: "rgba(75,85,99,0.4)" }}
         >
-          Ellenki College of Engineering · v2.0
+          Ellenki College of Engineering
         </p>
       </div>
     </footer>

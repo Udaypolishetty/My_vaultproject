@@ -188,6 +188,7 @@ import IdeaRulesModal from "./IdeaRulesModal";
 import IdeasHeader from "./IdeasHeader";
 import IdeasFilters from "./IdeasFilters";
 import IdeasLeaderboard from "./IdeasLeaderboard";
+import { Lightbulb } from "lucide-react";
 
 export default function IdeasBoard() {
   const token = sessionStorage.getItem("token");
@@ -290,7 +291,7 @@ export default function IdeasBoard() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8 items-start">
             {filteredIdeas.length === 0 ? (
               <div className="col-span-3 flex flex-col items-center justify-center h-64 text-center">
-                <p className="text-4xl mb-4">💡</p>
+                <p className="text-4xl mb-4"><Lightbulb size ={34}/></p>
                 <p className="text-white text-lg font-semibold">No ideas yet.</p>
                 <p className="text-gray-400 text-sm mt-2 max-w-sm">
                   Be the first to share an idea for campus wellbeing and student growth.

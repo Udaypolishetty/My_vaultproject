@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Trophy, Flame } from "lucide-react";
+import { Trophy, Flame,Lightbulb,TrendingUp,Star,Landmark,Building } from "lucide-react";
 
 const CATEGORY_ICONS = {
   Tech: "/techh.png",
@@ -16,10 +16,10 @@ const RANK_STYLES = [
 const RANK_EMOJIS = ["🥇", "🥈", "🥉"];
 
 const getIdeaStage = (likes) => {
-  if (likes >= 30) return { label: "Community Favorite", icon: "⭐" };
-  if (likes >= 15) return { label: "Gaining Traction",  icon: "🚀" };
-  if (likes >= 5)  return { label: "Growing",           icon: "📈" };
-  return { label: "Proposed", icon: "💡" };
+  if (likes >= 30) return { label: "Community Favorite",  icon: <Star size={12} className="inline text-gray-400" /> };
+  if (likes >= 15) return { label: "Gaining Traction", icon: "🚀" };
+  if (likes >= 5)  return { label: "Growing",  icon: <TrendingUp size={12} className="inline text-gray-400" />  };
+  return { label: "Proposed", icon: <Lightbulb size={12} className="inline text-gray-400" /> };
 };
 
 const STATUS_BADGE = {
@@ -60,7 +60,7 @@ export default function IdeasLeaderboard({ myId }) {
       {/* ✅ Hall of Fame note */}
       <div className="mb-4 flex items-center gap-2 bg-green-500/5 border border-green-500/20
                       rounded-xl px-4 py-2.5">
-        <span className="text-green-400 text-sm">🏛️</span>
+        <span className="text-green-400 text-sm"><Landmark size={14}/></span>
         <p className="text-xs text-green-400">
           Implemented ideas with 5+ likes are permanently preserved in the leaderboard.
         </p>
@@ -68,7 +68,7 @@ export default function IdeasLeaderboard({ myId }) {
 
       {leaderboard.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-4xl mb-3">🏆</p>
+          <p className="text-4xl mb-3"><Trophy size={14}/></p>
           <p className="text-gray-400">No ideas yet. Be the first!</p>
         </div>
       ) : (
@@ -145,9 +145,9 @@ export default function IdeasLeaderboard({ myId }) {
                     )}
                     {/* ✅ Hall of fame tag */}
                     {isImplemented && idea.likes > 5 && Boolean(idea.archived) && (
-                      <span className="text-xs px-2 py-0.5 rounded-full
+                      <span className="text-xs px-4 py-0.5 rounded-full
                                        bg-yellow-500/20 text-yellow-400 border border-yellow-400/30">
-                        🏛️ Hall of Fame
+                        <Landmark size={14}/> Hall of Fame
                       </span>
                     )}
                   </div>

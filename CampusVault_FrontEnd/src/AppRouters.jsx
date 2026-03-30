@@ -159,7 +159,7 @@
 
 
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route,Navigate } from "react-router-dom";
 import Access from './Access';
 import AppLayout from "./AppLayout";
 import StudentProfile from "./Components/StudentProfile";
@@ -209,19 +209,27 @@ function AppRouters() {
 
       {/* Admin */}
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/dashboard/:tab" element={<AdminDashboard />} />
+<Route path="/admin/dashboard" element={<Navigate to="/admin/dashboard/students" />} />
 
       {/* Public idea page */}
       <Route path="/idea/:id" element={<PublicIdeaPage />} />
 
-      <Route path="/profile" element={<AppLayout />}>
+      <Route path="/profile/:id" element={<AppLayout />}>
         <Route index element={<StudentProfile />} />
-        <Route path=":roll" element={<NavbarLayout />}>
+        <Route element={<NavbarLayout />}>
           <Route path="home"      element={<Home />} />
           <Route path="resources" element={<Resources />} />
           <Route path="connect"   element={<Connect />} />
           <Route path="about"     element={<About />} />
           <Route path="upload"    element={<Upload />} />
           <Route path="dashboard" element={<StudentDashboard />} />
+
+          <Route path="connect/:tab" element={<Connect />} />
+<Route path="connect" element={<Navigate to="connect/ideas" />} />
+
+<Route path="dashboard/:tab" element={<StudentDashboard />} />
+<Route path="dashboard" element={<Navigate to="dashboard/profile" />} />
         </Route>
       </Route>
     </Routes>

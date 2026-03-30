@@ -30,7 +30,7 @@ const DashboardLayout = () => {
   const location = useLocation();
 
   const handleSectionChange = (section) => {
-    navigate(`/profile/${roll}/${section.toLowerCase()}`);
+    navigate(`/profile/${id}/${section.toLowerCase()}`);
   };
 
   return (

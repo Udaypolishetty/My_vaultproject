@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation,useParams,useNavigate } from "react-router-dom";
 import { Shield, Settings } from "lucide-react";
 import ModeratorIdeaReview from "./Ideas/ModeratorIdeaReview";
 import StudentProfile from "./Dashboard/StudentProfiles";
@@ -9,7 +9,12 @@ import ModeratorUploadPanel from "./Dashboard/ModeratorUploadPanel";
 import Footer from "./FooterFiles/Footer";
 
 export default function StudentDashboard() {
-  const [activeTab, setActiveTab] = useState("profile");
+  const {tab} = useParams();
+  const navigate = useNavigate();
+  const activeTab = tab || "profile";
+  const id = sessionStorage.getItem("id");
+  
+  // const [activeTab, setActiveTab] = useState("profile");
   const [ideas, setIdeas] = useState([]);
   const [myClub, setMyClub] = useState(null);
   const [joinedClubs, setJoinedClubs] = useState([]);
@@ -31,13 +36,13 @@ export default function StudentDashboard() {
 
   useEffect(() => { fetchData(); }, []);
 
-  useEffect(() => {
-    if (location.state?.tab === "activity" && !hasMarkedRead.current) {
-      hasMarkedRead.current = true;
-      setActiveTab("activity");
-      markAllRead();
-    }
-  }, [location.state]);
+  // useEffect(() => {
+  //   if (location.state?.tab === "activity" && !hasMarkedRead.current) {
+  //     hasMarkedRead.current = true;
+  //     setActiveTab("activity");
+  //     markAllRead();
+  //   }
+  // }, [location.state]);
 
   const fetchData = async () => {
     try {
@@ -151,13 +156,13 @@ export default function StudentDashboard() {
       {/* Tabs */}
       <div className="max-w-4xl mx-auto">
         <div className="flex gap-2 border-b border-white/10 mb-8 overflow-x-auto">
-          <button className={tabClass("profile")} onClick={() => setActiveTab("profile")}>
+          <button className={tabClass("profile")} onClick={() => navigate(`/profile/${id}/dashboard/profile`)}>
             Profile
           </button>
           <button
             className={tabClass("activity")}
             onClick={() => {
-              setActiveTab("activity");
+              navigate(`/profile/${id}/dashboard/activity`);
               if (unread > 0) markAllRead();
             }}
           >
@@ -175,11 +180,11 @@ export default function StudentDashboard() {
               </span>
             )}
           </button>
-          <button className={tabClass("upload")} onClick={() => setActiveTab("upload")}>
+          <button className={tabClass("upload")} onClick={() => navigate(`/profile/${id}/dashboard/upload`)}>
             Upload
           </button>
           {isModerator && (
-            <button className={tabClass("review")} onClick={() => setActiveTab("review")}>
+            <button className={tabClass("review")} onClick={() => navigate(`/profile/${id}/dashboard/review`)}>
               Review Ideas
             </button>
           )}

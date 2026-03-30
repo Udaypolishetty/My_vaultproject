@@ -437,21 +437,28 @@
 //   );
 // }
 
-
+import { useParams,useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import IdeasBoard from "./Ideas/IdeasBoard";
 import Club from "./Clubs/Club";
 import CampusNews from "./CampusNews";
 import CampusBuzz from "./CampusBuzz";
 import FirstUserSuggestion from "./FirstUserSuggestion";
+import { Megaphone,Newspaper,Users,Lightbulb } from "lucide-react";
+// import { useParams } from "react-router-dom";
 
 export default function Connect() {
-  const [activeTab, setActiveTab] = useState("ideas");
+  // const [activeTab, setActiveTab] = useState("ideas");
   const [buzzDot, setBuzzDot] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   const token = sessionStorage.getItem("token");
   const rollNumber = sessionStorage.getItem("rollNumber");
+
+  const {tab} = useParams();
+  const navigate = useNavigate();
+  const activeTab = tab || "ideas";
+  const id = sessionStorage.getItem("id");
 
   useEffect(() => {
     const key = `onboarded_${rollNumber}`;
@@ -486,13 +493,14 @@ export default function Connect() {
   };
 
   const handleBuzzTabClick = () => {
-    setActiveTab("buzz");
+    // setActiveTab("buzz");
+    navigate(`/profile/${id}/connect/buzz`)
     setBuzzDot(false);
     window.dispatchEvent(new Event("buzzRead"));
   };
 
   const tabClass = (tab) =>
-    `px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-[2px] whitespace-nowrap
+    `px-6 py-2 font-medium transition-all duration-200 border-b-2 -mb-[2px] whitespace-nowrap inline-flex items-center gap-2
     ${activeTab === tab
       ? "border-[#26F2D0] text-[#26F2D0]"
       : "border-transparent text-gray-400 hover:text-[#26F2D0] hover:border-[#26F2D0]/50"
@@ -507,7 +515,7 @@ export default function Connect() {
           onDismiss={handleDismissOnboarding}
           onTabSelect={(tab) => {
             if (tab === "buzz") handleBuzzTabClick();
-            else setActiveTab(tab);
+            else navigate(`/profile/${id}/connect/${tab}`)
           }}
         />
       )}
@@ -567,18 +575,18 @@ export default function Connect() {
 
       {/* Tabs */}
       <div className="flex gap-6 mb-8 border-b border-white/20 pb-3 overflow-x-auto">
-        <button className={tabClass("ideas")} onClick={() => setActiveTab("ideas")}>
-          Ideas
+        <button className={tabClass("ideas")} onClick={() => navigate(`/profile/${id}/connect/ideas`)}>
+         <Lightbulb size={20} /> Ideas
         </button>
-        <button className={tabClass("clubs")} onClick={() => setActiveTab("clubs")}>
-          Clubs
+        <button className={tabClass("clubs")} onClick={() => navigate(`/profile/${id}/connect/clubs`)}>
+          <Users size={20} />  Clubs
         </button>
-        <button className={tabClass("news")} onClick={() => setActiveTab("news")}>
-          Campus News
+        <button className={tabClass("news")} onClick={() => navigate(`/profile/${id}/connect/news`)}>
+          <Newspaper size={20} /> Campus News
         </button>
         <button className={tabClass("buzz")} onClick={handleBuzzTabClick}>
           <span className="relative inline-flex items-center gap-1">
-            📢 Campus Buzz
+            <Megaphone size={20} /> Campus Buzz
             {buzzDot && (
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
             )}

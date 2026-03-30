@@ -1,4 +1,4 @@
-import { Trophy, LayoutGrid } from "lucide-react";
+import { Trophy, LayoutGrid,Gem } from "lucide-react";
 
 export default function IdeasHeader({
   activeView, setActiveView,
@@ -10,7 +10,7 @@ export default function IdeasHeader({
                     flex flex-col md:flex-row md:items-center md:justify-between
                     gap-6 shadow-lg">
       <div className="flex items-start gap-4">
-        <div className="bg-[#26F2D0]/10 text-[#26F2D0] p-3 rounded-xl">💡</div>
+        <div className="bg-[#26F2D0]/10 text-[#26F2D0] p-3 rounded-xl"><Gem size={20}/></div>
         <div>
           <h2 className="text-2xl font-bold">Ideas Board</h2>
           <p className="text-gray-400 text-sm">Share and support student initiatives</p>

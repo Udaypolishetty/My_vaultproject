@@ -279,9 +279,13 @@ export default function Club() {
     }
   };
 
-  const handleClubUpdate = (updated) => {
-    setClubs(prev => prev.map(c => c.id === updated.id ? updated : c));
-  };
+const handleClubUpdate = (updated) => {
+  if (!updated) {
+    fetchClubs();  // leave happened — full re-fetch
+    return;
+  }
+  setClubs(prev => prev.map(c => c.id === updated.id ? updated : c));
+};
 
   // ✅ fetch fresh club data for detail view
   const handleCardClick = async (club) => {

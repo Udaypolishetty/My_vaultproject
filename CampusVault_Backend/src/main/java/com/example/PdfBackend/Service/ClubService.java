@@ -371,26 +371,69 @@ public class ClubService {
         return mapToResponse(club);
     }
 
-    public ClubResponse leaveClub(String clubId, String rollNumber) {
-    Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+//     public ClubResponse leaveClub(String clubId, String rollNumber) {
+//     Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
     
+//     // 1. Remove from members or pending
+//     boolean removed = club.getMembers().remove(rollNumber);
+//     if (!removed) {
+//         club.getPendingMembers().removeIf(p -> p.getRollNumber().equals(rollNumber));
+//     }
+
+//     // 2. Clear Roles if they were leadership
+//     if (rollNumber.equals(club.getPresidentRoll())) {
+//         club.setPresidentRoll(null);
+//         // Note: Admin will see the "Request President" button again on frontend
+//     }
+//     if (rollNumber.equals(club.getVpRoll())) {
+//         club.setVpRoll(null);
+//     }
+
+//     return mapToResponse(clubRepository.save(club));
+// }
+
+
+public ClubResponse leaveClub(String clubId, String rollNumber) {
+    Club club = clubRepository.findById(clubId)
+        .orElseThrow(() -> new NotFoundException("Club not found"));
+ 
     // 1. Remove from members or pending
     boolean removed = club.getMembers().remove(rollNumber);
     if (!removed) {
         club.getPendingMembers().removeIf(p -> p.getRollNumber().equals(rollNumber));
     }
-
-    // 2. Clear Roles if they were leadership
+ 
+    // 2. Clear leadership roles if applicable
     if (rollNumber.equals(club.getPresidentRoll())) {
         club.setPresidentRoll(null);
-        // Note: Admin will see the "Request President" button again on frontend
     }
     if (rollNumber.equals(club.getVpRoll())) {
         club.setVpRoll(null);
     }
-
+ 
+    // ✅ 3. Record leave timestamp for 24-hour cooldown enforcement
+    if (club.getRecentLeaves() == null) {
+        club.setRecentLeaves(new java.util.HashMap<>());
+    }
+    club.getRecentLeaves().put(rollNumber, LocalDateTime.now());
+ 
     return mapToResponse(clubRepository.save(club));
 }
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public ClubResponse renewSemester(String clubId, String rollNumber) {
         if (!isAdminOnly(rollNumber)) throw new ForbiddenException("Only admin can renew semester");
@@ -585,26 +628,107 @@ if (confirmedMembers >= needed && club.getPresidentRoll() != null && club.getCur
 
     // ─── MEMBER OPERATIONS ───────────────────────────────────────────
 
-    public ClubResponse joinClub(String clubId, String rollNumber) {
-        Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
-        if (club.isAnyMember(rollNumber)) throw new ForbiddenException("Already joined this club");
-        if (club.isFull()) throw new ForbiddenException("This club is full");
-        if (!"ACTIVE".equals(club.getStatus())) throw new ForbiddenException("Not accepting members");
-        long joinedCount = clubRepository.findAll().stream().filter(c -> c.isAnyMember(rollNumber)).count();
-        if (joinedCount >= 2) throw new ForbiddenException("You can only join up to 2 clubs");
-        StudentProfile student = studentRepository.findByRollNumber(rollNumber)
-            .orElseThrow(() -> new NotFoundException("Student not found"));
-        club.getPendingMembers().add(new Club.PendingMember(rollNumber, student.getName(), LocalDateTime.now()));
-        long daysSince = java.time.Duration.between(club.getCreatedAt(), LocalDateTime.now()).toDays();
-        boolean early = daysSince <= 7;
-        if (early) awardBadgeQuiet(club, rollNumber, "EARLY_MEMBER");
-        String msg = "✅ Joined \"" + club.getTitle() + "\"! 2-day grace period started." + (early ? " 🌱 Early Member badge!" : "");
-        notificationService.create(rollNumber, msg, "CLUB_JOIN");
-        if (club.getPresidentRoll() != null)
-            notificationService.create(club.getPresidentRoll(), "👋 " + student.getName() + " joined. 2 days to remove.", "CLUB_JOIN");
-        clubRepository.save(club);
-        return mapToResponse(club);
+    // public ClubResponse joinClub(String clubId, String rollNumber) {
+    //     Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
+    //     if (club.isAnyMember(rollNumber)) throw new ForbiddenException("Already joined this club");
+    //     if (club.isFull()) throw new ForbiddenException("This club is full");
+    //     if (!"ACTIVE".equals(club.getStatus())) throw new ForbiddenException("Not accepting members");
+    //     long joinedCount = clubRepository.findAll().stream().filter(c -> c.isAnyMember(rollNumber)).count();
+    //     if (joinedCount >= 2) throw new ForbiddenException("You can only join up to 2 clubs");
+    //     StudentProfile student = studentRepository.findByRollNumber(rollNumber)
+    //         .orElseThrow(() -> new NotFoundException("Student not found"));
+    //     club.getPendingMembers().add(new Club.PendingMember(rollNumber, student.getName(), LocalDateTime.now()));
+    //     long daysSince = java.time.Duration.between(club.getCreatedAt(), LocalDateTime.now()).toDays();
+    //     boolean early = daysSince <= 7;
+    //     if (early) awardBadgeQuiet(club, rollNumber, "EARLY_MEMBER");
+    //     String msg = "✅ Joined \"" + club.getTitle() + "\"! 2-day grace period started." + (early ? " 🌱 Early Member badge!" : "");
+    //     notificationService.create(rollNumber, msg, "CLUB_JOIN");
+    //     if (club.getPresidentRoll() != null)
+    //         notificationService.create(club.getPresidentRoll(), "👋 " + student.getName() + " joined. 2 days to remove.", "CLUB_JOIN");
+    //     clubRepository.save(club);
+    //     return mapToResponse(club);
+    // }
+
+
+
+public ClubResponse joinClub(String clubId, String rollNumber) {
+    Club club = clubRepository.findById(clubId)
+        .orElseThrow(() -> new NotFoundException("Club not found"));
+ 
+    // Existing checks — unchanged
+    if (club.isAnyMember(rollNumber)) throw new ForbiddenException("Already joined this club");
+    if (club.isFull())                throw new ForbiddenException("This club is full");
+    if (!"ACTIVE".equals(club.getStatus())) throw new ForbiddenException("Not accepting members");
+ 
+    long joinedCount = clubRepository.findAll().stream()
+        .filter(c -> c.isAnyMember(rollNumber)).count();
+    if (joinedCount >= 2) throw new ForbiddenException("You can only join up to 2 clubs");
+ 
+    // ✅ NEW CHECK (a) — 24hr cooldown on THIS specific club
+    if (club.getRecentLeaves() != null && club.getRecentLeaves().containsKey(rollNumber)) {
+        LocalDateTime leftAt  = club.getRecentLeaves().get(rollNumber);
+        LocalDateTime canJoin = leftAt.plusHours(24);
+        if (LocalDateTime.now().isBefore(canJoin)) {
+            long hoursLeft = java.time.Duration.between(LocalDateTime.now(), canJoin).toHours() + 1;
+            throw new ForbiddenException(
+                "You left this club recently. You can rejoin in " + hoursLeft + " hour(s)."
+            );
+        }
+        // Cooldown expired — clean up the entry so it doesn't grow forever
+        club.getRecentLeaves().remove(rollNumber);
     }
+ 
+    // ✅ NEW CHECK (b) — 24hr cooldown on ANY club after leaving one
+    // Checks all clubs to see if student left any club within the last 24 hours
+    LocalDateTime cutoff = LocalDateTime.now().minusHours(24);
+    boolean leftAnyRecently = clubRepository.findAll().stream()
+        .filter(c -> !c.getId().equals(clubId)) // skip current club (already checked above)
+        .anyMatch(c ->
+            c.getRecentLeaves() != null &&
+            c.getRecentLeaves().containsKey(rollNumber) &&
+            c.getRecentLeaves().get(rollNumber).isAfter(cutoff)
+        );
+ 
+    if (leftAnyRecently) {
+        throw new ForbiddenException(
+            "You recently left a club. You cannot join another club for 24 hours after leaving."
+        );
+    }
+ 
+    // Everything passed — proceed with join (unchanged from original)
+    StudentProfile student = studentRepository.findByRollNumber(rollNumber)
+        .orElseThrow(() -> new NotFoundException("Student not found"));
+ 
+    club.getPendingMembers().add(new Club.PendingMember(rollNumber, student.getName(), LocalDateTime.now()));
+ 
+    long daysSince = java.time.Duration.between(club.getCreatedAt(), LocalDateTime.now()).toDays();
+    boolean early  = daysSince <= 7;
+    if (early) awardBadgeQuiet(club, rollNumber, "EARLY_MEMBER");
+ 
+    String msg = "✅ Joined \"" + club.getTitle() + "\"! 2-day grace period started."
+        + (early ? " 🌱 Early Member badge!" : "");
+    notificationService.create(rollNumber, msg, "CLUB_JOIN");
+ 
+    if (club.getPresidentRoll() != null)
+        notificationService.create(club.getPresidentRoll(),
+            "👋 " + student.getName() + " joined. 2 days to remove.", "CLUB_JOIN");
+ 
+    clubRepository.save(club);
+    return mapToResponse(club);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public ClubResponse presidentRemoveMember(String clubId, String targetRoll, String presidentRoll) {
         Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));

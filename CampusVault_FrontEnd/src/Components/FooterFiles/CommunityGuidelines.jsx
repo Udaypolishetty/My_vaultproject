@@ -10,7 +10,7 @@ const TABS = [
   { key: "ideas",      label: "Ideas Hub",         icon: Lightbulb,       accent: "#f59e0b" },
   { key: "clubs",      label: "Clubs",              icon: Users,           accent: "#ec4899" },
   { key: "resources",  label: "Resources",          icon: BookOpen,        accent: "#a78bfa" },
-  { key: "buzz",       label: "Campus Buzz",        icon: Megaphone,       accent: "#26F2D0" },
+  { key: "buzz",       label: "Campus Buzz",        icon: Megaphone,       accent: "#3b82f6" },
   { key: "news",       label: "Campus News",        icon: Newspaper,       accent: "#3b82f6" },
   { key: "dashboard",  label: "Dashboard",          icon: LayoutDashboard, accent: "#22c55e" },
   { key: "moderator",  label: "Moderator",          icon: ShieldCheck,     accent: "#f97316" },
@@ -256,7 +256,7 @@ const ResourcesContent = () => {
 };
 
 const BuzzContent = () => {
-  const a = "#26F2D0";
+  const a = "#386b11";
   return (
     <>
       <SubSection title="What is Campus Buzz?" accent={a}>

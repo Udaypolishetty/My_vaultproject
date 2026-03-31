@@ -739,17 +739,47 @@ public ClubResponse joinClub(String clubId, String rollNumber) {
         return mapToResponse(clubRepository.save(club));
     }
 
-    public void confirmPendingMembers(Club club) {
-        LocalDateTime cutoff = LocalDateTime.now().minusDays(2);
-        List<Club.PendingMember> toConfirm = club.getPendingMembers().stream()
-            .filter(p -> p.getJoinedAt().isBefore(cutoff)).collect(Collectors.toList());
-        for (Club.PendingMember p : toConfirm) {
+public void confirmPendingMembers(Club club) {
+    LocalDateTime cutoff = LocalDateTime.now().minusDays(2);
+
+    List<Club.PendingMember> toConfirm = club.getPendingMembers().stream()
+            .filter(p -> p.getJoinedAt().isBefore(cutoff))
+            .collect(Collectors.toList());
+
+    for (Club.PendingMember p : toConfirm) {
+        if (!club.getMembers().contains(p.getRollNumber())) {
             club.getMembers().add(p.getRollNumber());
-            club.getPendingMembers().remove(p);
-            notificationService.create(p.getRollNumber(), "🎉 Confirmed member of \"" + club.getTitle() + "\"!", "CLUB_CONFIRMED");
         }
-        if (!toConfirm.isEmpty()) clubRepository.save(club);
+        club.getPendingMembers().remove(p);
+        notificationService.create(
+                p.getRollNumber(),
+                "🎉 Confirmed member of \"" + club.getTitle() + "\"!",
+                "CLUB_CONFIRMED"
+        );
     }
+
+    if (!toConfirm.isEmpty()) {
+        int confirmedMembers = club.getMembers().size();
+        int needed = (int) Math.ceil(club.getMaxMembers() * 0.5);
+
+        if (confirmedMembers >= needed
+                && club.getPresidentRoll() != null
+                && club.getCurrentActivityId() == null
+                && club.getActivities() != null
+                && !club.getActivities().isEmpty()) {
+
+            Club.ClubActivity first = club.getActivities().get(0);
+
+            if (first.getAvailableFrom() == null) {
+                first.setAvailableFrom(LocalDateTime.now());
+            }
+
+            club.setCurrentActivityId(first.getId());
+        }
+
+        clubRepository.save(club);
+    }
+}
 
     public ClubResponse requestRole(String clubId, String rollNumber, String role) {
         Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));

@@ -1,4 +1,4 @@
-
+import { useNavigate,useParams  } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Building2, Bot, Printer, Code2, Cog, Rocket,
@@ -245,6 +245,8 @@ const HomeClub = ({ isModerator }) => {
   const [activeIndex,  setActiveIndex]  = useState(0);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting,     setDeleting]     = useState(false);
+    const { id } = useParams();
+  const navigate = useNavigate();
 
   /* ── pause refs — no re-renders ── */
   const pausedRef     = useRef(false);   // true when user is hovering OR dragging
@@ -340,8 +342,12 @@ const HomeClub = ({ isModerator }) => {
     }, 350);
   };
 
-  const goToClubs = () => { window.location.href = "/Connect"; };
+//   const goToClubs = () => { window.location.href = `/Profile/${id}/Connect/Clubs`; };
 
+
+ const goToClubs = () => {
+  navigate(`/profile/${id}/connect/clubs`);
+};
   if (loading || clubs.length === 0) return null;
 
   return (

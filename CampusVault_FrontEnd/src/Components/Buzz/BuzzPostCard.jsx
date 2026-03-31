@@ -355,6 +355,7 @@ export default function BuzzPostCard({
   const [replyText, setReplyText] = useState("");
   const [expanded, setExpanded] = useState(false);
   const [replyError, setReplyError] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const tagCfg = TAG_CONFIG[post.tag] || TAG_CONFIG.GENERAL;
   const TagIcon = tagCfg.icon;
@@ -417,16 +418,21 @@ export default function BuzzPostCard({
     if (res.ok) onUpdate(await res.json());
   };
 
-  const handleDeletePost = async () => {
-    if (!window.confirm("Delete this post?")) return;
+const handleDeletePost = async () => {
+  setConfirmDelete(false);
+  const res = await fetch(`http://localhost:8081/api/buzz/${post.id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
-    const res = await fetch(`http://localhost:8081/api/buzz/${post.id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (res.ok) onDelete(post.id);
-  };
+  if (res.ok) {
+    onDelete(post.id);
+  } else {
+    // Keep the error message, but make it nicer
+    const error = await res.text();
+    alert(error); // or replace with toast later
+  }
+};
 
   const handleResolve = async () => {
     const res = await fetch(`http://localhost:8081/api/buzz/${post.id}/resolve`, {
@@ -500,15 +506,37 @@ export default function BuzzPostCard({
             </span>
           )}
 
-          {isMyPost && (
-            <button
-              onClick={handleDeletePost}
-              className="w-7 h-7 rounded-full flex items-center justify-center
-                         text-gray-600 hover:text-red-400 hover:bg-red-400/10 transition-all"
-            >
-              <Trash2 size={14} />
-            </button>
-          )}
+{isMyPost && (
+  <div className="flex items-center gap-1.5">
+    {confirmDelete ? (
+      <>
+        <span className="text-xs text-gray-500">Delete post?</span>
+        <button
+          onClick={handleDeletePost}
+          className="text-xs font-semibold text-red-400 bg-red-400/10
+                     px-2 py-1 rounded-lg hover:bg-red-400/20 transition"
+        >
+          Yes
+        </button>
+        <button
+          onClick={() => setConfirmDelete(false)}
+          className="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-lg
+                     hover:bg-white/10 transition"
+        >
+          No
+        </button>
+      </>
+    ) : (
+      <button
+        onClick={() => setConfirmDelete(true)}
+        className="w-7 h-7 rounded-full flex items-center justify-center
+                   text-gray-600 hover:text-red-400 hover:bg-red-400/10 transition-all"
+      >
+        <Trash2 size={14} />
+      </button>
+    )}
+  </div>
+)}
         </div>
       </div>
 

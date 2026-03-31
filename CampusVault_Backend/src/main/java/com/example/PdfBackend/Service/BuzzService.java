@@ -28,6 +28,14 @@ public class BuzzService {
     private final StudentProfileRepository studentRepository;
     private final NotificationService notificationService; // ✅ added for notifications
 
+
+    private boolean isAdminOnly(String rollNumber) {
+    return studentRepository.findByRollNumber(rollNumber)
+        .map(s -> s.getRole() != null && s.getRole().toString().equals("ADMIN"))
+        .orElse(false);
+}
+
+
     // ✅ filter posts based on student's year and branch
     public List<BuzzPost> getAll(String rollNumber) {
         StudentProfile student = studentRepository.findByRollNumber(rollNumber)
@@ -140,35 +148,81 @@ public class BuzzService {
         return savedPost;
     }
 
+
+
     public BuzzPost deleteReply(String postId, String replyId, String rollNumber) {
-        BuzzPost post = buzzRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException("Post not found: " + postId));
+    BuzzPost post = buzzRepository.findById(postId)
+            .orElseThrow(() -> new NotFoundException("Post not found: " + postId));
 
-        if (post.getReplies() == null) post.setReplies(new ArrayList<>());
+    if (post.getReplies() == null) post.setReplies(new ArrayList<>());
 
-        BuzzReply target = post.getReplies().stream()
-                .filter(r -> replyId.equals(r.getId()))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Reply not found: " + replyId));
+    BuzzReply target = post.getReplies().stream()
+            .filter(r -> replyId.equals(r.getId()))
+            .findFirst()
+            .orElseThrow(() -> new NotFoundException("Reply not found: " + replyId));
 
-        if (!rollNumber.equals(target.getCreatedByRollNumber())) {
-            throw new ForbiddenException("You can only delete your own replies");
-        }
+    StudentProfile student = studentRepository.findByRollNumber(rollNumber)
+            .orElseThrow(() -> new NotFoundException("Student not found: " + rollNumber));
 
-        post.getReplies().remove(target);
-        return buzzRepository.save(post);
+    boolean isOwner = rollNumber.equals(target.getCreatedByRollNumber());
+    boolean isAdmin = isAdminOnly(rollNumber);
+
+    if (!isOwner && !isAdmin) {
+        throw new ForbiddenException("You can only delete your own replies");
     }
+
+    post.getReplies().remove(target);
+    return buzzRepository.save(post);
+}
+
+    // public BuzzPost deleteReply(String postId, String replyId, String rollNumber) {
+    //     BuzzPost post = buzzRepository.findById(postId)
+    //             .orElseThrow(() -> new NotFoundException("Post not found: " + postId));
+
+    //     if (post.getReplies() == null) post.setReplies(new ArrayList<>());
+
+    //     BuzzReply target = post.getReplies().stream()
+    //             .filter(r -> replyId.equals(r.getId()))
+    //             .findFirst()
+    //             .orElseThrow(() -> new NotFoundException("Reply not found: " + replyId));
+
+    //     if (!rollNumber.equals(target.getCreatedByRollNumber())) {
+    //         throw new ForbiddenException("You can only delete your own replies");
+    //     }
+
+    //     post.getReplies().remove(target);
+    //     return buzzRepository.save(post);
+    // }
+
+    // public void deletePost(String postId, String rollNumber) {
+    //     BuzzPost post = buzzRepository.findById(postId)
+    //             .orElseThrow(() -> new NotFoundException("Post not found: " + postId));
+
+    //     if (!rollNumber.equals(post.getCreatedByRollNumber())) {
+    //         throw new ForbiddenException("You can only delete your own posts");
+    //     }
+
+    //     buzzRepository.deleteById(postId);
+    // }
+
+
 
     public void deletePost(String postId, String rollNumber) {
-        BuzzPost post = buzzRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException("Post not found: " + postId));
+    BuzzPost post = buzzRepository.findById(postId)
+            .orElseThrow(() -> new NotFoundException("Post not found: " + postId));
 
-        if (!rollNumber.equals(post.getCreatedByRollNumber())) {
-            throw new ForbiddenException("You can only delete your own posts");
-        }
+    StudentProfile student = studentRepository.findByRollNumber(rollNumber)
+            .orElseThrow(() -> new NotFoundException("Student not found: " + rollNumber));
 
-        buzzRepository.deleteById(postId);
+    boolean isOwner = rollNumber.equals(post.getCreatedByRollNumber());
+    boolean isAdmin = isAdminOnly(rollNumber);
+
+    if (!isOwner && !isAdmin) {
+        throw new ForbiddenException("You can only delete your own posts");
     }
+
+    buzzRepository.deleteById(postId);
+}
 
     @Scheduled(cron = "0 0 1 * * *")
     public void cleanupExpiredPosts() {
@@ -179,6 +233,9 @@ public class BuzzService {
         }
     }
 
+
+
+
     public BuzzPost resolvePost(String postId, String rollNumber) {
         BuzzPost post = buzzRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("Post not found: " + postId));
@@ -188,7 +245,7 @@ public class BuzzService {
                 .orElseThrow(() -> new NotFoundException("Student not found: " + rollNumber));
 
         boolean isOwner = rollNumber.equals(post.getCreatedByRollNumber());
-        boolean isAdmin = "ADMIN".equals(student.getRole());
+        boolean isAdmin = isAdminOnly(rollNumber);
 
         if (!isOwner && !isAdmin) {
             throw new ForbiddenException("Only the post owner or admin can resolve this post");

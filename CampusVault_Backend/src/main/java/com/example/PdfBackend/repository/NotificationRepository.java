@@ -18,6 +18,8 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     );
     // ✅ for manual delete
     void deleteByIdAndRecipientRollNumber(String id, String rollNumber);
+        void deleteByRecipientRollNumber(String recipientRollNumber);
+
 
     // ✅ for auto cleanup
     List<Notification> findByCreatedAtBefore(LocalDateTime cutoff);

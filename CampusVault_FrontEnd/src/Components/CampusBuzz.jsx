@@ -1516,13 +1516,14 @@
 import { useState, useEffect, useRef } from "react";
 import BuzzComposer from "./Buzz/BuzzComposer";
 import BuzzFeed from "./Buzz/BuzzFeed";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, RefreshCw, Zap } from "lucide-react";
 
 export default function CampusBuzz({ onNewPost }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newCount, setNewCount] = useState(0);
   const [pendingPosts, setPendingPosts] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const latestPostTime = useRef(null);
 
   const token = sessionStorage.getItem("token");
@@ -1615,8 +1616,61 @@ export default function CampusBuzz({ onNewPost }) {
     <div className="text-center py-20 text-gray-500">Loading buzz...</div>
   );
 
+
+  const handleRefresh = async () => {
+  setRefreshing(true);
+  try {
+    const res = await fetch("http://localhost:8081/api/buzz", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    setPosts(data);
+    setPendingPosts([]);
+    setNewCount(0);
+
+    if (data.length > 0) {
+      latestPostTime.current = Math.max(
+        ...data.map(p => new Date(p.createdAt).getTime())
+      );
+    } else {
+      latestPostTime.current = Date.now();
+    }
+  } catch (err) {
+    console.error("Refresh failed:", err);
+  } finally {
+    setRefreshing(false);
+  }
+};
+
+
+
+
+
+
   return (
-    <div className="max-w-2xl mx-auto pb-20">
+    // <div className="max-w-2xl mx-auto pb-20">
+    <div className="max-w-2xl mx-auto px-3 sm:px-4 pb-16 sm:pb-20">
+
+
+<div className="flex items-center justify-between mb-3 px-1">
+  <div className="flex items-center gap-2">
+    <Zap size={18} className="text-[#26F2D0]" />
+    <h2 className="text-lg font-bold text-white">Campus Buzz</h2>
+  </div>
+
+  <button
+    onClick={handleRefresh}
+    disabled={refreshing}
+    className="flex items-center gap-1.5 px-3 py-2 text-xs
+               bg-white/5 text-gray-300 border border-white/10
+               rounded-xl hover:text-white hover:border-white/20
+               transition disabled:opacity-50"
+  >
+    <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+    Refresh
+  </button>
+</div>
 
       {/* ✅ Sticky new posts banner — slides in when new posts arrive */}
       <div className={`sticky top-16 z-40 flex justify-center transition-all duration-500

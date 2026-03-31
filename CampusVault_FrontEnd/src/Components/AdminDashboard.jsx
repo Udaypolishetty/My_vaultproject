@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate,useParams } from "react-router-dom";
-import { LogOut, Users, Shield, Lightbulb, Building, Megaphone, Search, ShieldAlert } from "lucide-react";
+import { LogOut, Users, Shield, Lightbulb, Building, Megaphone, Search, ShieldAlert,Zap } from "lucide-react";
 import AdminStudents from "./Admin/AdminStudents";
 import AdminModerators from "./Admin/AdminModerators";
 import AdminClubs from "./Admin/AdminClubs";
@@ -10,6 +10,7 @@ import AdminIdeas from "./Admin/AdminIdeas";
 import AdminWarnings from "./Admin/AdminWarnings";
 import ModeratorIdeaReview from "./Ideas/ModeratorIdeaReview";
 import AdminNotificationDropdown from "./Admin/AdminNotificationDropdown";
+import AdminBuzz from "./Admin/AdminBuzz";
 
 const TAB_CONFIG = [
   { key: "students",      label: "Students",      icon: <Users size={14} /> },
@@ -19,6 +20,7 @@ const TAB_CONFIG = [
   { key: "announcements", label: "Announcements",  icon: <Megaphone size={14} /> },
   { key: "review",        label: "Review",         icon: <Search size={14} /> },
   { key: "warnings",      label: "Warnings",       icon: <ShieldAlert size={14} /> },
+  { key: "buzz", label: "Buzz", icon: <Zap size={14} /> },
 ];
 
 export default function AdminDashboard() {
@@ -340,6 +342,9 @@ return (
         {activeTab === "warnings" && (
           <AdminWarnings token={token} students={students} />
         )}
+        {activeTab === "buzz" && (
+  <AdminBuzz token={token} />
+)}
       </div>
     </div>
   );

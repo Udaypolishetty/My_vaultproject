@@ -136,6 +136,7 @@ Keep it short, smart, and relevant.
         try {
             response = aiService.getAdvisorResponse(prompt);
         } catch (Exception e) {
+            e.printStackTrace();
             response = "⚠️ Unable to generate advice right now. Try again later.";
         }
 

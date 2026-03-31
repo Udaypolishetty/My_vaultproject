@@ -444,7 +444,7 @@ import Club from "./Clubs/Club";
 import CampusNews from "./CampusNews";
 import CampusBuzz from "./CampusBuzz";
 import FirstUserSuggestion from "./FirstUserSuggestion";
-import { Megaphone,Newspaper,Users,Lightbulb } from "lucide-react";
+import { Megaphone,Newspaper,Users,Lightbulb,Layers } from "lucide-react";
 // import { useParams } from "react-router-dom";
 
 export default function Connect() {
@@ -579,7 +579,7 @@ export default function Connect() {
          <Lightbulb size={20} /> Ideas
         </button>
         <button className={tabClass("clubs")} onClick={() => navigate(`/profile/${id}/connect/clubs`)}>
-          <Users size={20} />  Clubs
+          <Layers size={20} />  Clubs
         </button>
         <button className={tabClass("news")} onClick={() => navigate(`/profile/${id}/connect/news`)}>
           <Newspaper size={20} /> Campus News

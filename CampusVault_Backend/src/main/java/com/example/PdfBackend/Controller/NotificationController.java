@@ -85,6 +85,12 @@ public class NotificationController {
         notificationService.deleteNotification(id, auth.getName());
     }
 
+    @DeleteMapping("/clear-all")
+public ResponseEntity<Void> clearAllNotifications(Authentication auth) {
+    notificationService.clearAllNotifications(auth.getName());
+    return ResponseEntity.ok().build();
+}
+
 @PostMapping("/broadcast")
 public ResponseEntity<Void> broadcast(
         @RequestBody Map<String, String> body,

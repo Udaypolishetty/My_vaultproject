@@ -23,6 +23,7 @@ public class StudentProfile {
     private String year;
     private String branch;
     private String password;
+    private String linkedinUrl;
     private Role role = Role.STUDENT;
 
 

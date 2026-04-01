@@ -787,7 +787,7 @@ const About = () => {
       {/* ── Hero ── */}
       <section className="flex flex-col items-center text-center px-6 pt-32 pb-16 relative z-10">
         <p className="tracking-[6px] text-[#26F2D0] text-xs mb-4 uppercase font-bold drop-shadow-[0_0_10px_rgba(38,242,208,0.5)]">
-          Establish . Access . Collaborate
+          Innovate . Implement . Inspire
         </p>
         <h1 className="text-6xl md:text-8xl font-black mb-4 tracking-tighter">
           Campus{" "}
@@ -797,7 +797,7 @@ const About = () => {
         </h1>
         <div className="h-[1px] w-32 bg-[#26F2D0] shadow-[0_0_15px_#26F2D0] mx-auto mt-2 mb-8" />
         <p className="text-gray-400 max-w-2xl text-lg leading-relaxed font-light italic">
-          The ultimate digital treasury for college resources. Designed for the high-pace student life.
+         "Every expert was once a beginner. Start your mastery today."
         </p>
       </section>
 
@@ -988,16 +988,16 @@ const About = () => {
           {/* ══ SUPPORT US ══ */}
           {cardMode === "support" && (
             <div className="fade-in">
-              <h2 className="text-4xl font-black mb-2">Support the Vault.</h2>
-              <p className="text-gray-400 mb-2">
-                Campus Vault runs on passion — and a little bit of server fees.
-              </p>
-              <p className="text-gray-600 text-sm mb-8">
-                Every rupee keeps the platform alive for every student.
-              </p>
+<h2 className="text-4xl font-black mb-2">Keep the Vault Alive.</h2>
+<p className="text-gray-400 mb-2">
+  If Campus Vault helped you, you can support it.
+</p>
+<p className="text-gray-600 text-sm mb-8">
+  No pressure — even a small contribution keeps things running.
+</p>
 
               {/* preset amounts */}
-              <div className="grid grid-cols-3 gap-3 mb-5">
+              {/* <div className="grid grid-cols-3 gap-3 mb-5">
                 {AMOUNTS.map(({ label, value, note }) => (
                   <a
                     key={value}
@@ -1017,7 +1017,7 @@ const About = () => {
                     </span>
                   </a>
                 ))}
-              </div>
+              </div> */}
 
               {/* custom amount CTA */}
               <a
@@ -1025,29 +1025,38 @@ const About = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full bg-[#26F2D0] text-black py-5 rounded-2xl font-black uppercase
-                           tracking-widest hover:bg-white hover:scale-[0.98] transition-all duration-300
-                           shadow-[0_20px_40px_rgba(38,242,208,0.2)] mb-6"
+                          tracking-widest hover:bg-white hover:scale-[0.98] transition-all duration-300
+                          shadow-[0_20px_40px_rgba(38,242,208,0.2)] mb-6"
               >
-                Choose Your Amount →
+                Contribute →
               </a>
 
               {/* UPI fallback */}
-              <div className="flex flex-col items-center gap-2 pt-4 border-t border-white/5">
-                <p className="text-gray-500 text-xs uppercase tracking-widest">or pay via UPI</p>
-                <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-xl px-5 py-3 mt-1">
-                  <span className="text-[#26F2D0] font-mono font-bold text-sm">{UPI_ID}</span>
-                  <button
-                    onClick={handleCopyUPI}
-                    className="text-gray-500 hover:text-white transition text-xs border border-white/10
-                               hover:border-white/30 px-2 py-0.5 rounded-lg ml-2"
-                  >
-                    {copied ? "Copied ✓" : "Copy"}
-                  </button>
-                </div>
-                <p className="text-gray-600 text-xs mt-1">
-                  Google Pay · PhonePe · Paytm · any UPI app
-                </p>
+            <div className="flex flex-col items-center gap-3 pt-4 border-t border-white/5">
+
+              <p className="text-gray-500 text-xs uppercase tracking-widest">
+                Or contribute via UPI
+              </p>
+
+              <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-5 py-3 mt-1">
+                <span className="text-[#26F2D0] font-mono font-bold text-sm tracking-wide">
+                  {UPI_ID}
+                </span>
+
+                <button
+                  onClick={handleCopyUPI}
+                  className="text-gray-400 hover:text-white transition text-xs border border-white/10
+                            hover:border-white/30 px-3 py-1 rounded-lg"
+                >
+                  {copied ? "Copied ✓" : "Copy"}
+                </button>
               </div>
+
+              <p className="text-gray-600 text-xs">
+                Works with Google Pay · PhonePe · Paytm
+              </p>
+
+            </div>
             </div>
           )}
 

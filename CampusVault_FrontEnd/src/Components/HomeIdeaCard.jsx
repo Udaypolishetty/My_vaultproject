@@ -1010,8 +1010,473 @@
 
 
 
-import { ExternalLink, Trash2, ThumbsUp, Calendar,GraduationCap,Lightbulb,Building2,Zap,Flame } from "lucide-react";
-import { useState } from "react";
+// import { ExternalLink, Trash2, ThumbsUp, Calendar,GraduationCap,Lightbulb,Building2,Zap,Flame } from "lucide-react";
+// import { useState } from "react";
+
+// /* ── Category config ── */
+// const CATEGORY_ICONS = {
+//   Tech:           "/techh.png",
+//   Academic:       "/academic.png",
+//   "Campus Pulse": "/campuspulse.png",
+//   Cultural:       "/cultural.png",
+// };
+
+// const CATEGORY_ACCENT = {
+//   Tech:           { from: "#3b82f6", to: "#06b6d4", glow: "rgba(59,130,246,0.5)"  },
+//   Academic:       { from: "#22c55e", to: "#10b981", glow: "rgba(34,197,94,0.5)"   },
+//   "Campus Pulse": { from: "#ef4444", to: "#f97316", glow: "rgba(239,68,68,0.5)"   },
+//   Cultural:       { from: "#eab308", to: "#f59e0b", glow: "rgba(234,179,8,0.5)"   },
+// };
+
+// const getLinkLabel = (url) => {
+//   if (!url) return "View";
+//   if (url.includes("youtube") || url.includes("youtu.be")) return "▶ YouTube";
+//   if (url.includes("instagram")) return "📸 Instagram";
+//   if (url.includes("drive.google")) return "📁 Drive";
+//   if (url.includes("linkedin")) return "💼 LinkedIn";
+//   return "🔗 View";
+// };
+
+// /* ── Delete button ── */
+// const ShowcaseDeleteButton = ({ ideaId, token, onDeleted }) => {
+//   const [confirm,  setConfirm]  = useState(false);
+//   const [deleting, setDeleting] = useState(false);
+//   const [errorMsg, setErrorMsg] = useState("");
+
+//   const handleDelete = async (e) => {
+//     e.stopPropagation();
+//     setDeleting(true);
+//     setErrorMsg("");
+//     try {
+//       const res = await fetch(`http://localhost:8081/api/ideas/${ideaId}`, {
+//         method: "DELETE",
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+//       if (res.ok) {
+//         onDeleted(ideaId);
+//       } else if (res.status === 403) {
+//         setConfirm(false);
+//         setErrorMsg("Seems you are not the one who implemented this idea.");
+//         setTimeout(() => setErrorMsg(""), 3000);
+//       }
+//     } catch (err) {
+//       console.error("Delete failed:", err);
+//     } finally {
+//       setDeleting(false);
+//     }
+//   };
+
+//   if (confirm) {
+//     return (
+//       <div style={{ position: "relative" }}>
+//         <div style={{ display: "flex", alignItems: "center", gap: 4 }} onClick={e => e.stopPropagation()}>
+//           <span style={{ fontSize: 11, color: "#9ca3af" }}>Remove?</span>
+//           <button
+//             onClick={handleDelete}
+//             disabled={deleting}
+//             style={{
+//               fontSize: 11, color: "#f87171", fontWeight: 600,
+//               padding: "2px 8px", borderRadius: 999,
+//               background: "rgba(239,68,68,0.12)",
+//               border: "1px solid rgba(239,68,68,0.25)",
+//               cursor: "pointer", opacity: deleting ? 0.5 : 1,
+//             }}
+//           >
+//             {deleting ? "..." : "Yes"}
+//           </button>
+//           <button
+//             onClick={e => { e.stopPropagation(); setConfirm(false); }}
+//             style={{
+//               fontSize: 11, color: "#6b7280", padding: "2px 8px",
+//               borderRadius: 999, background: "rgba(255,255,255,0.06)",
+//               border: "none", cursor: "pointer",
+//             }}
+//           >
+//             No
+//           </button>
+//         </div>
+//         {errorMsg && (
+//           <div style={{
+//             position: "absolute", top: 28, right: 0, width: 200,
+//             background: "#1a1a1a", border: "1px solid rgba(239,68,68,0.3)",
+//             color: "#f87171", fontSize: 11, borderRadius: 10,
+//             padding: "8px 12px", zIndex: 20,
+//             boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+//           }}>
+//             {errorMsg}
+//           </div>
+//         )}
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div style={{ position: "relative" }}>
+//       <button
+//         onClick={e => { e.stopPropagation(); setConfirm(true); }}
+//         title="Remove from showcase"
+//         style={{
+//           padding: 6, borderRadius: 0,
+//           // background: "rgba(239,68,68,0.08)",
+//           // border: "1px solid rgba(239,68,68,0.18)",
+//           color: "#ef4444", cursor: "pointer",
+//           display: "flex", alignItems: "center", justifyContent: "center",
+//           transition: "all 0.2s",
+//         }}
+//         onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.2)"; }}
+//         onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
+//       >
+//         <Trash2 size={8} />
+//       </button>
+//       {errorMsg && (
+//         <div style={{
+//           position: "absolute", top: 28, right: 0, width: 200,
+//           background: "#1a1a1a", border: "1px solid rgba(239,68,68,0.3)",
+//           color: "#f87171", fontSize: 11, borderRadius: 10,
+//           padding: "8px 12px", zIndex: 20,
+//         }}>
+//           {errorMsg}
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// /* ────────────────────────────────────────────────
+//    GlassIdeaCard — a single full card (icon + label)
+//    accepts transform props so the parent can
+//    position/rotate it for both stack & spread states
+// ──────────────────────────────────────────────── */
+// function GlassIdeaCard({ idea, style, isModerator, token, onDeleted, formatDate }) {
+//   const accent = CATEGORY_ACCENT[idea.category] || {
+//     from: "#26F2D0", to: "#0891b2", glow: "rgba(38,242,208,0.5)",
+//   };
+
+
+
+
+// const proposedBy = idea.classProposal ? (
+//   <span className="flex items-center gap-2">
+//     <Building2 size={16} />
+//     {idea.proposalClass}
+//   </span>
+// ) : (
+//   <span className="flex items-center gap-2">
+//     <GraduationCap size={16} />
+
+//     {idea.createdByName}
+//   </span>
+// );
+
+
+
+
+
+//   const proposedBySubtext = idea.classProposal
+//     ? `Class Proposal · ${idea.category}`
+//     : `${idea.createdByBranch} · ${idea.createdByYear}`;
+
+//   return (
+//     <div
+//       style={{
+//         position: "absolute",
+//         width: 200,
+//         height: 250,
+//         borderRadius: 16,
+//         background: "linear-gradient(160deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 60%, rgba(0,0,0,0.15) 100%)",
+//         border: "1px solid rgba(255,255,255,0.13)",
+//         boxShadow: "0 20px 40px rgba(0,0,0,0.45), 0 0 0 0.5px rgba(255,255,255,0.06) inset",
+//         backdropFilter: "blur(14px)",
+//         WebkitBackdropFilter: "blur(14px)",
+//         overflow: "hidden",
+//         cursor: "default",
+//         display: "flex",
+//         flexDirection: "column",
+//         /* transition handles both stack→spread and spread→stack */
+//         transition: "transform 0.55s cubic-bezier(0.34,1.1,0.64,1)",
+//         ...style,
+//       }}
+//     >
+//       {/* category colour top bar */}
+//       <div style={{
+//         height: 3, flexShrink: 0,
+//         background: `linear-gradient(90deg, ${accent.from}, ${accent.to})`,
+//         boxShadow: `0 0 10px ${accent.glow}`,
+//       }} />
+
+//       {/* image or icon */}
+//       {idea.showcaseImageUrl ? (
+//         <div style={{ height: 96, flexShrink: 0, position: "relative", overflow: "hidden" }}>
+//           <img
+//             src={idea.showcaseImageUrl}
+//             alt={idea.title}
+//             style={{ width: "100%", height: "100%", objectFit: "cover" }}
+//           />
+//           <div style={{
+//             position: "absolute", inset: 0,
+//             background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
+//           }} />
+//           <span style={{
+//             position: "absolute", bottom: 6, left: 8,
+//             fontSize: 9, padding: "2px 7px", borderRadius: 999,
+//             background: "rgba(34,197,94,0.8)", color: "white", fontWeight: 600,
+//           }}>
+//             ✅ Implemented
+//           </span>
+//         </div>
+//       ) : (
+//         <div style={{
+//           height: 80, flexShrink: 0,
+//           display: "flex", alignItems: "center", justifyContent: "center",
+//           background: `linear-gradient(135deg, ${accent.from}18, ${accent.to}0a)`,
+//           borderBottom: "1px solid rgba(255,255,255,0.06)",
+//         }}>
+//           <img
+//             src={CATEGORY_ICONS[idea.category] || "/others.png"}
+//             style={{ width: 40, height: 40, objectFit: "contain", opacity: 0.7 }}
+//             alt=""
+//           />
+//         </div>
+//       )}
+
+//       {/* body */}
+//       <div style={{ padding: "10px 12px", flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+//         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 6 }}>
+//           <p style={{
+//             color: "white", fontWeight: 700, fontSize: 12, lineHeight: 1.3,
+//             margin: 0, flex: 1,
+//             display: "-webkit-box", WebkitLineClamp: 2,
+//             WebkitBoxOrient: "vertical", overflow: "hidden",
+//           }}>
+//             {idea.title}
+//           </p>
+//           {idea.showcaseLink && (
+//             <a
+//               href={idea.showcaseLink}
+//               target="_blank"
+//               rel="noopener noreferrer"
+//               onClick={e => e.stopPropagation()}
+//               style={{
+//                 flexShrink: 0, display: "flex", alignItems: "center", gap: 3,
+//                 padding: "3px 7px", borderRadius: 8,
+//                 background: "rgba(255,255,255,0.08)",
+//                 border: "1px solid rgba(255,255,255,0.12)",
+//                 color: "#9ca3af", fontSize: 10, textDecoration: "none",
+//                 whiteSpace: "nowrap", transition: "all 0.2s",
+//               }}
+//               onMouseEnter={e => { e.currentTarget.style.color = "#26F2D0"; e.currentTarget.style.background = "rgba(38,242,208,0.12)"; }}
+//               onMouseLeave={e => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+//             >
+//               {getLinkLabel(idea.showcaseLink)}
+//               <ExternalLink size={8} />
+//             </a>
+//           )}
+//         </div>
+
+//         <div style={{ marginTop: "auto" }}>
+//           <p style={{ fontSize: 10, color: "#e5e7eb", fontWeight: 500, margin: 0 }}>{proposedBy}</p>
+//           <p style={{ fontSize: 9, color: "#6b7280", margin: "1px 0 0" }}>{proposedBySubtext}</p>
+//         </div>
+
+//         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+//           <span style={{ fontSize: 10, color: "#26F2D0", fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
+//             <ThumbsUp size={9} /> {idea.likes || 0}
+//           </span>
+//           {idea.reviewedAt && (
+//             <span style={{ fontSize: 9, color: "#4b5563", display: "flex", alignItems: "center", gap: 3 }}>
+//               <Calendar size={8} />
+//               {formatDate(idea.reviewedAt)}
+//             </span>
+//           )}
+//         </div>
+//       </div>
+
+//       {/* bottom label bar */}
+//       <div style={{
+//         height: 36, flexShrink: 0,
+//         background: "rgba(255,255,255,0.05)",
+//         borderTop: "1px solid rgba(255,255,255,0.07)",
+//         display: "flex", alignItems: "center", justifyContent: "center",
+//         gap: 6,
+//       }}>
+//         <span style={{
+//           fontSize: 10, color: "#d1d5db", fontWeight: 500,
+//           letterSpacing: "0.06em", textTransform: "uppercase",
+//         }}>
+//           {idea.category || "Idea"}
+//         </span>
+//         {isModerator && (
+//           <ShowcaseDeleteButton ideaId={idea.id} token={token} onDeleted={onDeleted} />
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+// /* ════════════════════════════════════════════════════════
+//    HomeIdeaCard
+//    --------------------------------------------------------
+//    Props:
+//      ideas       — array of idea objects (the whole group)
+//      isModerator — bool
+//      token       — auth token
+//      onDeleted   — callback
+//      formatDate  — date formatter fn
+
+//    Default  → cards stacked as a fanned deck (image 1)
+//    On hover → all cards spread flat side-by-side (image 2)
+//    No individual card hover effects — group only.
+// ════════════════════════════════════════════════════════ */
+
+// const CARD_W   = 200;   // card width
+// const CARD_GAP = 20;    // gap between cards when spread
+
+// /*
+//   Stack transforms per index (for up to 5 cards):
+//   The last card (highest index) is on top with no rotation.
+//   Earlier cards peek behind with slight rotation & offset.
+// */
+// const STACK_TRANSFORMS = [
+//   { rotate: -15, x: -30, y: 20, z: 1 },   // furthest back / left
+//   { rotate: -8,  x: -14, y: 10, z: 2 },
+//   { rotate:  0,  x:   0, y:  0, z: 3 },   // top card — front face
+//   { rotate:  8,  x:  14, y: 10, z: 2 },
+//   { rotate:  15, x:  30, y: 20, z: 1 },
+// ];
+
+// const HomeIdeaCard = ({
+//   ideas = [],
+//   isModerator,
+//   token,
+//   onDeleted,
+//   formatDate
+// }) => {
+//   const [hovered, setHovered] = useState(false);
+//   const [expanded, setExpanded] = useState(false);
+
+//   const isMobile = window.innerWidth < 768;
+
+//   const count = ideas.length;
+//   const spreadW = count * CARD_W + (count - 1) * CARD_GAP;
+
+//   return (
+//     <div
+//       style={{
+//         position: "relative",
+
+//         width: isMobile
+//           ? (expanded ? "100%" : CARD_W + 40)
+//           : (hovered ? spreadW : CARD_W + 40),
+
+//         height: 260,
+
+//         overflowX: isMobile && expanded ? "auto" : "visible",
+
+//         display: "flex",
+//         alignItems: "center",
+
+//         // 🔥 KEY FIX: left align when expanded
+//         justifyContent: isMobile
+//           ? (expanded ? "flex-start" : "center")
+//           : "center",
+
+//         gap: isMobile && expanded ? CARD_GAP : 0,
+//         padding: isMobile && expanded ? "0 10px" : 0,
+
+//         WebkitOverflowScrolling: "touch",
+
+//         margin: "0 auto",
+//         transition: "all 0.4s ease",
+//         cursor: "pointer"
+//       }}
+
+//       // Desktop
+//       onMouseEnter={() => !isMobile && setHovered(true)}
+//       onMouseLeave={() => !isMobile && setHovered(false)}
+
+//       // Mobile click
+//       onClick={() => isMobile && !expanded && setExpanded(true)}
+//     >
+
+//       {/* ❌ Close Button */}
+//       {isMobile && expanded && (
+//         <div
+//           onClick={(e) => {
+//             e.stopPropagation();
+//             setExpanded(false);
+//           }}
+//           style={{
+//             position: "absolute",
+//             top: 10,
+//             right: 15,
+//             zIndex: 100,
+//             background: "rgba(0,0,0,0.6)",
+//             color: "#fff",
+//             borderRadius: "50%",
+//             width: 28,
+//             height: 28,
+//             display: "flex",
+//             alignItems: "center",
+//             justifyContent: "center",
+//             fontSize: 16,
+//             cursor: "pointer"
+//           }}
+//         >
+//           ✕
+//         </div>
+//       )}
+
+//       {ideas.map((idea, i) => {
+//         const spreadX =
+//           i * (CARD_W + CARD_GAP) - (spreadW - CARD_W) / 2;
+//         const spreadTransform = `translateX(${spreadX}px) rotate(0deg)`;
+
+//         const adjustedSlot =
+//           STACK_TRANSFORMS[
+//             Math.round(
+//               (i / Math.max(count - 1, 1)) *
+//               (STACK_TRANSFORMS.length - 1)
+//             )
+//           ] || STACK_TRANSFORMS[0];
+
+//         const stackTransform = `translateX(${adjustedSlot.x}px) translateY(${adjustedSlot.y}px) rotate(${adjustedSlot.rotate}deg)`;
+
+//         // 🔥 FINAL TRANSFORM FIX
+//         const transformStyle = isMobile
+//           ? (expanded ? "none" : stackTransform)
+//           : (hovered ? spreadTransform : stackTransform);
+
+//         return (
+//           <GlassIdeaCard
+//             key={idea.id}
+//             idea={idea}
+//             isModerator={isModerator}
+//             token={token}
+//             onDeleted={onDeleted}
+//             formatDate={formatDate}
+//             style={{
+//               transform: transformStyle,
+
+//               zIndex: isMobile
+//                 ? (expanded ? 1 : adjustedSlot.z)
+//                 : (hovered ? i + 1 : adjustedSlot.z),
+
+//               // 🔥 CRITICAL FOR SCROLL
+//               minWidth: isMobile && expanded ? CARD_W : undefined,
+//               flexShrink: isMobile && expanded ? 0 : undefined
+//             }}
+//           />
+//         );
+//       })}
+//     </div>
+//   );
+// };
+
+// export default HomeIdeaCard;
+
+
+import { ExternalLink, Trash2, ThumbsUp, Calendar, GraduationCap, Building2 } from "lucide-react";
+import { useState, useEffect,useRef  } from "react";
 
 /* ── Category config ── */
 const CATEGORY_ICONS = {
@@ -1037,370 +1502,449 @@ const getLinkLabel = (url) => {
   return "🔗 View";
 };
 
-/* ── Delete button ── */
-const ShowcaseDeleteButton = ({ ideaId, token, onDeleted }) => {
-  const [confirm,  setConfirm]  = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-
-  const handleDelete = async (e) => {
-    e.stopPropagation();
-    setDeleting(true);
-    setErrorMsg("");
-    try {
-      const res = await fetch(`http://localhost:8081/api/ideas/${ideaId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        onDeleted(ideaId);
-      } else if (res.status === 403) {
-        setConfirm(false);
-        setErrorMsg("Seems you are not the one who implemented this idea.");
-        setTimeout(() => setErrorMsg(""), 3000);
-      }
-    } catch (err) {
-      console.error("Delete failed:", err);
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  if (confirm) {
-    return (
-      <div style={{ position: "relative" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 4 }} onClick={e => e.stopPropagation()}>
-          <span style={{ fontSize: 11, color: "#9ca3af" }}>Remove?</span>
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            style={{
-              fontSize: 11, color: "#f87171", fontWeight: 600,
-              padding: "2px 8px", borderRadius: 999,
-              background: "rgba(239,68,68,0.12)",
-              border: "1px solid rgba(239,68,68,0.25)",
-              cursor: "pointer", opacity: deleting ? 0.5 : 1,
-            }}
-          >
-            {deleting ? "..." : "Yes"}
-          </button>
-          <button
-            onClick={e => { e.stopPropagation(); setConfirm(false); }}
-            style={{
-              fontSize: 11, color: "#6b7280", padding: "2px 8px",
-              borderRadius: 999, background: "rgba(255,255,255,0.06)",
-              border: "none", cursor: "pointer",
-            }}
-          >
-            No
-          </button>
-        </div>
-        {errorMsg && (
-          <div style={{
-            position: "absolute", top: 28, right: 0, width: 200,
-            background: "#1a1a1a", border: "1px solid rgba(239,68,68,0.3)",
-            color: "#f87171", fontSize: 11, borderRadius: 10,
-            padding: "8px 12px", zIndex: 20,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-          }}>
-            {errorMsg}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ position: "relative" }}>
-      <button
-        onClick={e => { e.stopPropagation(); setConfirm(true); }}
-        title="Remove from showcase"
-        style={{
-          padding: 6, borderRadius: 0,
-          // background: "rgba(239,68,68,0.08)",
-          // border: "1px solid rgba(239,68,68,0.18)",
-          color: "#ef4444", cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          transition: "all 0.2s",
-        }}
-        onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.2)"; }}
-        onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
-      >
-        <Trash2 size={8} />
-      </button>
-      {errorMsg && (
-        <div style={{
-          position: "absolute", top: 28, right: 0, width: 200,
-          background: "#1a1a1a", border: "1px solid rgba(239,68,68,0.3)",
-          color: "#f87171", fontSize: 11, borderRadius: 10,
-          padding: "8px 12px", zIndex: 20,
-        }}>
-          {errorMsg}
-        </div>
-      )}
-    </div>
-  );
-};
-
-/* ────────────────────────────────────────────────
-   GlassIdeaCard — a single full card (icon + label)
-   accepts transform props so the parent can
-   position/rotate it for both stack & spread states
-──────────────────────────────────────────────── */
-function GlassIdeaCard({ idea, style, isModerator, token, onDeleted, formatDate }) {
+/* ─────────────────────────────────────────────
+   GlassIdeaCard
+   position:absolute — used in stacked + desktop spread
+   isModerator is gone — no delete button anywhere on Home
+───────────────────────────────────────────── */
+function GlassIdeaCard({ idea, style, formatDate }) {
   const accent = CATEGORY_ACCENT[idea.category] || {
     from: "#26F2D0", to: "#0891b2", glow: "rgba(38,242,208,0.5)",
   };
 
-
-
-
-const proposedBy = idea.classProposal ? (
-  <span className="flex items-center gap-2">
-    <Building2 size={16} />
-    {idea.proposalClass}
-  </span>
-) : (
-  <span className="flex items-center gap-2">
-    <GraduationCap size={16} />
-
-    {idea.createdByName}
-  </span>
-);
-
-
-
-
+  const proposedBy = idea.classProposal ? (
+    <span style={{ display:"flex", alignItems:"center", gap:4 }}>
+      <Building2 size={13} /> {idea.proposalClass}
+    </span>
+  ) : (
+    <span style={{ display:"flex", alignItems:"center", gap:4 }}>
+      <GraduationCap size={13} /> {idea.createdByName}
+    </span>
+  );
 
   const proposedBySubtext = idea.classProposal
     ? `Class Proposal · ${idea.category}`
     : `${idea.createdByBranch} · ${idea.createdByYear}`;
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        width: 200,
-        height: 250,
-        borderRadius: 16,
-        background: "linear-gradient(160deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 60%, rgba(0,0,0,0.15) 100%)",
-        border: "1px solid rgba(255,255,255,0.13)",
-        boxShadow: "0 20px 40px rgba(0,0,0,0.45), 0 0 0 0.5px rgba(255,255,255,0.06) inset",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
-        overflow: "hidden",
-        cursor: "default",
-        display: "flex",
-        flexDirection: "column",
-        /* transition handles both stack→spread and spread→stack */
-        transition: "transform 0.55s cubic-bezier(0.34,1.1,0.64,1)",
-        ...style,
-      }}
-    >
-      {/* category colour top bar */}
-      <div style={{
-        height: 3, flexShrink: 0,
-        background: `linear-gradient(90deg, ${accent.from}, ${accent.to})`,
-        boxShadow: `0 0 10px ${accent.glow}`,
-      }} />
+    <div style={{
+      position: "absolute",
+      width: 200, height: 250,
+      borderRadius: 16,
+      background: "linear-gradient(160deg,rgba(255,255,255,0.10) 0%,rgba(255,255,255,0.04) 60%,rgba(0,0,0,0.15) 100%)",
+      border: "1px solid rgba(255,255,255,0.13)",
+      boxShadow: "0 20px 40px rgba(0,0,0,0.45),0 0 0 0.5px rgba(255,255,255,0.06) inset",
+      backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
+      overflow: "hidden", cursor: "default",
+      display: "flex", flexDirection: "column",
+      transition: "transform 0.55s cubic-bezier(0.34,1.1,0.64,1)",
+      ...style,
+    }}>
+      <div style={{ height:3, flexShrink:0,
+        background:`linear-gradient(90deg,${accent.from},${accent.to})`,
+        boxShadow:`0 0 10px ${accent.glow}` }} />
 
-      {/* image or icon */}
       {idea.showcaseImageUrl ? (
-        <div style={{ height: 96, flexShrink: 0, position: "relative", overflow: "hidden" }}>
-          <img
-            src={idea.showcaseImageUrl}
-            alt={idea.title}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
-          }} />
-          <span style={{
-            position: "absolute", bottom: 6, left: 8,
-            fontSize: 9, padding: "2px 7px", borderRadius: 999,
-            background: "rgba(34,197,94,0.8)", color: "white", fontWeight: 600,
-          }}>
+        <div style={{ height:96, flexShrink:0, position:"relative", overflow:"hidden" }}>
+          <img src={idea.showcaseImageUrl} alt={idea.title}
+            style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+          <div style={{ position:"absolute", inset:0,
+            background:"linear-gradient(to top,rgba(0,0,0,0.6),transparent)" }} />
+          <span style={{ position:"absolute", bottom:6, left:8,
+            fontSize:9, padding:"2px 7px", borderRadius:999,
+            background:"rgba(34,197,94,0.8)", color:"white", fontWeight:600 }}>
             ✅ Implemented
           </span>
         </div>
       ) : (
-        <div style={{
-          height: 80, flexShrink: 0,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          background: `linear-gradient(135deg, ${accent.from}18, ${accent.to}0a)`,
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-        }}>
-          <img
-            src={CATEGORY_ICONS[idea.category] || "/others.png"}
-            style={{ width: 40, height: 40, objectFit: "contain", opacity: 0.7 }}
-            alt=""
-          />
+        <div style={{ height:80, flexShrink:0,
+          display:"flex", alignItems:"center", justifyContent:"center",
+          background:`linear-gradient(135deg,${accent.from}18,${accent.to}0a)`,
+          borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
+          <img src={CATEGORY_ICONS[idea.category] || "/others.png"}
+            style={{ width:40, height:40, objectFit:"contain", opacity:0.7 }} alt="" />
         </div>
       )}
 
-      {/* body */}
-      <div style={{ padding: "10px 12px", flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 6 }}>
-          <p style={{
-            color: "white", fontWeight: 700, fontSize: 12, lineHeight: 1.3,
-            margin: 0, flex: 1,
-            display: "-webkit-box", WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical", overflow: "hidden",
-          }}>
+      <div style={{ padding:"10px 12px", flex:1, display:"flex", flexDirection:"column", gap:6 }}>
+        <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:6 }}>
+          <p style={{ color:"white", fontWeight:700, fontSize:12, lineHeight:1.3,
+            margin:0, flex:1,
+            display:"-webkit-box", WebkitLineClamp:2,
+            WebkitBoxOrient:"vertical", overflow:"hidden" }}>
             {idea.title}
           </p>
           {idea.showcaseLink && (
-            <a
-              href={idea.showcaseLink}
-              target="_blank"
-              rel="noopener noreferrer"
+            <a href={idea.showcaseLink} target="_blank" rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              style={{
-                flexShrink: 0, display: "flex", alignItems: "center", gap: 3,
-                padding: "3px 7px", borderRadius: 8,
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                color: "#9ca3af", fontSize: 10, textDecoration: "none",
-                whiteSpace: "nowrap", transition: "all 0.2s",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.color = "#26F2D0"; e.currentTarget.style.background = "rgba(38,242,208,0.12)"; }}
-              onMouseLeave={e => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-            >
+              style={{ flexShrink:0, display:"flex", alignItems:"center", gap:3,
+                padding:"3px 7px", borderRadius:8,
+                background:"rgba(255,255,255,0.08)",
+                border:"1px solid rgba(255,255,255,0.12)",
+                color:"#9ca3af", fontSize:10, textDecoration:"none",
+                whiteSpace:"nowrap", transition:"all 0.2s" }}
+              onMouseEnter={e => { e.currentTarget.style.color="#26F2D0"; e.currentTarget.style.background="rgba(38,242,208,0.12)"; }}
+              onMouseLeave={e => { e.currentTarget.style.color="#9ca3af"; e.currentTarget.style.background="rgba(255,255,255,0.08)"; }}>
               {getLinkLabel(idea.showcaseLink)}
               <ExternalLink size={8} />
             </a>
           )}
         </div>
 
-        <div style={{ marginTop: "auto" }}>
-          <p style={{ fontSize: 10, color: "#e5e7eb", fontWeight: 500, margin: 0 }}>{proposedBy}</p>
-          <p style={{ fontSize: 9, color: "#6b7280", margin: "1px 0 0" }}>{proposedBySubtext}</p>
+        <div style={{ marginTop:"auto" }}>
+          <p style={{ fontSize:10, color:"#e5e7eb", fontWeight:500, margin:0 }}>{proposedBy}</p>
+          <p style={{ fontSize:9, color:"#6b7280", margin:"1px 0 0" }}>{proposedBySubtext}</p>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontSize: 10, color: "#26F2D0", fontWeight: 700, display: "flex", alignItems: "center", gap: 3 }}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <span style={{ fontSize:10, color:"#26F2D0", fontWeight:700, display:"flex", alignItems:"center", gap:3 }}>
             <ThumbsUp size={9} /> {idea.likes || 0}
           </span>
           {idea.reviewedAt && (
-            <span style={{ fontSize: 9, color: "#4b5563", display: "flex", alignItems: "center", gap: 3 }}>
-              <Calendar size={8} />
-              {formatDate(idea.reviewedAt)}
+            <span style={{ fontSize:9, color:"#4b5563", display:"flex", alignItems:"center", gap:3 }}>
+              <Calendar size={8} /> {formatDate(idea.reviewedAt)}
             </span>
           )}
         </div>
       </div>
 
-      {/* bottom label bar */}
-      <div style={{
-        height: 36, flexShrink: 0,
-        background: "rgba(255,255,255,0.05)",
-        borderTop: "1px solid rgba(255,255,255,0.07)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        gap: 6,
-      }}>
-        <span style={{
-          fontSize: 10, color: "#d1d5db", fontWeight: 500,
-          letterSpacing: "0.06em", textTransform: "uppercase",
-        }}>
+      {/* bottom label — no delete button */}
+      <div style={{ height:36, flexShrink:0,
+        background:"rgba(255,255,255,0.05)",
+        borderTop:"1px solid rgba(255,255,255,0.07)",
+        display:"flex", alignItems:"center", justifyContent:"center" }}>
+        <span style={{ fontSize:10, color:"#d1d5db", fontWeight:500,
+          letterSpacing:"0.06em", textTransform:"uppercase" }}>
           {idea.category || "Idea"}
         </span>
-        {isModerator && (
-          <ShowcaseDeleteButton ideaId={idea.id} token={token} onDeleted={onDeleted} />
-        )}
       </div>
     </div>
   );
 }
 
-/* ════════════════════════════════════════════════════════
-   HomeIdeaCard
-   --------------------------------------------------------
-   Props:
-     ideas       — array of idea objects (the whole group)
-     isModerator — bool
-     token       — auth token
-     onDeleted   — callback
-     formatDate  — date formatter fn
+/* ─────────────────────────────────────────────
+   MobileScrollCard
+   position:relative — used inside the horizontal
+   scroll row so cards take up real space
+───────────────────────────────────────────── */
+function MobileScrollCard({ idea, formatDate }) {
+  const accent = CATEGORY_ACCENT[idea.category] || {
+    from: "#26F2D0", to: "#0891b2", glow: "rgba(38,242,208,0.5)",
+  };
 
-   Default  → cards stacked as a fanned deck (image 1)
-   On hover → all cards spread flat side-by-side (image 2)
-   No individual card hover effects — group only.
-════════════════════════════════════════════════════════ */
+  const proposedBy = idea.classProposal ? (
+    <span style={{ display:"flex", alignItems:"center", gap:4 }}>
+      <Building2 size={13} /> {idea.proposalClass}
+    </span>
+  ) : (
+    <span style={{ display:"flex", alignItems:"center", gap:4 }}>
+      <GraduationCap size={13} /> {idea.createdByName}
+    </span>
+  );
 
-const CARD_W   = 200;   // card width
-const CARD_GAP = 20;    // gap between cards when spread
+  const proposedBySubtext = idea.classProposal
+    ? `Class Proposal · ${idea.category}`
+    : `${idea.createdByBranch} · ${idea.createdByYear}`;
 
-/*
-  Stack transforms per index (for up to 5 cards):
-  The last card (highest index) is on top with no rotation.
-  Earlier cards peek behind with slight rotation & offset.
-*/
+  return (
+    <div style={{
+      position: "relative",          // KEY: real space for scroll
+      width: 200, minWidth: 200,
+      flexShrink: 0, height: 250,
+      borderRadius: 16,
+      background: "linear-gradient(160deg,rgba(255,255,255,0.10) 0%,rgba(255,255,255,0.04) 60%,rgba(0,0,0,0.15) 100%)",
+      border: "1px solid rgba(255,255,255,0.13)",
+      boxShadow: "0 20px 40px rgba(0,0,0,0.45),0 0 0 0.5px rgba(255,255,255,0.06) inset",
+      backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
+      overflow: "hidden", display: "flex", flexDirection: "column",
+      scrollSnapAlign: "start",
+      animation: "cardSlideIn 0.4s cubic-bezier(0.34,1.1,0.64,1) both",
+    }}>
+      <div style={{ height:3, flexShrink:0,
+        background:`linear-gradient(90deg,${accent.from},${accent.to})`,
+        boxShadow:`0 0 10px ${accent.glow}` }} />
+
+      {idea.showcaseImageUrl ? (
+        <div style={{ height:96, flexShrink:0, position:"relative", overflow:"hidden" }}>
+          <img src={idea.showcaseImageUrl} alt={idea.title}
+            style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+          <div style={{ position:"absolute", inset:0,
+            background:"linear-gradient(to top,rgba(0,0,0,0.6),transparent)" }} />
+          <span style={{ position:"absolute", bottom:6, left:8,
+            fontSize:9, padding:"2px 7px", borderRadius:999,
+            background:"rgba(34,197,94,0.8)", color:"white", fontWeight:600 }}>
+            ✅ Implemented
+          </span>
+        </div>
+      ) : (
+        <div style={{ height:80, flexShrink:0,
+          display:"flex", alignItems:"center", justifyContent:"center",
+          background:`linear-gradient(135deg,${accent.from}18,${accent.to}0a)`,
+          borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
+          <img src={CATEGORY_ICONS[idea.category] || "/others.png"}
+            style={{ width:40, height:40, objectFit:"contain", opacity:0.7 }} alt="" />
+        </div>
+      )}
+
+      <div style={{ padding:"10px 12px", flex:1, display:"flex", flexDirection:"column", gap:6 }}>
+        <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:6 }}>
+          <p style={{ color:"white", fontWeight:700, fontSize:12, lineHeight:1.3,
+            margin:0, flex:1,
+            display:"-webkit-box", WebkitLineClamp:2,
+            WebkitBoxOrient:"vertical", overflow:"hidden" }}>
+            {idea.title}
+          </p>
+          {idea.showcaseLink && (
+            <a href={idea.showcaseLink} target="_blank" rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              style={{ flexShrink:0, display:"flex", alignItems:"center", gap:3,
+                padding:"3px 7px", borderRadius:8,
+                background:"rgba(255,255,255,0.08)",
+                border:"1px solid rgba(255,255,255,0.12)",
+                color:"#9ca3af", fontSize:10, textDecoration:"none",
+                whiteSpace:"nowrap" }}>
+              {getLinkLabel(idea.showcaseLink)}
+              <ExternalLink size={8} />
+            </a>
+          )}
+        </div>
+
+        <div style={{ marginTop:"auto" }}>
+          <p style={{ fontSize:10, color:"#e5e7eb", fontWeight:500, margin:0 }}>{proposedBy}</p>
+          <p style={{ fontSize:9, color:"#6b7280", margin:"1px 0 0" }}>{proposedBySubtext}</p>
+        </div>
+
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <span style={{ fontSize:10, color:"#26F2D0", fontWeight:700, display:"flex", alignItems:"center", gap:3 }}>
+            <ThumbsUp size={9} /> {idea.likes || 0}
+          </span>
+          {idea.reviewedAt && (
+            <span style={{ fontSize:9, color:"#4b5563", display:"flex", alignItems:"center", gap:3 }}>
+              <Calendar size={8} /> {formatDate(idea.reviewedAt)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div style={{ height:36, flexShrink:0,
+        background:"rgba(255,255,255,0.05)",
+        borderTop:"1px solid rgba(255,255,255,0.07)",
+        display:"flex", alignItems:"center", justifyContent:"center" }}>
+        <span style={{ fontSize:10, color:"#d1d5db", fontWeight:500,
+          letterSpacing:"0.06em", textTransform:"uppercase" }}>
+          {idea.category || "Idea"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ── Stack layout constants ── */
+const CARD_W   = 200;
+const CARD_GAP = 20;
+
 const STACK_TRANSFORMS = [
-  { rotate: -15, x: -30, y: 20, z: 1 },   // furthest back / left
-  { rotate: -8,  x: -14, y: 10, z: 2 },
-  { rotate:  0,  x:   0, y:  0, z: 3 },   // top card — front face
-  { rotate:  8,  x:  14, y: 10, z: 2 },
-  { rotate:  15, x:  30, y: 20, z: 1 },
+  { rotate:-15, x:-30, y:20, z:1 },
+  { rotate: -8, x:-14, y:10, z:2 },
+  { rotate:  0, x:  0, y: 0, z:3 },
+  { rotate:  8, x: 14, y:10, z:2 },
+  { rotate: 15, x: 30, y:20, z:1 },
 ];
 
-const HomeIdeaCard = ({ ideas = [], isModerator, token, onDeleted, formatDate }) => {
-  const [hovered, setHovered] = useState(false);
+/* ══════════════════════════════════════════════════════════════
+   HomeIdeaCard
+   ─────────────────────────────────────────────────────────────
+   Props: ideas, token, formatDate, onDeleted
+   NOTE: isModerator is intentionally NOT accepted here.
+         No one can delete from Home — admin uses AdminDashboard.
+
+   MOBILE:
+     default   → stacked fan, tap to expand
+     expanded  → horizontal scroll row, ✕ sits ABOVE the row
+                 (not inside it, so it never overlaps cards)
+
+   DESKTOP:
+     default   → stacked fan
+     hover     → spread side by side
+══════════════════════════════════════════════════════════════ */
+const HomeIdeaCard = ({ ideas = [], token, formatDate, onDeleted }) => {
+  const [hovered,  setHovered]  = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+const [scrollLeft, setScrollLeft] = useState(0);
+const scrollRef = useRef(null)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const count   = ideas.length;
-  // total width when spread: N cards + (N-1) gaps
   const spreadW = count * CARD_W + (count - 1) * CARD_GAP;
 
-return (
-  <div
-    style={{
-      position: "relative",
-      width: hovered ? spreadW : CARD_W + 40,
-      height: 260,
-      // ✅ MOBILE SCROLL ONLY (inline media query alternative)
-      maxWidth: window.innerWidth < 768 ? "100vw" : spreadW,
-      overflowX: window.innerWidth < 768 && hovered ? "auto" : "visible",
-      WebkitOverflowScrolling: "touch",
-      scrollbarWidth: "thin",
-      msOverflowStyle: "none",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      cursor: "pointer",
-      margin: "0 auto",
-      transition: "width 0.4s ease"
-    }}
-    onMouseEnter={() => setHovered(true)}
-    onMouseLeave={() => setHovered(false)}
-  >
+  /* ── MOBILE EXPANDED ── */
+  if (isMobile && expanded) {
+    return (
+      /*
+        Outer wrapper:
+        position:relative so the ✕ button anchors to THIS box,
+        NOT to a card inside the scroll row. This is the overlap fix.
+        The ✕ sits at top-right of the wrapper, completely outside
+        the scrollable area.
+      */
+      <div style={{ position:"relative", width:"100%" }}>
 
+        {/* ✕ — anchored to outer wrapper, above the scroll row */}
+        <button
+          onClick={() => setExpanded(false)}
+          style={{
+            position: "absolute",
+            top: -16,               // sits just above the scroll row
+            right: 12,
+            zIndex: 50,
+            background: "rgba(20,20,24,0.9)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            color: "#e5e7eb",
+            borderRadius: "50%",
+            width: 30, height: 30,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 15, cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+            transition: "background 0.2s",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background="rgba(239,68,68,0.25)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background="rgba(20,20,24,0.9)"; }}
+        >
+          ✕
+        </button>
+
+        {/* Scroll row — cards are position:relative, flex children */}
+        <div style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: CARD_GAP,
+          overflowX: "auto",
+          overflowY: "visible",
+          WebkitOverflowScrolling: "touch",
+          scrollSnapType: "x mandatory",
+          padding: "18px 20px 14px",   // top padding gives room for ✕ button
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
+        onScroll={(e) => setScrollLeft(e.target.scrollLeft)}  // ADD THIS
+  ref={scrollRef}  // ADD THIS (add const scrollRef = useRef(null); at top)
+   >
+          {ideas.map(idea => (
+            <MobileScrollCard
+              key={idea.id}
+              idea={idea}
+              formatDate={formatDate}
+            />
+          ))}
+        </div>
+
+        {/* Scroll indicator dots */}
+{/* Scroll indicator dots */}
+{count > 1 && (
+  <div style={{ display:"flex", justifyContent:"center", gap:5, marginTop:8 }}>
+    {ideas.map((_, i) => {
+      const activeIndex = Math.round(scrollLeft / (CARD_W + CARD_GAP));
+      const active = i === activeIndex;
+
+      return (
+        <div
+          key={i}
+          style={{
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: active ? "#26F2D0" : "rgba(255,255,255,0.2)",
+            transition: "background 0.2s ease",
+          }}
+        />
+      );
+    })}
+  </div>
+)}
+      </div>
+    );
+  }
+
+  /* ── MOBILE STACKED (default) ── */
+  if (isMobile) {
+    return (
+      <div
+        onClick={() => setExpanded(true)}
+        style={{
+          position: "relative",
+          width: CARD_W + 40, height: 260,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", margin: "0 auto",
+        }}
+      >
+        {/* tap hint */}
+        <div style={{
+          position:"absolute", bottom:4, left:"50%",
+          transform:"translateX(-50%)",
+          fontSize:9, color:"rgba(255,255,255,0.25)",
+          letterSpacing:"0.06em", textTransform:"uppercase",
+          whiteSpace:"nowrap", pointerEvents:"none",
+        }}>
+          tap to explore
+        </div>
+
+        {ideas.map((idea, i) => {
+          const slot = STACK_TRANSFORMS[
+            Math.round((i / Math.max(count - 1, 1)) * (STACK_TRANSFORMS.length - 1))
+          ] || STACK_TRANSFORMS[0];
+
+          return (
+            <GlassIdeaCard
+              key={idea.id}
+              idea={idea}
+              formatDate={formatDate}
+              style={{
+                transform: `translateX(${slot.x}px) translateY(${slot.y}px) rotate(${slot.rotate}deg)`,
+                zIndex: slot.z,
+              }}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
+  /* ── DESKTOP — stack → hover spread (unchanged) ── */
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: spreadW, height: 260,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        margin: "0 60px",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       {ideas.map((idea, i) => {
-        /* ── SPREAD position (hover) ── */
-        const spreadX = i * (CARD_W + CARD_GAP) - (spreadW - CARD_W) / 2;
+        const spreadX      = i * (CARD_W + CARD_GAP) - (spreadW - CARD_W) / 2;
         const spreadTransform = `translateX(${spreadX}px) rotate(0deg)`;
-
-        /* ── STACK position (default) ── */
-        // Pick a stack slot; centre the top card
-        const slotIndex = Math.min(i, STACK_TRANSFORMS.length - 1);
-        const slot = STACK_TRANSFORMS[slotIndex];
-        // bring the "top" card (last in array) to index 2 slot (front)
-        const adjustedSlot = STACK_TRANSFORMS[
+        const slot = STACK_TRANSFORMS[
           Math.round((i / Math.max(count - 1, 1)) * (STACK_TRANSFORMS.length - 1))
-        ] || slot;
-
-        const stackTransform = `translateX(${adjustedSlot.x}px) translateY(${adjustedSlot.y}px) rotate(${adjustedSlot.rotate}deg)`;
+        ] || STACK_TRANSFORMS[0];
+        const stackTransform  = `translateX(${slot.x}px) translateY(${slot.y}px) rotate(${slot.rotate}deg)`;
 
         return (
           <GlassIdeaCard
             key={idea.id}
             idea={idea}
-            isModerator={isModerator}
-            token={token}
-            onDeleted={onDeleted}
             formatDate={formatDate}
             style={{
               transform: hovered ? spreadTransform : stackTransform,
-              zIndex: hovered ? i + 1 : adjustedSlot.z,
+              zIndex:    hovered ? i + 1 : slot.z,
             }}
           />
         );

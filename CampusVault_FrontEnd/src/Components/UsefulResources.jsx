@@ -365,7 +365,7 @@ const AI_TOOLS = [
     name: "Perplexity",
     url: "https://www.perplexity.ai",
     icon: perplexity,
-    tags: ["Search","Knowledge"],
+    tags: ["Search","Knowledge","Business"],
   },
   {
     name: "NotebookLM",
@@ -377,7 +377,7 @@ const AI_TOOLS = [
     name: "Gamma",
     url: "https://gamma.app",
     icon: gamma,
-    tags: ["PPT",],
+    tags: ["PPT","Portfolio"],
   },
   {
     name: "Overleaf",

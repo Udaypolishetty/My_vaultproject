@@ -407,8 +407,8 @@ const HomeClub = ({ isModerator }) => {
               background: "linear-gradient(180deg,#26F2D0,#7c3aed)",
             }} />
             <h2 style={{
-              fontFamily: "'Sora',sans-serif", fontWeight: 800, fontSize: 20,
-              color: "white", margin: 0, letterSpacing: "-0.03em",
+              fontFamily: "'Story Script',sans-serif", fontWeight: 600, fontSize: 20,
+              color: "white", margin: 0, letterSpacing: "-0.01em",
             }}>Active Clubs</h2>
             {/* <span style={{
               fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 999,

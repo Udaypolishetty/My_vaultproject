@@ -11,4 +11,6 @@ public class RegisterRequest {
     private String email;
     private String year;
     private String branch;
+    private String password;      // ✅ student sets own password at registration
+    private String linkedinUrl;   // ✅ required for 4th year, optional otherwise
 }

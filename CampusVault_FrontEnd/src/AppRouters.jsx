@@ -164,7 +164,6 @@ import Access from './Access';
 import AppLayout from "./AppLayout";
 import StudentProfile from "./Components/StudentProfile";
 import Home from "./Components/Home";
-import Update from "./Components/Update";
 import Upload from "./Components/Upload";
 import Resources from "./Components/Resources";
 import About from "./Components/About";
@@ -214,7 +213,7 @@ function AppRouters() {
 
       {/* Public idea page */}
       <Route path="/idea/:id" element={<PublicIdeaPage />} />
-
+      <Route path="/profile" element={<StudentProfile />} />
       <Route path="/profile/:id" element={<AppLayout />}>
         <Route index element={<StudentProfile />} />
         <Route element={<NavbarLayout />}>

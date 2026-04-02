@@ -15,4 +15,5 @@ public interface IdeaRepository extends MongoRepository<Idea, String> {
 
      List<Idea> findTop3ByCreatedByRollNumberOrderByCreatedAtDesc(String rollNumber);
      List<Idea> findByShowcasedTrue();
+     List<Idea> findTop5ByCreatedByRollNumberOrderByLikesDesc(String rollNumber);
 }

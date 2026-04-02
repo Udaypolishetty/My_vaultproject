@@ -26,7 +26,7 @@ public class Idea {
     private String createdByYear;
     private String createdById;      // ✅ added
     private String createdByEmail;   // ✅ added
-    private int likes = 0;
+    private Integer  likes = 0;
     private List<String> likedBy = new ArrayList<>();
     private List<Comment> comments = new ArrayList<>();
     private String createdByRollNumber;

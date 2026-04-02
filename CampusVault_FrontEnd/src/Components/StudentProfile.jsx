@@ -783,6 +783,7 @@
 
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { ShieldCheck, FileText,Eye,EyeOff } from "lucide-react";
 
 /* ─── Validators ───────────────────────────── */
 function getRollError(roll) {
@@ -856,21 +857,21 @@ export default function StudentProfile() {
   const handleRoll = (e) => {
     const v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
     setForm(f => ({ ...f, roll: v }));
-    setErrors(e => ({ ...e, roll: getRollError(v) }));
+    // setErrors(e => ({ ...e, roll: getRollError(v) }));
   };
 
   const validate = () => {
     const e = {};
     if (!form.name.trim())       e.name     = "Full name is required";
     if (!form.degree)            e.degree   = "Select your degree";
-    if (!form.roll)              e.roll     = "Roll number is required";
-    else if (!isValidRoll(form.roll)) e.roll = getRollError(form.roll) || "Must be exactly 10 characters (e.g. 22C71A0577)";
+if (!form.roll)              e.roll     = "Roll number is required";
+else if (!isValidRoll(form.roll)) e.roll = "Invalid roll number/college ID";
     if (!form.email)             e.email    = "Email is required";
     else if (!isValidEmail(form.email)) e.email = "Enter a valid email address";
     if (!form.year)              e.year     = "Select your year";
     if (!form.branch)            e.branch   = "Select your branch";
-    if (!form.password)          e.password = "Password is required";
-    else if (form.password.length < 6) e.password = "Minimum 6 characters";
+if (!form.password)          e.password = "Password is required";
+else if (!isStrongPassword(form.password)) e.password = "Use 8+ chars, uppercase, lowercase, number, special char, no repeated chars";
     if (!form.confirm)           e.confirm  = "Please confirm your password";
     else if (form.confirm !== form.password) e.confirm = "Passwords do not match";
     if (is4thYear) {
@@ -882,6 +883,16 @@ export default function StudentProfile() {
     setErrors(e);
     return Object.keys(e).length === 0;
   };
+
+  const isStrongPassword = (password) => {
+  if (password.length < 8) return false;
+  if (!/[A-Z]/.test(password)) return false;
+  if (!/[a-z]/.test(password)) return false;
+  if (!/[0-9]/.test(password)) return false;
+  if (!/[!@#$%^&*(),.?":{}|<>_\-\\[\]/;'+=]/.test(password)) return false;
+  if (/(.)\1/.test(password)) return false; // blocks aa, 11, @@
+  return true;
+};
 
   const handleSubmit = async () => {
     if (!validate()) return;
@@ -982,7 +993,22 @@ export default function StudentProfile() {
           boxShadow: "0 0 60px rgba(38,242,208,0.1)",
         }}>
           <div style={{ textAlign: "center", marginBottom: 24 }}>
-            <p style={{ fontSize: 36, margin: "0 0 12px" }}>🎓</p>
+
+
+<img
+  src="/cv-logo.png"
+  alt="Campus Vault logo"
+  style={{
+    width: 56,
+    height: 56,
+    objectFit: "contain",
+    display: "block",
+    margin: "0 auto 14px",
+  }}
+/>
+
+
+
             <h2 style={{ color: "white", fontWeight: 800, fontSize: 20, margin: "0 0 8px" }}>
               Welcome to Campus Vault
             </h2>
@@ -991,26 +1017,120 @@ export default function StudentProfile() {
             </p>
           </div>
 
-          <div style={{
-            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)",
-            borderRadius: 14, padding: "18px 20px", marginBottom: 20,
-            display: "flex", flexDirection: "column", gap: 12,
-          }}>
-            {[
-              ["📌", "Your profile is visible to other students for collaboration."],
-              ["💡", "You can post up to 2 ideas per day. Make them count!"],
-              ["📧", "Your email lets other students contact you about your ideas."],
-              ["🏛",  "You can create one club and join up to one other."],
-              ["🔒", "Your password is private. Never share it with anyone."],
-              ["⚠️", "Misuse may result in your profile being permanently removed.", true],
-            ].map(([icon, text, red], i) => (
-              <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                <span style={{ flexShrink: 0, fontSize: 15 }}>{icon}</span>
-                <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6,
-                  color: red ? "#fca5a5" : "#d1d5db" }}>{text}</p>
-              </div>
-            ))}
-          </div>
+
+
+
+
+<div
+  style={{
+    background: "rgba(255,255,255,0.03)",
+    border: "1px solid rgba(255,255,255,0.07)",
+    borderRadius: 14,
+    padding: "16px 18px",
+    marginBottom: 20,
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+  }}
+>
+  <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+    <span
+      style={{
+        flexShrink: 0,
+        width: 18,
+        height: 18,
+        marginTop: 2,
+        color: "#93c5fd",
+      }}
+    >
+      <ShieldCheck size={18} />
+    </span>
+<p
+  style={{
+    margin: 0,
+    fontSize: 13,
+    lineHeight: 1.7,
+    color: "#d1d5db",
+  }}
+>
+  By creating an account, you agree to our{" "}
+  <a
+    href="/terms"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      color: "#93c5fd",
+      textDecoration: "underline",
+      textUnderlineOffset: "3px",
+      fontWeight: 600,
+      cursor: "pointer",
+      transition: "color 0.2s ease, text-decoration-color 0.2s ease",
+    }}
+    onMouseEnter={(e) => {
+      e.target.style.color = "#bfdbfe";
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.color = "#93c5fd";
+    }}
+  >
+    Terms of Service
+  </a>{" "}
+  and{" "}
+  <a
+    href="/privacy"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      color: "#93c5fd",
+      textDecoration: "underline",
+      textUnderlineOffset: "3px",
+      fontWeight: 600,
+      cursor: "pointer",
+      transition: "color 0.2s ease, text-decoration-color 0.2s ease",
+    }}
+    onMouseEnter={(e) => {
+      e.target.style.color = "#bfdbfe";
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.color = "#93c5fd";
+    }}
+  >
+    Privacy Policy
+  </a>
+  .
+</p>
+  </div>
+
+  <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+    <span
+      style={{
+        flexShrink: 0,
+        width: 18,
+        height: 18,
+        marginTop: 2,
+        color: "#fca5a5",
+      }}
+    >
+      <FileText size={18} />
+    </span>
+
+    <p
+      style={{
+        margin: 0,
+        fontSize: 12.5,
+        lineHeight: 1.6,
+        color: "#9ca3af",
+      }}
+    >
+      Please read them carefully before registering.
+    </p>
+  </div>
+</div>
+
+
+
+
+
 
           <label style={{ display: "flex", gap: 12, cursor: "pointer", marginBottom: 20 }}>
             <div onClick={() => setAgreed(a => !a)} style={{
@@ -1022,9 +1142,19 @@ export default function StudentProfile() {
             }}>
               {agreed && <span style={{ color: "black", fontSize: 11, fontWeight: 900 }}>✓</span>}
             </div>
-            <span style={{ color: "#d1d5db", fontSize: 13, lineHeight: 1.6 }}>
-              I have read and agree to the Campus Vault community guidelines and terms of use.
-            </span>
+<span
+  style={{
+    color: "#e5e7eb",
+    fontSize: 13.5,
+    lineHeight: 1.7,
+    fontWeight: 500,
+    letterSpacing: "0.01em",
+    display: "block",
+    maxWidth: 420,
+  }}
+>
+  I have read and agree to the Campus Vault community guidelines and terms of use.
+</span>
           </label>
 
           <button onClick={() => agreed && setStep(2)} disabled={!agreed}
@@ -1107,7 +1237,7 @@ export default function StudentProfile() {
           {/* Degree */}
           <Field label="Degree" required error={errors.degree}>
             <select value={form.degree} onChange={e => set("degree", e.target.value)}
-              style={{ ...inputBase(errors.degree, form.degree), cursor: "pointer" }}>
+              style={{ ...inputBase(errors.degree, form.degree), cursor: "pointer",backgroundColor: "#0f0f0f", color: "#e5e7eb" }}>
               <option value="">Select Degree</option>
               <option value="B.Tech">B.Tech</option>
               <option value="Diploma">Diploma</option>
@@ -1117,12 +1247,13 @@ export default function StudentProfile() {
           </Field>
 
           {/* Roll number */}
-          <Field label="Roll Number" required error={errors.roll}
+          {/* <Field label="Roll Number" required error={errors.roll}
             hint={!errors.roll && form.roll.length > 0 && form.roll.length < 10
               ? `${10 - form.roll.length} more character${10 - form.roll.length !== 1 ? "s" : ""} needed`
-              : !errors.roll && form.roll.length === 10 ? "✓ Valid roll number" : "e.g. 22C71A0577"}>
+              : !errors.roll && form.roll.length === 10 ? "✓ Valid roll number" : ""}> */}
+              <Field label="Roll Number" required error={errors.roll}>
             <div style={{ position: "relative" }}>
-              <input placeholder="e.g. 22C71A0577" value={form.roll}
+              <input placeholder="Enter valid rollno." value={form.roll}
                 onChange={handleRoll} maxLength={10}
                 style={{ ...inputBase(errors.roll, isValidRoll(form.roll)), paddingRight: 44, fontFamily: "monospace" }}
                 onFocus={e => e.target.style.borderColor = "rgba(38,242,208,0.5)"}
@@ -1148,7 +1279,7 @@ export default function StudentProfile() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <Field label="Year" required error={errors.year}>
               <select value={form.year} onChange={e => set("year", e.target.value)}
-                style={{ ...inputBase(errors.year, form.year), cursor: "pointer" }}>
+                style={{ ...inputBase(errors.year, form.year), cursor: "pointer",    backgroundColor: "#0f0f0f", color: "#e5e7eb" }}>
                 <option value="">Year</option>
                 <option>1st Year</option>
                 <option>2nd Year</option>
@@ -1158,7 +1289,7 @@ export default function StudentProfile() {
             </Field>
             <Field label="Branch" required error={errors.branch}>
               <select value={form.branch} onChange={e => set("branch", e.target.value)}
-                style={{ ...inputBase(errors.branch, form.branch), cursor: "pointer" }}>
+                style={{ ...inputBase(errors.branch, form.branch), cursor: "pointer",backgroundColor: "#0f0f0f", color: "#e5e7eb" }}>
                 <option value="">Branch</option>
                 <option value="CSE">CSE</option>
                 <option value="CSE-AI">CSE (AI)</option>
@@ -1173,22 +1304,56 @@ export default function StudentProfile() {
           </div>
 
           {/* Password */}
-          <Field label="Password" required error={errors.password}
-            hint={!errors.password ? "Min 6 characters — remember this to log in" : ""}>
-            <div style={{ position: "relative" }}>
-              <input type={showPass ? "text" : "password"}
-                placeholder="Create a strong password" value={form.password}
-                onChange={e => set("password", e.target.value)}
-                style={{ ...inputBase(errors.password, form.password), paddingRight: 40 }}
-                onFocus={e => e.target.style.borderColor = "rgba(38,242,208,0.5)"}
-                onBlur={e  => e.target.style.borderColor = errors.password ? "rgba(239,68,68,0.5)" : form.password ? "rgba(38,242,208,0.3)" : "rgba(255,255,255,0.09)"} />
-              <button type="button" tabIndex={-1} onClick={() => setShowPass(s => !s)}
-                style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
-                  background: "none", border: "none", cursor: "pointer", fontSize: 14, padding: 0, color: "#4b5563" }}>
-                {showPass ? "🙈" : "👁"}
-              </button>
-            </div>
-          </Field>
+<Field
+  label="Password"
+  required
+  error={errors.password}
+  hint={
+    !errors.password
+      ? "8+ chars, uppercase, lowercase, number, special character"
+      : ""
+  }
+>
+  <div style={{ position: "relative" }}>
+    <input
+      type={showPass ? "text" : "password"}
+      placeholder="Create a strong password"
+      value={form.password}
+      onChange={e => set("password", e.target.value)}
+      style={{
+        ...inputBase(errors.password, isStrongPassword(form.password)),
+        paddingRight: 40
+      }}
+      onFocus={e => e.target.style.borderColor = "rgba(38,242,208,0.5)"}
+      onBlur={e => e.target.style.borderColor =
+        errors.password
+          ? "rgba(239,68,68,0.5)"
+          : form.password && isStrongPassword(form.password)
+          ? "rgba(38,242,208,0.3)"
+          : "rgba(255,255,255,0.09)"
+      }
+    />
+    <button
+      type="button"
+      tabIndex={-1}
+      onClick={() => setShowPass(s => !s)}
+      style={{
+        position: "absolute",
+        right: 12,
+        top: "50%",
+        transform: "translateY(-50%)",
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        fontSize: 14,
+        padding: 0,
+        color: "#4b5563"
+      }}
+    >
+      {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+    </button>
+  </div>
+</Field>
 
           {/* Confirm password */}
           <Field label="Confirm Password" required error={errors.confirm}>
@@ -1202,7 +1367,7 @@ export default function StudentProfile() {
               <button type="button" tabIndex={-1} onClick={() => setShowConf(s => !s)}
                 style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
                   background: "none", border: "none", cursor: "pointer", fontSize: 14, padding: 0, color: "#4b5563" }}>
-                {showConf ? "🙈" : "👁"}
+                {showConf ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </Field>

@@ -21,123 +21,132 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/ai")
 public class AIController {
 
-    @Autowired
-    private IdeaRepository ideaRepository;
+    @Autowired private IdeaRepository            ideaRepository;
+    @Autowired private ClubRepository            clubRepository;
+    @Autowired private StudentProfileRepository  studentProfileRepository;
+    @Autowired private JwtUtil                   jwtUtil;
+    @Autowired private AIService                 aiService;
 
-    @Autowired
-    private ClubRepository clubRepository;
-
-    @Autowired
-    private StudentProfileRepository studentProfileRepository;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private AIService aiService;
-
-    // 🔥 Rate limit storage (thread-safe)
-    private Map<String, Long> lastRequestTime = new ConcurrentHashMap<>();
+    // ── Rate limit: 5 min per user (thread-safe) ──
+    private final Map<String, Long> lastRequestTime = new ConcurrentHashMap<>();
 
     @GetMapping("/advisor")
     public ResponseEntity<String> advisor(
             @RequestHeader(value = "Authorization", required = false) String token) {
 
-        // 🔐 Token Safety Check
+        // Auth check
         if (token == null || !token.startsWith("Bearer ")) {
             return ResponseEntity.status(401).body("Invalid or missing token");
         }
 
         String roll = jwtUtil.extractRollNumber(token.replace("Bearer ", ""));
 
-        // 🚫 RATE LIMIT (5 minutes per user)
+        // Rate limit: 5 minutes
         long now = System.currentTimeMillis();
-
         if (lastRequestTime.containsKey(roll)) {
-            long last = lastRequestTime.get(roll);
-
-            if (now - last < 300000) { // ✅ 5 minutes
+            long elapsed = now - lastRequestTime.get(roll);
+            if (elapsed < 300_000) {
+                long remainingSec = (300_000 - elapsed) / 1000;
+                long m = remainingSec / 60, s = remainingSec % 60;
                 return ResponseEntity.badRequest()
-                        .body("⏳ Please wait 5 minutes before requesting again");
+                        .body("RATE_LIMIT:" + m + "m " + s + "s");
             }
         }
-
         lastRequestTime.put(roll, now);
 
-        // ✅ Fetch limited data
-        List<Idea> ideas = ideaRepository
-                .findTop3ByCreatedByRollNumberOrderByCreatedAtDesc(roll);
-
-        List<Club> clubs = clubRepository
-                .findByMembersContaining(roll);
-
-        // ✅ Get student name (SAFE)
+        // ── Fetch student data ──
         String name = studentProfileRepository
                 .findByRollNumber(roll)
                 .map(s -> s.getName())
                 .orElse("Student");
 
-        // ✅ Prepare summaries
+        // Top 5 ideas with likes + status for richer context
+        List<Idea> ideas = ideaRepository
+                .findTop5ByCreatedByRollNumberOrderByLikesDesc(roll);
+
+        List<Club> clubs = clubRepository
+                .findByMembersContaining(roll);
+
+        // ── Build idea summary (title + likes + status) ──
         String ideaSummary = ideas.isEmpty()
-                ? "No ideas submitted"
+                ? "No ideas submitted yet"
                 : ideas.stream()
-                        .map(i -> "- " + i.getTitle())
+                        .map(i -> "- " + i.getTitle()
+                                + " [" + (i.getLikes() != null ? i.getLikes() : 0) + " likes"
+                                + ", status: " + (i.getStatus() != null ? i.getStatus() : "pending") + "]")
                         .collect(Collectors.joining("\n"));
 
+        // ── Total likes across all ideas ──
+        int totalLikes = ideas.stream()
+                .mapToInt(i -> i.getLikes() != null ? i.getLikes() : 0)
+                .sum();
+
+        // ── Club summary with role if available ──
         String clubSummary = clubs.isEmpty()
-                ? "No clubs joined"
+                ? "No clubs joined yet"
                 : clubs.stream()
-                        .map(c -> "- " + c.getTitle())
+                        .map(c -> "- " + c.getTitle()
+                                + (c.getPresidentRoll() != null && c.getPresidentRoll().equals(roll)
+                                        ? " [President]"
+                                        : " [Member]"))
                         .collect(Collectors.joining("\n"));
 
-        // 🤖 FINAL CONTROLLED PROMPT
+        int ideaCount = ideas.size();
+        int clubCount = clubs.size();
+
+        // ── Gen-Z style prompt ──
         String prompt = """
-You are a campus AI advisor.
+You are CampusAI — a Gen-Z AI advisor for college students. You speak like a smart, hype friend who keeps it real. Use casual language, light emoji, short punchy sentences. No corporate talk. No fake positivity. Real talk only.
 
 STRICT RULES:
-- ONLY use given Ideas and Clubs
-- DO NOT suggest external programs, internships, or companies
-- DO NOT invent anything outside given data
-- Keep response grounded in student activity only
+- ONLY reference the student's actual ideas and clubs given below
+- DO NOT mention internships, LinkedIn, external companies, or anything outside campus
+- DO NOT invent clubs or ideas not listed
+- Keep each bullet point to 1–2 short sentences max
 
-Student Name:
+Student: %s (Roll: %s)
+Total Ideas: %d | Total Likes Earned: %d
+Clubs Joined: %d
+
+Ideas (with likes + status):
 %s
 
-Ideas:
+Clubs (with role):
 %s
 
-Clubs:
-%s
+Generate a EXACT response in this format — no extra text, no headers outside the format:
 
-Instructions:
-1. Start with: Hi %s
-2. Strengths MUST reference ideas or clubs
-3. Improvements MUST relate to missing engagement
-4. Next actions MUST be inside campus activities only
+Hey %s 👋
 
-Output format EXACTLY:
+Vibe Check:
+[One sentence honest vibe about their campus presence so far — keep it real, can be encouraging or a gentle roast depending on their activity]
+Score: [X/10]
 
-Hi %s 👋
+🔥 What You're Crushing:
+- [strength bullet 1]
+- [strength bullet 2]
+- [strength bullet 3 if warranted]
 
-Strengths:
-- ...
+💡 Room to Level Up:
+- [improvement bullet 1]
+- [improvement bullet 2]
+- [improvement bullet 3 if warranted]
 
-Improvements:
-- ...
+⚡ Your Next Moves:
+- [action bullet 1]
+- [action bullet 2]
+- [action bullet 3]
 
-Next Actions:
-- ...
+Keep it punchy. Keep it campus. Keep it real.
+""".formatted(name, roll, ideaCount, totalLikes, clubCount,
+              ideaSummary, clubSummary, name);
 
-Keep it short, smart, and relevant.
-""".formatted(name, ideaSummary, clubSummary, name, name);
-
-        // 🤖 AI Call with fallback
         String response;
         try {
             response = aiService.getAdvisorResponse(prompt);
         } catch (Exception e) {
             e.printStackTrace();
-            response = "⚠️ Unable to generate advice right now. Try again later.";
+            response = "⚠️ AI is taking a breather rn. Try again in a bit.";
         }
 
         return ResponseEntity.ok(response);

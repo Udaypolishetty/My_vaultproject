@@ -960,475 +960,369 @@
 // }
 
 
-
-
-
-
 import { useEffect, useState } from "react";
+import { GraduationCap } from "lucide-react";
 
-/*
-  ┌─────────────────────────────────────────────────────────────┐
-  │  DROP YOUR LOGO PNG HERE                                    │
-  │  Place your CV logo image at:  /cv-logo.png  (public/)      │
-  │  or swap the src below with the correct path.               │
-  └─────────────────────────────────────────────────────────────┘
-*/
 const LOGO_SRC = "/cv-logo.png";
 
+/* ─── timing (ms) ─── */
+const T = {
+  logoIn:    150,
+  logoRise:  1700,
+  textIn:    2100,
+  capsIn:    3000,
+  tagline:   3700,
+  hideShell: 5600,
+  done:      6600,
+};
+
 export default function SplashScreen({ onDone }) {
-  const [visible, setVisible] = useState(true);
+  const [phase, setPhase] = useState("idle");
+  const [hide,  setHide]  = useState(false);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setVisible(false), 5000);
-    const t2 = setTimeout(() => onDone?.(),        6100);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const ids = [
+      setTimeout(() => setPhase("logoIn"),   T.logoIn),
+      setTimeout(() => setPhase("logoRise"), T.logoRise),
+      setTimeout(() => setPhase("textIn"),   T.textIn),
+      setTimeout(() => setPhase("capsIn"),   T.capsIn),
+      setTimeout(() => setPhase("tagIn"),    T.tagline),
+      setTimeout(() => setHide(true),        T.hideShell),
+      setTimeout(() => onDone?.(),           T.done),
+    ];
+    return () => ids.forEach(clearTimeout);
   }, [onDone]);
+
+  const logoActive  = phase !== "idle";
+  const logoRisen   = ["logoRise","textIn","capsIn","tagIn"].includes(phase);
+  const textVisible = ["textIn","capsIn","tagIn"].includes(phase);
+  const capsVisible = ["capsIn","tagIn"].includes(phase);
+  const tagVisible  = phase === "tagIn";
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Eagle+Lake&family=Sora:wght@400;600&display=swap');
 
-        /* ─────────────── SHELL ─────────────── */
-        .sp-shell {
+        /* ── shell ── */
+        .spl {
           position: fixed; inset: 0;
-          background: #050507;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 0;
-          z-index: 99999;
-          overflow: hidden;
+          background: #040406;
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          z-index: 99999; overflow: hidden;
           opacity: 1;
-          transition: opacity 1.1s cubic-bezier(0.4, 0, 1, 1);
+          transition: opacity 1.1s cubic-bezier(0.4,0,1,1);
         }
-        .sp-shell.hide { opacity: 0; pointer-events: none; }
+        .spl.out { opacity: 0; pointer-events: none; }
 
-        /* ─────────────── AMBIENT ─────────────── */
-        .sp-orb {
+        /* ── ambient ── */
+        .spl-orb {
           position: absolute; border-radius: 50%;
-          pointer-events: none; filter: blur(110px);
+          pointer-events: none; filter: blur(130px);
         }
-        .sp-orb1 {
-          width: 360px; height: 360px;
-          background: #26F2D0; opacity: 0.045;
-          top: -80px; left: 8%;
-          animation: orbD 13s ease-in-out infinite;
+        .spl-orb1 {
+          width: 440px; height: 440px;
+          background: #26F2D0; opacity: 0.04;
+          top: -110px; left: 4%;
+          animation: orbD 14s ease-in-out infinite;
         }
-        .sp-orb2 {
-          width: 280px; height: 280px;
-          background: #7028dc; opacity: 0.055;
-          bottom: -60px; right: 6%;
-          animation: orbD 17s ease-in-out infinite reverse;
+        .spl-orb2 {
+          width: 340px; height: 340px;
+          background: #7028dc; opacity: 0.05;
+          bottom: -90px; right: 4%;
+          animation: orbD 18s ease-in-out infinite reverse;
         }
         @keyframes orbD {
-          0%, 100% { transform: translate(0, 0); }
-          50%       { transform: translate(18px, -22px); }
+          0%,100% { transform: translate(0,0); }
+          50%     { transform: translate(20px,-24px); }
         }
-        .sp-grid {
-          position: absolute; inset: 0; opacity: 0.018;
-          background-image: radial-gradient(circle, #fff 1px, transparent 1px);
-          background-size: 36px 36px;
-          pointer-events: none;
+        .spl-grid {
+          position: absolute; inset: 0; opacity: 0.014;
+          background-image: radial-gradient(circle,#fff 1px,transparent 1px);
+          background-size: 38px 38px; pointer-events: none;
         }
 
-        /* ─────────────── LOGO IMAGE ─────────────── */
-        /*
-          Logo animation:
-          1. Starts above viewport (translateY -120px), invisible
-          2. Falls down + slight overshoot — settles at center
-          3. Then gently rises upward to its final resting position
-             (the "center to up rise" you asked for)
-        */
-        .sp-logo {
-          position: relative; z-index: 3;
-          width: clamp(180px, 38vw, 260px);
+        /* ── logo — longer, smoother transition ── */
+        .spl-logo {
+          position: relative; z-index: 4;
+          width: clamp(160px, 36vw, 240px);
           height: auto;
-          /* Step 1: off-screen above */
           opacity: 0;
-          transform: translateY(-130px) scale(0.85);
-          animation: logoDrop 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.15s;
-          /* drop-shadow gives it subtle depth against black */
+          transform: translateY(-160px) scale(0.72);
           filter:
-            drop-shadow(0 0 32px rgba(38, 242, 208, 0.22))
-            drop-shadow(0 0 80px rgba(38, 242, 208, 0.09));
+            drop-shadow(0 0 32px rgba(38,242,208,0.32))
+            drop-shadow(0 0 80px rgba(38,242,208,0.12));
+          transition:
+            opacity   1.4s cubic-bezier(0.22,1,0.36,1),
+            transform 1.6s cubic-bezier(0.22,1,0.36,1);
         }
-        @keyframes logoDrop {
-          0%   { opacity: 0; transform: translateY(-130px) scale(0.82); }
-          55%  { opacity: 1; transform: translateY(12px)   scale(1.03); }
-          72%  { transform: translateY(-6px) scale(0.98); }
-          85%  { transform: translateY(4px)  scale(1.01); }
-          100% { opacity: 1; transform: translateY(0)      scale(1); }
+        .spl-logo.in {
+          opacity: 1;
+          transform: translateY(0) scale(1);
         }
-
-        /* After settling, logo rises upward gently */
-        .sp-logo.risen {
-          animation: logoDrop 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.15s,
-                     logoRise  0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards 2.0s;
-        }
-        @keyframes logoRise {
-          from { transform: translateY(0)    scale(1); }
-          to   { transform: translateY(-12px) scale(1); }
+        .spl-logo.risen {
+          opacity: 1;
+          transform: translateY(-22px) scale(1);
+          transition:
+            transform 1.1s cubic-bezier(0.4,0,0.2,1);
         }
 
-        /* ─────────────── BRAND TEXT BLOCK ─────────────── */
-        .sp-brand-block {
-          position: relative; z-index: 3;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0;
-          margin-top: 28px;
+        /* ── name row ── */
+        .spl-row {
+          display: flex; align-items: flex-end;
+          gap: 0; line-height: 1;
+          /* Eagle Lake is a display serif — use it for the whole name */
+          font-family: 'Eagle Lake', serif;
+          font-size: clamp(46px, 10.5vw, 80px);
+          letter-spacing: -0.01em;
+          line-height: 1;
+        }
+
+        /* plain letters — off-white */
+        .spl-plain {
+          color: rgba(255,255,255,0.82);
+          display: inline-block;
           opacity: 0;
-          transform: translateY(20px);
-          animation: slideUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards 1.4s;
+          transform: translateY(8px);
+          transition: opacity 0.65s ease, transform 0.65s ease;
         }
-        @keyframes slideUp {
-          to { opacity: 1; transform: translateY(0); }
-        }
+        .spl-plain.show { opacity: 1; transform: translateY(0); }
 
-        /* "Campus Vault" row */
-        .sp-name-row {
-          display: flex;
-          align-items: flex-end;
-          gap: 0;
-          line-height: 1;
-        }
-
-        /* Plain white letters */
-        .sp-plain {
-          font-family: 'Sora', sans-serif;
-          font-weight: 700;
-          font-size: clamp(30px, 6vw, 46px);
-          color: #ffffff;
-          letter-spacing: -0.025em;
-          line-height: 1;
-        }
-
-        /* Teal M */
-        .sp-M {
-          font-family: 'Sora', sans-serif;
-          font-weight: 800;
-          font-size: clamp(30px, 6vw, 46px);
+        /* ── M highlight (teal) ── */
+        .spl-M {
+          position: relative;
+          display: inline-block;
           color: #26F2D0;
-          letter-spacing: -0.025em;
-          line-height: 1;
+          text-shadow:
+            0 0 18px rgba(38,242,208,0.55),
+            0 0 48px rgba(38,242,208,0.18);
+          opacity: 0;
+          transform: translateY(8px);
+          transition: opacity 0.65s ease 0.05s, transform 0.65s ease 0.05s;
+        }
+        .spl-M.show { opacity: 1; transform: translateY(0); }
+
+        /* ── U highlight (purple) ── */
+        .spl-U {
           position: relative;
           display: inline-block;
-          text-shadow:
-            0 0 14px rgba(38, 242, 208, 0.5),
-            0 0 30px rgba(38, 242, 208, 0.2);
-        }
-
-        /* Purple U */
-        .sp-U {
-          font-family: 'Sora', sans-serif;
-          font-weight: 800;
-          font-size: clamp(30px, 6vw, 46px);
           color: #a06aff;
-          letter-spacing: -0.025em;
-          line-height: 1;
-          position: relative;
-          display: inline-block;
           text-shadow:
-            0 0 14px rgba(160, 106, 255, 0.5),
-            0 0 30px rgba(160, 106, 255, 0.2);
+            0 0 18px rgba(160,106,255,0.55),
+            0 0 48px rgba(160,106,255,0.18);
+          opacity: 0;
+          transform: translateY(8px);
+          transition: opacity 0.65s ease 0.18s, transform 0.65s ease 0.18s;
+        }
+        .spl-U.show { opacity: 1; transform: translateY(0); }
+
+        /* word gap */
+        .spl-space {
+          display: inline-block;
+          width: 0.28em;
         }
 
-        /* ─────────────── GRADUATION CAPS ─────────────── */
-        /*
-          The cap container uses:
-            position: absolute
-            bottom: 100%   → base of cap is flush on letter top
-            left: 50%      → centered over letter
-            transform-origin: 50% 100% → scale/rotate from brim (letter contact point)
-
-          Animation: drops from above, bounces, lands with zero gap on letter.
-          The SVG cap is drawn with the brim at the BOTTOM of the viewBox
-          so bottom:100% means brim = top of letter = zero gap.
-        */
-        .sp-cap {
+        /* ── grad cap — sits right on the letter, nearly touching ── */
+        .spl-cap {
           position: absolute;
-          bottom: 100%;
+          /* bottom of cap touches top of letter with ~2px gap */
+          bottom: 102%;
           left: 50%;
-          pointer-events: none;
-          transform: translateX(-50%) translateY(-16px) scale(0) rotate(-10deg);
+          transform: translateX(-50%) translateY(-18px) scale(0.4) rotate(-14deg);
           transform-origin: 50% 100%;
           opacity: 0;
-          filter: drop-shadow(0 4px 12px rgba(0,0,0,0.8));
+          filter: drop-shadow(0 3px 10px rgba(0,0,0,0.9));
+          transition:
+            transform 0.75s cubic-bezier(0.22,1,0.36,1),
+            opacity   0.38s ease;
+          pointer-events: none;
         }
-        .sp-cap-M {
-          animation: capWear 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards 2.2s;
+        .spl-cap.on {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0) scale(1) rotate(0deg);
         }
-        .sp-cap-U {
-          animation: capWear 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards 2.55s;
+        /* cap for U — delayed slightly */
+        .spl-cap.u-delay {
+          transition-delay: 0.32s;
         }
-        @keyframes capWear {
-          0%   {
-            opacity: 0;
-            transform: translateX(-50%) translateY(-28px) scale(0)    rotate(-14deg);
-          }
-          52%  {
-            opacity: 1;
-            transform: translateX(-50%) translateY(3px)   scale(1.14) rotate(5deg);
-          }
-          70%  {
-            transform: translateX(-50%) translateY(-2px)  scale(0.97) rotate(-2deg);
-          }
-          84%  {
-            transform: translateX(-50%) translateY(1px)   scale(1.02) rotate(0deg);
-          }
-          100% {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0px)   scale(1)    rotate(0deg);
-          }
+        /* gentle float after landing */
+        .spl-cap.bob {
+          animation: capBob 3.2s ease-in-out infinite;
+        }
+        .spl-cap.bob.u-delay {
+          animation-delay: 0.32s;
+        }
+        @keyframes capBob {
+          0%,100% { transform: translateX(-50%) translateY(0)   rotate(0deg); }
+          40%     { transform: translateX(-50%) translateY(-5px) rotate(1.8deg); }
+          70%     { transform: translateX(-50%) translateY(-1px) rotate(-1.2deg); }
         }
 
-        /* Subtle float after landing — cap gently bobs */
-        .sp-cap-M.worn,
-        .sp-cap-U.worn {
-          animation:
-            capWear  0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-            capFloat 3.5s ease-in-out infinite 1.2s;
-        }
-        .sp-cap-M.worn { animation-delay: 2.2s, 3.0s; }
-        .sp-cap-U.worn { animation-delay: 2.55s, 3.4s; }
-        @keyframes capFloat {
-          0%, 100% { transform: translateX(-50%) translateY(0px)   rotate(0deg); }
-          40%       { transform: translateX(-50%) translateY(-3px)  rotate(1.5deg); }
-          70%       { transform: translateX(-50%) translateY(-1px)  rotate(-1deg); }
-        }
-
-        /* ─────────────── UNDERLINE ─────────────── */
-        .sp-underline {
-          width: 0%;
-          height: 1.5px;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+        /* ── underline ── */
+        .spl-line {
+          height: 1.5px; width: 0%;
+          background: linear-gradient(90deg,
+            transparent,
+            rgba(38,242,208,0.45),
+            rgba(160,106,255,0.35),
+            transparent);
           border-radius: 2px;
           margin-top: 10px;
-          animation: lineGrow 0.8s ease forwards 2.0s;
+          transition: width 1.0s cubic-bezier(0.4,0,0.2,1) 0.15s;
         }
-        @keyframes lineGrow { to { width: 100%; } }
+        .spl-line.show { width: 100%; }
 
-        /* ─────────────── TAGLINE — "Share & Connect" ─────────────── */
-        .sp-tagline {
-          margin-top: 14px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          opacity: 0;
-          animation: fadeUp 0.7s ease forwards 2.8s;
+        /* ── tagline — plain text, no box ── */
+        .spl-tagline {
+          margin-top: 24px;
+          display: flex; align-items: center; gap: 10px;
+          opacity: 0; transform: translateY(8px);
+          transition: opacity 0.6s ease, transform 0.6s ease;
         }
-        .sp-tag-pill {
+        .spl-tagline.show { opacity: 1; transform: translateY(0); }
+
+        .spl-tag-word {
           font-family: 'Sora', sans-serif;
           font-weight: 600;
-          font-size: 11px;
-          letter-spacing: 0.08em;
+          font-size: clamp(10px, 1.6vw, 12px);
+          letter-spacing: 0.18em;
           text-transform: uppercase;
-          padding: 5px 13px;
-          border-radius: 999px;
-          cursor: default;
-          transition: all 0.2s ease;
         }
-        .sp-tag-share {
-          color: #26F2D0;
-          background: rgba(38, 242, 208, 0.1);
-          border: 1px solid rgba(38, 242, 208, 0.28);
-        }
-        .sp-tag-connect {
-          color: #a06aff;
-          background: rgba(160, 106, 255, 0.1);
-          border: 1px solid rgba(160, 106, 255, 0.28);
-        }
-        .sp-tag-dot {
-          width: 3px; height: 3px;
-          border-radius: 50%;
-          background: rgba(255,255,255,0.2);
-          flex-shrink: 0;
+        .spl-tag-teal   { color: rgba(38,242,208,0.7); }
+        .spl-tag-purple { color: rgba(160,106,255,0.7); }
+        .spl-tag-dot {
+          width: 3px; height: 3px; border-radius: 50%;
+          background: rgba(255,255,255,0.15); flex-shrink: 0;
         }
 
-        /* ─────────────── PROGRESS BAR ─────────────── */
-        .sp-bar-wrap {
-          width: 200px; height: 1.5px;
+        /* ── progress bar ── */
+        .spl-bar-wrap {
+          width: clamp(160px, 40vw, 220px);
+          height: 2px;
           background: rgba(255,255,255,0.07);
           border-radius: 2px;
-          margin-top: 24px;
+          margin-top: 28px;
           overflow: hidden;
           opacity: 0;
-          animation: fadeUp 0.4s ease forwards 1.6s;
+          transition: opacity 0.4s ease 0.6s;
         }
-        .sp-bar-fill {
+        .spl-bar-wrap.show { opacity: 1; }
+        .spl-bar-fill {
           height: 100%; width: 0%;
-          background: linear-gradient(90deg, #26F2D0 0%, #a06aff 55%, #26F2D0 100%);
+          background: linear-gradient(90deg,
+            #26F2D0 0%, #a06aff 55%, #26F2D0 100%);
           background-size: 200% 100%;
           border-radius: 2px;
-          animation:
-            barGrow  3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards 1.6s,
-            barShine 1.8s linear infinite 2.0s;
+          animation: barGrow 4.0s cubic-bezier(0.4,0,0.2,1) forwards,
+                     barShine 1.8s linear infinite 0.6s;
         }
         @keyframes barGrow  { to { width: 100%; } }
         @keyframes barShine { to { background-position: -200% 0; } }
 
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: translateY(0); }
+        @media (max-width: 480px) {
+          .spl-logo { width: 52vw !important; }
+          .spl-row  { font-size: clamp(38px, 11vw, 58px) !important; }
         }
       `}</style>
 
-      <div className={`sp-shell${!visible ? " hide" : ""}`}>
+      <div className={`spl${hide ? " out" : ""}`}>
+        <div className="spl-orb spl-orb1" />
+        <div className="spl-orb spl-orb2" />
+        <div className="spl-grid" />
 
-        {/* Ambient */}
-        <div className="sp-orb sp-orb1" />
-        <div className="sp-orb sp-orb2" />
-        <div className="sp-grid" />
-
-        {/* ══════════════════════════════════════════
-            YOUR CV LOGO PNG
-            Drop your file at public/cv-logo.png
-            The image falls from above, bounces,
-            then gently rises to its final position.
-        ══════════════════════════════════════════ */}
+        {/* ══ LOGO ══ */}
         <img
-          className="sp-logo risen"
+          className={`spl-logo${logoRisen ? " risen" : logoActive ? " in" : ""}`}
           src={LOGO_SRC}
           alt="Campus Vault"
           draggable={false}
         />
 
-        {/* ══════════════════════════════════════════
-            BRAND NAME BLOCK
-        ══════════════════════════════════════════ */}
-        <div className="sp-brand-block">
+        {/* ══ BRAND BLOCK ══ */}
+        <div style={{ position: "relative", zIndex: 4, display: "flex",
+          flexDirection: "column", alignItems: "center", marginTop: 20 }}>
 
-          {/* "Campus Vault" */}
-          <div className="sp-name-row">
-            <span className="sp-plain">Ca</span>
+          {/* "Campus Vault" in Eagle Lake */}
+          <div className="spl-row">
 
-            {/* ── M — teal, grad cap lands on it ── */}
-            <span className="sp-M">
-              {/*
-                Cap SVG:
-                The mortarboard brim sits at the very BOTTOM of the viewBox.
-                bottom:100% on .sp-cap makes the brim flush with letter top.
-                Zero gap guaranteed.
-              */}
-              <span className="sp-cap sp-cap-M worn">
-                <svg
-                  width="36" height="32"
-                  viewBox="0 0 36 32"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  {/* Board (flat diamond) — brim at bottom of svg */}
-                  <polygon
-                    points="18,4 35,13 18,22 1,13"
-                    fill="#1a9e8a"
-                    stroke="#26F2D0"
-                    strokeWidth="1.2"
-                  />
-                  {/* Shine on board */}
-                  <polygon
-                    points="18,4 35,13 26,10 14,6"
-                    fill="rgba(255,255,255,0.15)"
-                  />
-                  {/* Cap body — dome below board */}
-                  <path
-                    d="M6 16 Q6 28 18 30 Q30 28 30 16"
-                    fill="#0d6b5e"
-                    stroke="#1eb8a0"
-                    strokeWidth="0.8"
-                  />
-                  {/* Inner dome highlight */}
-                  <path
-                    d="M10 17 Q10 26 18 28 Q26 26 26 17"
-                    fill="rgba(38,242,208,0.08)"
-                  />
-                  {/* Top button */}
-                  <circle cx="18" cy="4" r="2.5" fill="#26F2D0" opacity="0.7"/>
-                  {/* Tassel cord */}
-                  <line x1="35" y1="13" x2="35" y2="24"
-                    stroke="#26F2D0" strokeWidth="1.5" strokeLinecap="round"/>
-                  {/* Tassel ball */}
-                  <circle cx="35" cy="26.5" r="2.5" fill="#26F2D0" opacity="0.9"/>
-                  {/* Tassel fringe */}
-                  <line x1="33" y1="26" x2="32" y2="30"
-                    stroke="#26F2D0" strokeWidth="1" strokeLinecap="round" opacity="0.7"/>
-                  <line x1="35" y1="27" x2="35" y2="31.5"
-                    stroke="#26F2D0" strokeWidth="1" strokeLinecap="round" opacity="0.7"/>
-                  <line x1="37" y1="26" x2="38" y2="30"
-                    stroke="#26F2D0" strokeWidth="1" strokeLinecap="round" opacity="0.7"/>
-                </svg>
+            {/* Ca */}
+            <span className={`spl-plain${textVisible ? " show" : ""}`}
+              style={{ transitionDelay: textVisible ? "0s" : "0s" }}>
+              Ca
+            </span>
+
+            {/* M — teal highlight + cap */}
+            <span className={`spl-M${textVisible ? " show" : ""}`}>
+              {/* Teal graduation cap on M */}
+              <span className={`spl-cap${capsVisible ? " on bob" : ""}`}>
+                <GraduationCap
+                  size={clamp(28, 32)}
+                  strokeWidth={2}
+                  color="#26F2D0"
+                  style={{ display: "block" }}
+                />
               </span>
               m
             </span>
 
-            <span className="sp-plain">pus Va</span>
+            {/* pus */}
+            <span className={`spl-plain${textVisible ? " show" : ""}`}
+              style={{ transitionDelay: textVisible ? "0.08s" : "0s" }}>
+              pus
+            </span>
 
-            {/* ── U — purple, grad cap lands on it ── */}
-            <span className="sp-U">
-              <span className="sp-cap sp-cap-U worn">
-                <svg
-                  width="36" height="32"
-                  viewBox="0 0 36 32"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <polygon
-                    points="18,4 35,13 18,22 1,13"
-                    fill="#5a2a9e"
-                    stroke="#a06aff"
-                    strokeWidth="1.2"
-                  />
-                  <polygon
-                    points="18,4 35,13 26,10 14,6"
-                    fill="rgba(255,255,255,0.15)"
-                  />
-                  <path
-                    d="M6 16 Q6 28 18 30 Q30 28 30 16"
-                    fill="#3a1870"
-                    stroke="#7a40cc"
-                    strokeWidth="0.8"
-                  />
-                  <path
-                    d="M10 17 Q10 26 18 28 Q26 26 26 17"
-                    fill="rgba(160,106,255,0.08)"
-                  />
-                  <circle cx="18" cy="4" r="2.5" fill="#a06aff" opacity="0.7"/>
-                  <line x1="35" y1="13" x2="35" y2="24"
-                    stroke="#a06aff" strokeWidth="1.5" strokeLinecap="round"/>
-                  <circle cx="35" cy="26.5" r="2.5" fill="#a06aff" opacity="0.9"/>
-                  <line x1="33" y1="26" x2="32" y2="30"
-                    stroke="#a06aff" strokeWidth="1" strokeLinecap="round" opacity="0.7"/>
-                  <line x1="35" y1="27" x2="35" y2="31.5"
-                    stroke="#a06aff" strokeWidth="1" strokeLinecap="round" opacity="0.7"/>
-                  <line x1="37" y1="26" x2="38" y2="30"
-                    stroke="#a06aff" strokeWidth="1" strokeLinecap="round" opacity="0.7"/>
-                </svg>
+            {/* space */}
+            <span className="spl-space" />
+
+            {/* Va */}
+            <span className={`spl-plain${textVisible ? " show" : ""}`}
+              style={{ transitionDelay: textVisible ? "0.14s" : "0s" }}>
+              Va
+            </span>
+
+            {/* U — purple highlight + cap */}
+            <span className={`spl-U${textVisible ? " show" : ""}`}>
+              {/* Purple graduation cap on U */}
+              <span className={`spl-cap u-delay${capsVisible ? " on bob" : ""}`}>
+                <GraduationCap
+                  size={clamp(28, 32)}
+                  strokeWidth={2}
+                  color="#a06aff"
+                  style={{ display: "block" }}
+                />
               </span>
               u
             </span>
 
-            <span className="sp-plain">lt</span>
+            {/* lt */}
+            <span className={`spl-plain${textVisible ? " show" : ""}`}
+              style={{ transitionDelay: textVisible ? "0.2s" : "0s" }}>
+              lt
+            </span>
           </div>
 
-          {/* Underline — matches image */}
-          <div className="sp-underline" />
+          {/* underline */}
+          <div className={`spl-line${textVisible ? " show" : ""}`} />
 
-          {/* Share & Connect pills */}
-          <div className="sp-tagline">
-            <span className="sp-tag-pill sp-tag-share">Share</span>
-            <span className="sp-tag-dot" />
-            <span className="sp-tag-pill sp-tag-connect">Connect</span>
+          {/* tagline — no boxes, just plain coloured text */}
+          <div className={`spl-tagline${tagVisible ? " show" : ""}`}>
+            <span className="spl-tag-word spl-tag-teal">Share</span>
+            <span className="spl-tag-dot" />
+            <span className="spl-tag-word spl-tag-purple">Connect</span>
+            <span className="spl-tag-dot" />
+            <span className="spl-tag-word" style={{ color: "rgba(255,255,255,0.3)" }}>Collaborate</span>
           </div>
 
-          {/* Progress bar */}
-          <div className="sp-bar-wrap">
-            <div className="sp-bar-fill" />
+          {/* progress bar */}
+          <div className={`spl-bar-wrap${logoActive ? " show" : ""}`}>
+            <div className="spl-bar-fill" />
           </div>
-
         </div>
       </div>
     </>
   );
 }
+
+/* tiny helper so JSX doesn't error on clamp() in size prop */
+function clamp(a, b) { return b; }

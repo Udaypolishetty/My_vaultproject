@@ -1311,8 +1311,9 @@ export default function SplashScreen({ onDone }) {
             <span className="spl-tag-dot" />
             <span className="spl-tag-word spl-tag-purple">Connect</span>
             <span className="spl-tag-dot" />
-            <span className="spl-tag-word" style={{ color: "rgba(255,255,255,0.3)" }}>Collaborate</span>
-          </div>
+<span className="spl-tag-word" style={{ color: "#F5F527" }}>
+  Collaborate
+</span>          </div>
 
           {/* progress bar */}
           <div className={`spl-bar-wrap${logoActive ? " show" : ""}`}>

@@ -29,6 +29,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+        .headers(headers -> headers
+    .frameOptions(frameOptions -> frameOptions.sameOrigin())  // ← THIS LINE ONLY
+)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sess -> sess
@@ -144,6 +147,9 @@ public class SecurityConfig {
 
                         // ===== STUDENTS SEARCH =====
                         .requestMatchers("/api/students/search").hasAnyRole("ADMIN", "MODERATOR")
+                          // ✅ ADD THESE TWO LINES:
+                        .requestMatchers("/admin.html").permitAll()           // Static admin page
+                        .requestMatchers("/actuator/**").permitAll()          // Health checks
 
                         .anyRequest().authenticated()
                 )
@@ -152,18 +158,21 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+@Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowedOrigins(List.of(
+        "http://localhost:5173",
+        "http://localhost:8081"
+    ));
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+    config.setAllowedHeaders(List.of("*"));
+    config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return source;
+}
 
     @Bean
     public PasswordEncoder passwordEncoder() {

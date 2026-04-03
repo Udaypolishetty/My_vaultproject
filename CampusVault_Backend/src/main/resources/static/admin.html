@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus Vault — Emergency Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #07070a;
+      color: #e5e7eb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 0 16px 60px;
+    }
+
+    .hdr {
+      display: flex; align-items: center; gap: 10px;
+      padding: 20px 0 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 28px;
+    }
+    .hdr-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #26F2D0;
+      box-shadow: 0 0 10px rgba(38,242,208,0.6);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.5; transform:scale(1.3); }
+    }
+    .hdr-title { font-size: 18px; font-weight: 700; color: #26F2D0; }
+    .hdr-badge {
+      margin-left: auto; font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 999px;
+      background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3);
+      color: #f87171; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+
+    /* ── backend URL config bar ── */
+    .url-bar {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      padding: 10px 14px; border-radius: 10px; margin-bottom: 20px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      font-size: 12px;
+    }
+    .url-bar label { color: rgba(255,255,255,0.35); white-space: nowrap; }
+    .url-bar input {
+      flex: 1; min-width: 200px;
+      background: #111; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; padding: 6px 10px;
+      font-size: 12px; color: #26F2D0; font-family: monospace;
+      outline: none; margin-bottom: 0;
+    }
+    .url-bar button {
+      padding: 6px 14px; border-radius: 8px; border: none;
+      background: rgba(38,242,208,0.12); border: 1px solid rgba(38,242,208,0.3);
+      color: #26F2D0; font-size: 12px; font-weight: 600; cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .card {
+      background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px; padding: 24px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.5);
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;
+    }
+
+    input[type=text], input[type=password] {
+      width: 100%; background: #111;
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+      padding: 11px 14px; font-size: 14px; color: white;
+      outline: none; margin-bottom: 10px; transition: border-color 0.2s;
+    }
+    input:focus { border-color: rgba(38,242,208,0.5); }
+
+    select {
+      width: 100%; background: #111;
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+      padding: 11px 14px; font-size: 14px; color: white;
+      outline: none; margin-bottom: 10px;
+    }
+
+    .btn {
+      width: 100%; padding: 12px; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #26F2D0, #5DADE2); color: #04110e;
+    }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-sm {
+      width: auto; padding: 7px 14px; font-size: 12px; font-weight: 600;
+      border-radius: 8px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12); color: #d1d5db;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-sm:hover { background: rgba(255,255,255,0.12); color: white; }
+    .btn-danger-sm {
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #f87171;
+    }
+    .btn-danger-sm:hover { background: rgba(239,68,68,0.22); }
+
+    .status-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; border-radius: 10px; margin-bottom: 20px;
+      font-size: 13px; font-weight: 600;
+    }
+    .status-up   { background: rgba(34,197,94,0.1);  border: 1px solid rgba(34,197,94,0.25);  color: #4ade80; }
+    .status-down { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.25);  color: #f87171; }
+    .status-warn { background: rgba(234,179,8,0.1);  border: 1px solid rgba(234,179,8,0.25);  color: #fbbf24; }
+    .status-dot  { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .tab {
+      padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
+      cursor: pointer; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.45);
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: rgba(38,242,208,0.12); border-color: rgba(38,242,208,0.3); color: #26F2D0;
+    }
+    .tab:hover:not(.active) { color: white; border-color: rgba(255,255,255,0.2); }
+
+    .data-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.07); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      background: rgba(255,255,255,0.04); padding: 10px 14px; text-align: left;
+      font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.35);
+      text-transform: uppercase; letter-spacing: 0.07em;
+      border-bottom: 1px solid rgba(255,255,255,0.07); white-space: nowrap;
+    }
+    td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); color: #d1d5db; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .health-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 12px; }
+    .health-item {
+      padding: 16px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02);
+    }
+    .health-label { font-size: 11px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+    .health-val   { font-size: 15px; font-weight: 700; }
+    .c-up   { color: #4ade80; }
+    .c-down { color: #f87171; }
+    .c-warn { color: #fbbf24; }
+
+    .empty   { text-align:center; padding:32px; color:rgba(255,255,255,0.25); font-size:13px; }
+    .loading { text-align:center; padding:32px; color:#26F2D0; font-size:13px; }
+    .err-msg { color:#f87171; font-size:12px; margin-top:6px; }
+
+    pre {
+      background: #0e0e12; border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px; padding: 16px; font-size: 12px; color: #86efac;
+      overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+    }
+
+    .warn-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; }
+    .w-LOW    { background:rgba(234,179,8,0.15);  color:#fbbf24; border:1px solid rgba(234,179,8,0.3); }
+    .w-MEDIUM { background:rgba(249,115,22,0.15); color:#fb923c; border:1px solid rgba(249,115,22,0.3); }
+    .w-HIGH   { background:rgba(239,68,68,0.15);  color:#f87171; border:1px solid rgba(239,68,68,0.3); }
+
+    textarea {
+      width:100%; background:#111; border:1px solid rgba(255,255,255,0.1);
+      color:white; padding:11px 14px; border-radius:10px; font-size:13px;
+      margin-bottom:10px; resize:vertical; outline:none;
+    }
+
+    @media(max-width:480px) {
+      .hdr-title { font-size:15px; }
+      td,th { padding:8px 10px; font-size:12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hdr">
+    <div class="hdr-dot"></div>
+    <span class="hdr-title">Campus Vault</span>
+    <span class="hdr-badge">Emergency Admin</span>
+  </div>
+
+  <!--
+    ── BACKEND URL CONFIG ──
+    Change this if your backend runs on a different port or is deployed.
+    e.g.  http://localhost:8081   (local dev)
+          https://api.campusvault.in  (production)
+  -->
+  <div class="url-bar">
+    <label>Backend URL:</label>
+    <input id="base-url" type="text" value="http://localhost:8081" />
+    <button onclick="saveBase()">Set</button>
+    <span id="base-saved" style="color:#4ade80;display:none">✓ saved</span>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="login-section" class="card">
+    <div class="card-title">Admin Login</div>
+    <input id="inp-roll" type="text"     placeholder="Roll number (e.g. ADMIN001)" />
+    <input id="inp-pass" type="password" placeholder="Password"
+      onkeydown="if(event.key==='Enter') doLogin()" />
+    <button class="btn btn-primary" id="login-btn" onclick="doLogin()">Login</button>
+    <div id="login-err" class="err-msg"></div>
+  </div>
+
+  <!-- PANEL -->
+  <div id="panel" style="display:none">
+    <div id="status-bar" class="status-bar status-warn">
+      <span class="status-dot"></span>
+      <span id="status-text">Checking backend...</span>
+      <button class="btn-sm" style="margin-left:auto" onclick="loadAll()">↻ Refresh all</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('health',   this)">🩺 Health</button>
+      <button class="tab"        onclick="switchTab('students', this)">👥 Students</button>
+      <button class="tab"        onclick="switchTab('ideas',    this)">💡 Ideas</button>
+      <button class="tab"           onclick="switchTab('clubs', this)">Clubs</button>
+      <button class="tab"        onclick="switchTab('warnings', this)">⚠️ Warnings</button>
+      <button class="tab"        onclick="switchTab('raw',      this)">🔧 Raw API</button>
+    </div>
+
+    <!-- health -->
+    <div id="tab-health">
+      <div id="health-grid" class="health-grid"></div>
+      <details style="margin-top:16px">
+        <summary style="cursor:pointer;color:rgba(255,255,255,0.3);font-size:12px;margin-bottom:8px">Full JSON response</summary>
+        <pre id="health-raw">—</pre>
+      </details>
+    </div>
+
+    <!-- students -->
+    <div id="tab-students" style="display:none">
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <input id="s-search" type="text" placeholder="Search name or roll..."
+          style="flex:1;min-width:140px;margin-bottom:0" oninput="filterStudents()" />
+        <span id="s-count" style="font-size:12px;color:rgba(255,255,255,0.3);white-space:nowrap"></span>
+      </div>
+      <div class="data-wrap">
+        <table><thead><tr>
+          <th>Name</th><th>Roll</th><th>Branch</th><th>Year</th><th>Role</th>
+        </tr></thead>
+        <tbody id="students-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ideas -->
+    <div id="tab-ideas" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <select id="idea-filter" onchange="filterIdeas()"
+          style="background:#111;border:1px solid rgba(255,255,255,0.1);color:white;padding:8px 12px;border-radius:8px;font-size:13px;width:auto">
+          <option value="">All statuses</option>
+          <option value="PENDING">Pending</option>
+          <option value="IMPLEMENTED">Implemented</option>
+          <option value="REJECTED">Rejected</option>
+          <option value="ON_HOLD">On Hold</option>
+        </select>
+        <span id="idea-count" style="font-size:12px;color:rgba(255,255,255,0.3)"></span>
+      </div>
+      <div class="data-wrap">
+        <table><thead><tr>
+          <th>Title</th><th>By</th><th>Category</th><th>Status</th><th>Likes</th><th>Action</th>
+        </tr></thead>
+        <tbody id="ideas-body"></tbody></table>
+      </div>
+    </div>
+
+
+    <!-- clubs -->
+<div id="tab-clubs" style="display:none">
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Create / Update Club</div>
+    <input id="c-id" type="text" placeholder="Club ID (only for update)">
+    <input id="c-name" type="text" placeholder="Club name">
+    <input id="c-desc" type="text" placeholder="Description">
+    <input id="c-faculty" type="text" placeholder="Faculty coordinator">
+    <div style="display:flex; gap:10px; flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="createClub()">Create Club</button>
+      <button class="btn btn-sm" onclick="updateClub()" style="width:100%">Update Club</button>
+    </div>
+    <div id="c-feedback" style="margin-top:8px;font-size:12px"></div>
+  </div>
+
+  <div class="data-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Faculty</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="clubs-body"></tbody>
+    </table>
+  </div>
+</div>
+
+
+
+
+    <!-- warnings -->
+    <div id="tab-warnings" style="display:none">
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Issue Warning</div>
+        <input id="w-roll" type="text" placeholder="Student roll number" />
+        <select id="w-sev">
+          <option value="LOW">LOW</option>
+          <option value="MEDIUM">MEDIUM</option>
+          <option value="HIGH">HIGH</option>
+        </select>
+        <input id="w-msg" type="text" placeholder="Warning message" />
+        <button class="btn btn-primary" onclick="issueWarning()">Send Warning</button>
+        <div id="w-feedback" style="margin-top:8px;font-size:12px"></div>
+      </div>
+      <div class="data-wrap">
+        <table><thead><tr>
+          <th>Student</th><th>Severity</th><th>Message</th><th>Date</th><th>Action</th>
+        </tr></thead>
+        <tbody id="warnings-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- raw api -->
+    <div id="tab-raw" style="display:none">
+      <div class="card">
+        <div class="card-title">Raw API Call — direct to your backend</div>
+        <input id="raw-url" type="text" placeholder="/api/admin/students" />
+        <select id="raw-method" style="background:#111;border:1px solid rgba(255,255,255,0.1);color:white;padding:11px 14px;border-radius:10px;font-size:14px;margin-bottom:10px">
+          <option>GET</option><option>POST</option><option>DELETE</option><option>PUT</option>
+        </select>
+        <textarea id="raw-body" rows="4"
+          placeholder='{"key":"value"}  — only needed for POST/PUT'></textarea>
+        <button class="btn btn-primary" onclick="rawCall()">Send Request</button>
+      </div>
+      <pre id="raw-output" style="margin-top:12px;display:none"></pre>
+    </div>
+  </div>
+
+<script>
+  /* ══ STATE ══ */
+  let TOKEN       = "";
+  let BASE        = localStorage.getItem("cv_admin_base") || "http://localhost:8081";
+  let allStudents = [];
+  let allIdeas    = [];
+  let allClubs = [];
+
+  /* ── init ── */
+  document.getElementById("base-url").value = BASE;
+
+  function saveBase() {
+    BASE = document.getElementById("base-url").value.replace(/\/$/, "");
+    localStorage.setItem("cv_admin_base", BASE);
+    const s = document.getElementById("base-saved");
+    s.style.display = "inline";
+    setTimeout(() => s.style.display = "none", 1500);
+  }
+
+  /* ══ CORE FETCH ══
+     All requests go to BASE (port 8081 by default).
+     This is the key fix — we never rely on window.location.
+  */
+async function api(path, opts = {}) {
+  const headers = { "Content-Type": "application/json" };
+  if (TOKEN) headers.Authorization = "Bearer " + TOKEN;
+
+  const normalizedPath = path.startsWith("/") ? path : "/" + path;
+
+  const res = await fetch(BASE + normalizedPath, {
+    headers,
+    ...opts
+  });
+
+  const ct = res.headers.get("Content-Type") || "";
+  const data = ct.includes("json") ? await res.json() : await res.text();
+
+  return { ok: res.ok, status: res.status, data };
+}
+
+  /* ══ LOGIN ══ */
+  async function doLogin() {
+    const roll = document.getElementById("inp-roll").value.trim();
+    const pass = document.getElementById("inp-pass").value.trim();
+    const err  = document.getElementById("login-err");
+    const btn  = document.getElementById("login-btn");
+    if (!roll || !pass) { err.textContent = "Fill both fields."; return; }
+
+    btn.disabled = true; btn.textContent = "Logging in..."; err.textContent = "";
+    try {
+      const { ok, data } = await api("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ rollNumber: roll, password: pass })
+      });
+      if (ok && data.token) {
+        TOKEN = data.token;
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("panel").style.display = "block";
+        loadAll();
+      } else {
+        err.textContent = "Login failed — wrong credentials or backend is down.";
+      }
+    } catch (e) {
+      err.textContent =
+        `Cannot reach backend at ${BASE}. ` +
+        `Is Spring Boot running on port 8081? ` +
+        `Check the Backend URL at the top of this page.`;
+    } finally {
+      btn.disabled = false; btn.textContent = "Login";
+    }
+  }
+
+  /* ══ TABS ══ */
+function switchTab(name, btn) {
+  ["health","students","ideas","clubs","warnings","raw"].forEach(t =>
+    document.getElementById("tab-" + t).style.display = "none"
+  );
+  document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + name).style.display = "block";
+  btn.classList.add("active");
+}
+
+async function loadAll() {
+  await loadHealth();
+  await loadStudents();
+  await loadIdeas();
+  await loadClubs();
+  await loadWarnings();
+}
+
+  /* ══ HEALTH ══ */
+  async function loadHealth() {
+    const bar = document.getElementById("status-bar");
+    const txt = document.getElementById("status-text");
+    try {
+      const { ok, data } = await api("/actuator/health");
+      document.getElementById("health-raw").textContent = JSON.stringify(data, null, 2);
+
+      if (ok && data.status === "UP") {
+        bar.className = "status-bar status-up";
+        txt.textContent = "✓ Backend UP — all systems healthy";
+      } else {
+        bar.className = "status-bar status-down";
+        txt.textContent = "✗ Backend reporting issues";
+      }
+
+      const grid  = document.getElementById("health-grid");
+      grid.innerHTML = "";
+      addHealthCard(grid, "Overall",    data.status, null);
+      const comps = data.components || {};
+      const keys  = [
+        ["db",        "Database"],
+        ["mongo",     "MongoDB"],
+        ["diskSpace", "Disk Space"],
+        ["ping",      "Ping"],
+        ["jvm",       "JVM Memory"],
+      ];
+      keys.forEach(([k, label]) => {
+        if (comps[k]) addHealthCard(grid, label, comps[k].status, comps[k].details);
+      });
+
+    } catch (e) {
+      bar.className = "status-bar status-down";
+      txt.textContent =
+        `✗ Cannot reach ${BASE}/actuator/health — ` +
+        `check Backend URL above or add Actuator to pom.xml`;
+    }
+  }
+
+  function addHealthCard(grid, label, status, details) {
+    const cls  = status === "UP" ? "c-up" : status === "DOWN" ? "c-down" : "c-warn";
+    const icon = status === "UP" ? "✓" : "✗";
+    let extra  = "";
+    if (details && details.free != null) {
+      const gb = (details.free / 1e9).toFixed(1);
+      extra = `<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">${gb} GB free</div>`;
+    }
+    const el = document.createElement("div");
+    el.className = "health-item";
+    el.innerHTML = `
+      <div class="health-label">${label}</div>
+      <div class="health-val ${cls}">${icon} ${status || "UNKNOWN"}</div>
+      ${extra}`;
+    grid.appendChild(el);
+  }
+
+  /* ══ STUDENTS ══ */
+  async function loadStudents() {
+    document.getElementById("students-body").innerHTML =
+      `<tr><td colspan="5" class="loading">Loading students...</td></tr>`;
+    try {
+      const { ok, data } = await api("/api/admin/students");
+      if (!ok) { tableErr("students-body", 5, "Failed — check token or endpoint."); return; }
+      allStudents = data;
+      renderStudents(data);
+    } catch { tableErr("students-body", 5, "Network error."); }
+  }
+
+  function renderStudents(list) {
+    document.getElementById("s-count").textContent = list.length + " students";
+    if (!list.length) {
+      document.getElementById("students-body").innerHTML =
+        `<tr><td colspan="5" class="empty">No students found.</td></tr>`;
+      return;
+    }
+    document.getElementById("students-body").innerHTML = list.map(s => `
+      <tr>
+        <td>${esc(s.name || "—")}</td>
+        <td style="font-family:monospace;font-size:12px">${esc(s.rollNumber)}</td>
+        <td>${esc(s.branch || "—")}</td>
+        <td>${esc(s.year   || "—")}</td>
+        <td><span style="font-size:11px;padding:2px 8px;border-radius:999px;
+          background:${s.role==="ADMIN"?"rgba(239,68,68,0.15)":"rgba(38,242,208,0.1)"};
+          color:${s.role==="ADMIN"?"#f87171":"#26F2D0"};
+          border:1px solid ${s.role==="ADMIN"?"rgba(239,68,68,0.3)":"rgba(38,242,208,0.25)"}">
+          ${esc(s.role||"STUDENT")}</span></td>
+      </tr>`).join("");
+  }
+
+  function filterStudents() {
+    const q = document.getElementById("s-search").value.toLowerCase();
+    renderStudents(q
+      ? allStudents.filter(s =>
+          (s.name||"").toLowerCase().includes(q) ||
+          (s.rollNumber||"").toLowerCase().includes(q))
+      : allStudents);
+  }
+
+  /* ══ IDEAS ══ */
+  async function loadIdeas() {
+    document.getElementById("ideas-body").innerHTML =
+      `<tr><td colspan="6" class="loading">Loading ideas...</td></tr>`;
+    try {
+      const { ok, data } = await api("/api/ideas");
+      if (!ok) { tableErr("ideas-body", 6, "Failed to load ideas."); return; }
+      allIdeas = data;
+      renderIdeas(data);
+    } catch { tableErr("ideas-body", 6, "Network error."); }
+  }
+
+  function renderIdeas(list) {
+    document.getElementById("idea-count").textContent = list.length + " ideas";
+    if (!list.length) {
+      document.getElementById("ideas-body").innerHTML =
+        `<tr><td colspan="6" class="empty">No ideas.</td></tr>`;
+      return;
+    }
+    document.getElementById("ideas-body").innerHTML = list.map(i => `
+      <tr>
+        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+          title="${esc(i.title)}">${esc(i.title)}</td>
+        <td style="font-size:12px">${esc(i.createdByName||i.createdByRollNumber||"—")}</td>
+        <td>${esc(i.category||"—")}</td>
+        <td><span style="font-size:11px;padding:2px 8px;border-radius:999px;
+          background:${sBg(i.status)};color:${sClr(i.status)};
+          border:1px solid ${sBrd(i.status)}">${esc(i.status||"—")}</span></td>
+        <td>${i.likes||0}</td>
+        <td><button class="btn-sm btn-danger-sm"
+          onclick="deleteIdea('${i.id}',this)">Delete</button></td>
+      </tr>`).join("");
+  }
+
+  function filterIdeas() {
+    const f = document.getElementById("idea-filter").value;
+    renderIdeas(f ? allIdeas.filter(i => i.status === f) : allIdeas);
+  }
+
+  async function deleteIdea(id, btn) {
+    if (!confirm("Delete this idea permanently from the DB?")) return;
+    btn.disabled = true; btn.textContent = "...";
+    const { ok } = await api(`/api/ideas/${id}`, { method:"DELETE" });
+    if (ok) { allIdeas = allIdeas.filter(i => i.id !== id); filterIdeas(); }
+    else    { btn.textContent = "Failed"; btn.disabled = false; }
+  }
+
+  const sBg  = s => s==="IMPLEMENTED"?"rgba(34,197,94,0.12)":s==="REJECTED"?"rgba(239,68,68,0.12)":s==="ON_HOLD"?"rgba(234,179,8,0.12)":"rgba(255,255,255,0.06)";
+  const sClr = s => s==="IMPLEMENTED"?"#4ade80":s==="REJECTED"?"#f87171":s==="ON_HOLD"?"#fbbf24":"#9ca3af";
+  const sBrd = s => s==="IMPLEMENTED"?"rgba(34,197,94,0.3)":s==="REJECTED"?"rgba(239,68,68,0.3)":s==="ON_HOLD"?"rgba(234,179,8,0.3)":"rgba(255,255,255,0.1)";
+
+
+
+
+
+
+async function loadClubs() {
+  document.getElementById("clubs-body").innerHTML =
+    `<tr><td colspan="5" class="loading">Loading clubs...</td></tr>`;
+
+  try {
+    const { ok, data } = await api("/api/clubs/all");
+    if (!ok) {
+      tableErr("clubs-body", 5, "Failed to load clubs.");
+      return;
+    }
+
+    allClubs = data || [];
+    renderClubs(allClubs);
+  } catch (e) {
+    tableErr("clubs-body", 5, "Network error.");
+  }
+}
+
+function renderClubs(list) {
+  if (!list.length) {
+    document.getElementById("clubs-body").innerHTML =
+      `<tr><td colspan="5" class="empty">No clubs found.</td></tr>`;
+    return;
+  }
+
+  document.getElementById("clubs-body").innerHTML = list.map(c => `
+    <tr>
+      <td style="font-family:monospace;font-size:12px">${esc(c.id)}</td>
+      <td>${esc(c.name)}</td>
+      <td style="max-width:220px">${esc(c.description)}</td>
+      <td>${esc(c.facultyCoordinator)}</td>
+      <td>
+        <button class="btn-sm"
+          onclick="fillClubForm('${esc(c.id)}','${esc(c.name)}','${esc(c.description)}','${esc(c.facultyCoordinator)}')">
+          Edit
+        </button>
+        <button class="btn-sm btn-danger-sm" onclick="deleteClub('${esc(c.id)}', this)">
+          Delete
+        </button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function fillClubForm(id, name, description, faculty) {
+  document.getElementById("c-id").value = id || "";
+  document.getElementById("c-name").value = name || "";
+  document.getElementById("c-desc").value = description || "";
+  document.getElementById("c-faculty").value = faculty || "";
+}
+
+async function createClub() {
+  const name = document.getElementById("c-name").value.trim();
+  const description = document.getElementById("c-desc").value.trim();
+  const facultyCoordinator = document.getElementById("c-faculty").value.trim();
+  const fb = document.getElementById("c-feedback");
+
+  if (!name || !description || !facultyCoordinator) {
+    fb.style.color = "#f87171";
+    fb.textContent = "Fill all fields.";
+    return;
+  }
+
+  fb.style.color = "#9ca3af";
+  fb.textContent = "Creating...";
+
+  const { ok } = await api("/api/clubs/create", {
+    method: "POST",
+    body: JSON.stringify({ name, description, facultyCoordinator })
+  });
+
+  if (ok) {
+    fb.style.color = "#4ade80";
+    fb.textContent = "Club created.";
+    clearClubForm();
+    loadClubs();
+  } else {
+    fb.style.color = "#f87171";
+    fb.textContent = "Create failed.";
+  }
+}
+
+async function updateClub() {
+  const id = document.getElementById("c-id").value.trim();
+  const name = document.getElementById("c-name").value.trim();
+  const description = document.getElementById("c-desc").value.trim();
+  const facultyCoordinator = document.getElementById("c-faculty").value.trim();
+  const fb = document.getElementById("c-feedback");
+
+  if (!id || !name || !description || !facultyCoordinator) {
+    fb.style.color = "#f87171";
+    fb.textContent = "ID and all fields are required for update.";
+    return;
+  }
+
+  fb.style.color = "#9ca3af";
+  fb.textContent = "Updating...";
+
+  const { ok } = await api(`/api/clubs/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ name, description, facultyCoordinator })
+  });
+
+  if (ok) {
+    fb.style.color = "#4ade80";
+    fb.textContent = "Club updated.";
+    clearClubForm();
+    loadClubs();
+  } else {
+    fb.style.color = "#f87171";
+    fb.textContent = "Update failed.";
+  }
+}
+
+async function deleteClub(id, btn) {
+  if (!confirm("Delete this club?")) return;
+
+  btn.disabled = true;
+  btn.textContent = "...";
+
+  const { ok } = await api(`/api/clubs/${id}`, {
+    method: "DELETE"
+  });
+
+  if (ok) {
+    loadClubs();
+  } else {
+    btn.textContent = "Failed";
+    btn.disabled = false;
+  }
+}
+
+function clearClubForm() {
+  document.getElementById("c-id").value = "";
+  document.getElementById("c-name").value = "";
+  document.getElementById("c-desc").value = "";
+  document.getElementById("c-faculty").value = "";
+}
+
+  
+  /* ══ WARNINGS ══ */
+  async function loadWarnings() {
+    document.getElementById("warnings-body").innerHTML =
+      `<tr><td colspan="5" class="loading">Loading warnings...</td></tr>`;
+    try {
+      const { ok, data } = await api("/api/warnings");
+      if (!ok) { tableErr("warnings-body", 5, "Failed to load warnings."); return; }
+      if (!data.length) {
+        document.getElementById("warnings-body").innerHTML =
+          `<tr><td colspan="5" class="empty">No warnings yet.</td></tr>`;
+        return;
+      }
+      document.getElementById("warnings-body").innerHTML = data.map(w => `
+        <tr>
+          <td>${esc(w.recipientName||w.recipientRollNumber||"—")}</td>
+          <td><span class="warn-badge w-${w.severity}">${esc(w.severity)}</span></td>
+          <td style="max-width:200px;font-size:12px">${esc(w.message)}</td>
+          <td style="font-size:11px;color:rgba(255,255,255,0.35)">
+            ${w.createdAt ? new Date(w.createdAt).toLocaleDateString("en-IN") : "—"}
+          </td>
+          <td><button class="btn-sm btn-danger-sm"
+            onclick="deleteWarning('${w.id}',this)">Delete</button></td>
+        </tr>`).join("");
+    } catch { tableErr("warnings-body", 5, "Network error."); }
+  }
+
+  async function issueWarning() {
+    const roll = document.getElementById("w-roll").value.trim();
+    const msg  = document.getElementById("w-msg").value.trim();
+    const sev  = document.getElementById("w-sev").value;
+    const fb   = document.getElementById("w-feedback");
+    if (!roll || !msg) { fb.style.color="#f87171"; fb.textContent="Fill roll number and message."; return; }
+    fb.style.color="#9ca3af"; fb.textContent="Sending...";
+    const { ok } = await api("/api/warnings/issue", {
+      method:"POST",
+      body: JSON.stringify({ recipientRollNumber:roll, message:msg, severity:sev, isSuggestion:false })
+    });
+    if (ok) {
+      fb.style.color="#4ade80"; fb.textContent="Warning sent ✓";
+      document.getElementById("w-roll").value="";
+      document.getElementById("w-msg").value="";
+      setTimeout(() => { fb.textContent=""; }, 3000);
+      loadWarnings();
+    } else {
+      fb.style.color="#f87171"; fb.textContent="Failed. Check roll number.";
+    }
+  }
+
+  async function deleteWarning(id, btn) {
+    if (!confirm("Delete this warning?")) return;
+    btn.disabled=true; btn.textContent="...";
+    const { ok } = await api(`/api/warnings/${id}`, { method:"DELETE" });
+    if (ok) loadWarnings();
+    else { btn.textContent="Failed"; btn.disabled=false; }
+  }
+
+  /* ══ RAW API ══ */
+  async function rawCall() {
+    const path   = document.getElementById("raw-url").value.trim();
+    const method = document.getElementById("raw-method").value;
+    const body   = document.getElementById("raw-body").value.trim();
+    const out    = document.getElementById("raw-output");
+    if (!path) { out.style.display="block"; out.textContent="Enter a URL path like /api/admin/students"; return; }
+    try {
+      const opts = { method };
+      if (body && method !== "GET") opts.body = body;
+      const { status, data } = await api(path, opts);
+      out.style.display = "block";
+      out.textContent =
+        `HTTP ${status}\nURL: ${BASE}${path}\n\n` +
+        (typeof data === "string" ? data : JSON.stringify(data, null, 2));
+    } catch (e) {
+      out.style.display="block";
+      out.textContent="Error: " + e.message;
+    }
+  }
+
+  /* ══ UTIL ══ */
+  function tableErr(id, cols, msg) {
+    document.getElementById(id).innerHTML =
+      `<tr><td colspan="${cols}" style="text-align:center;padding:24px;color:#f87171;font-size:13px">${msg}</td></tr>`;
+  }
+  function esc(s) {
+    return String(s ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;");
+  }
+
+  
+</script>
+</body>
+</html>

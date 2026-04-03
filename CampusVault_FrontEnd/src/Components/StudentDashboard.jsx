@@ -44,49 +44,62 @@ export default function StudentDashboard() {
   //   }
   // }, [location.state]);
 
-  const fetchData = async () => {
-    try {
-      const ideasRes = await fetch("http://localhost:8081/api/ideas");
-      const allIdeas = await ideasRes.json();
-      setIdeas(allIdeas.filter(i => String(i.createdById) === String(myId)));
+const fetchData = async () => {
+  try {
+    // 🔹 Ideas
+    const ideasRes = await fetch("http://localhost:8081/api/ideas");
+    const allIdeas = await ideasRes.json();
+    setIdeas(allIdeas.filter(i => String(i.createdById) === String(myId)));
 
-      const myClubRes = await fetch("http://localhost:8081/api/clubs/my", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (myClubRes.ok) {
-        const data = await myClubRes.json();
-        if (data.length > 0) setMyClub(data[0]);
-      }
+    // 🔹 Clubs (FIXED — no /my)
+    const allClubsRes = await fetch("http://localhost:8081/api/clubs/all", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-      const allClubsRes = await fetch("http://localhost:8081/api/clubs/all");
+    if (allClubsRes.ok) {
       const allClubs = await allClubsRes.json();
-      setJoinedClubs(allClubs.filter(c =>
-        c.members?.includes(rollNumber) && c.createdBy !== rollNumber
-      ));
 
-      const notifRes = await fetch("http://localhost:8081/api/notifications/my", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (notifRes.ok) {
-        const notifData = await notifRes.json();
-        setNotifications(notifData);
-        setUnread(notifData.filter(n => !n.read).length);
-      }
+      // ✅ clubs where user is member
+      const myClubs = allClubs.filter(c =>
+        Array.isArray(c.members) && c.members.includes(rollNumber)
+      );
 
-      // ✅ fetch warnings
-      const warnRes = await fetch("http://localhost:8081/api/warnings/my", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (warnRes.ok) {
-        setWarnings(await warnRes.json());
-      }
+      // ✅ set single club (your existing logic)
+      if (myClubs.length > 0) setMyClub(myClubs[0]);
 
-    } catch (err) {
-      console.error("Dashboard fetch error:", err);
-    } finally {
-      setLoading(false);
+      // ✅ joined clubs (excluding created ones)
+      setJoinedClubs(
+        myClubs.filter(c => c.createdBy !== myId)
+      );
     }
-  };
+
+    // 🔹 Notifications
+    const notifRes = await fetch("http://localhost:8081/api/notifications/my", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (notifRes.ok) {
+      const notifData = await notifRes.json();
+      setNotifications(notifData);
+      setUnread(notifData.filter(n => !n.read).length);
+    }
+
+    // 🔹 Warnings
+    const warnRes = await fetch("http://localhost:8081/api/warnings/my", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (warnRes.ok) {
+      const warnData = await warnRes.json();
+      setWarnings(warnData);
+    }
+
+  } catch (err) {
+    console.error("Dashboard fetch error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const markAllRead = async () => {
     if (unread === 0) return;

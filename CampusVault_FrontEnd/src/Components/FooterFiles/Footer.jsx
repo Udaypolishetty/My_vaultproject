@@ -132,7 +132,7 @@ export default function Footer() {
             className="flex items-center gap-1 text-[11px]"
             style={{ color: "rgba(107,114,128,0.5)" }}
           >
-            <span>© {year}</span>
+            <span> @{year}</span>
             <span className="mx-1">·</span>
             <Heart size={9} style={{ color: "rgba(239,68,68,0.5)", fill: "rgba(239,68,68,0.5)" }} />
             <span className="ml-1">for students</span>
@@ -145,7 +145,7 @@ export default function Footer() {
           className="text-center text-[10px] tracking-widest uppercase font-mono mt-3"
           style={{ color: "rgba(75,85,99,0.4)" }}
         >
-          Ellenki College of Engineering
+          © All Rights Reserved 
         </p>
       </div>
     </footer>

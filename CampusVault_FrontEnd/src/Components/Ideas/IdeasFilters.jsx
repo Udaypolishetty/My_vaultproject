@@ -114,12 +114,14 @@ export default function IdeasFilters({ activeFilter, setActiveFilter }) {
                     </>
                   )}
 
-                  <Icon
-                    size={16}
-                    className={`relative z-10 ${
-                      isActive ? CATEGORY_META[cat]?.active : "text-gray-500"
-                    }`}
-                  />
+{cat !== "All" && (
+  <Icon
+    size={16}
+    className={`relative z-10 ${
+      isActive ? CATEGORY_META[cat]?.active : "text-gray-500"
+    }`}
+  />
+)}
 
                   <span
                     className={`relative z-10 ${

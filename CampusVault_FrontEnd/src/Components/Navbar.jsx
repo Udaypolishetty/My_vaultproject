@@ -1100,15 +1100,19 @@ const Navbar = () => {
           {renderNavLinks(closeMenu)}
           {unread > 0 && (
             <li>
-              <button
-                onClick={() => { handleBellClick(); closeMenu(); }}
-                className="text-[#26F2D0] text-sm font-medium"
-              >
-                🔔 {unread} new notification{unread > 1 ? "s" : ""}
-              </button>
+<div className="flex w-full justify-center items-center">
+  <button
+    onClick={() => { handleBellClick(); closeMenu(); }}
+    className="flex items-center justify-center gap-2 text-[#26F2D0] text-base font-medium leading-none"
+  >
+    <Bell size={18} className="relative top-[2px]" />
+    {unread} new notification{unread > 1 ? "s" : ""}
+  </button>
+</div>
             </li>
           )}
-          <li>
+
+          <li className="flex justify-center">
 
 
 <button className="logoutBtn" onClick={handleLogout}>

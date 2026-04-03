@@ -84,7 +84,7 @@ export default function IdeasLeaderboard({ myId }) {
 
             return (
               <div key={idea.id}
-                className={`flex items-center gap-4 px-5 py-4 rounded-2xl border
+                className={`flex items-center gap-4 p-3 md:px-5 md:py-4 rounded-2xl border
                   transition-all duration-200 hover:scale-[1.01]
                   ${isImplemented
                     ? "bg-gradient-to-r from-green-500/10 to-[#111] border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.08)]"
@@ -96,7 +96,7 @@ export default function IdeasLeaderboard({ myId }) {
                   }`}>
 
                 {/* Rank */}
-                <div className="w-10 text-center shrink-0">
+                <div className="w-8 md:w-10 text-center shrink-0">
                   {isImplemented
                     ? <span className="text-xl">✯</span>
                     : isRejected
@@ -108,7 +108,7 @@ export default function IdeasLeaderboard({ myId }) {
                 </div>
 
                 {/* Category icon */}
-                <div className={`w-10 h-10 rounded-xl bg-white/5 border border-white/10
+                <div className={`w-9 h-9 md:w-10 md:h-10 rounded-xl bg-white/5 border border-white/10
                                 flex items-center justify-center shrink-0
                                 ${isRejected ? "opacity-40" : ""}`}>
                   <img
@@ -118,9 +118,10 @@ export default function IdeasLeaderboard({ myId }) {
                 </div>
 
                 {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className={`font-semibold text-sm truncate
+<div className="flex-1 min-w-0">
+  {/* Use flex-col for mobile, flex-row for desktop */}
+  <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
+    <p className={`font-semibold text-sm md:text-base truncate
                       ${isRejected ? "text-gray-500" : "text-white"}`}>
                       {idea.title}
                     </p>
@@ -144,12 +145,13 @@ export default function IdeasLeaderboard({ myId }) {
                       </span>
                     )}
                     {/* ✅ Hall of fame tag */}
-                    {isImplemented && idea.likes > 5 && Boolean(idea.archived) && (
-                      <span className="text-xs px-4 py-0.5 rounded-full
-                                       bg-yellow-500/20 text-yellow-400 border border-yellow-400/30">
-                        <Landmark size={14}/> Hall of Fame
-                      </span>
-                    )}
+{isImplemented && idea.likes > 5 && Boolean(idea.archived) && (
+  <span className="flex items-center gap-1 text-[10px] md:text-xs px-2 md:px-4 py-0.5 rounded-full
+                   bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 whitespace-nowrap">
+    <Landmark size={12} className="md:w-[14px] md:h-[14px]" /> 
+    Hall of Fame
+  </span>
+)}
                   </div>
                   <p className="text-xs text-gray-500 mt-0.5">
                     by {isMe ? "You" : idea.createdByName} · {idea.createdByBranch} ·
@@ -162,7 +164,7 @@ export default function IdeasLeaderboard({ myId }) {
                 </div>
 
                 {/* Stats */}
-                <div className="flex items-center gap-4 shrink-0">
+                {/* <div className="flex items-center gap-4 shrink-0">
                   <div className="text-center">
                     <p className={`text-lg font-bold ${
                       isImplemented ? "text-green-400" :
@@ -179,7 +181,23 @@ export default function IdeasLeaderboard({ myId }) {
                     </p>
                     <p className="text-xs text-gray-500">replies</p>
                   </div>
-                </div>
+                </div> */}
+
+                <div className="flex items-center gap-3 md:gap-4 shrink-0 border-l border-white/5 pl-3 md:pl-0 md:border-none">
+  <div className="text-center">
+    <p className="text-base md:text-lg font-bold ...">{idea.likes || 0}</p>
+    <p className="text-[10px] md:text-xs text-gray-500 uppercase tracking-tight">likes</p>
+  </div>
+  {/* Hide replies on extra small mobile screens to save space */}
+  <div className="text-center hidden sm:block">
+    <p className="text-base md:text-lg font-bold text-gray-400">
+      {idea.comments?.length || 0}
+    </p>
+    <p className="text-[10px] md:text-xs text-gray-500">replies</p>
+  </div>
+</div>
+
+
               </div>
             );
           })}

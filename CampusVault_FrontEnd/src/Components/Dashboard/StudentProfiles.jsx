@@ -166,10 +166,10 @@ export default function StudentProfiles({ name, rollNumber, email, ideas, myClub
                   <div className="flex items-center gap-2">
                     <p className="text-white font-medium text-sm">{idea.title}</p>
                     {idea.status === "IMPLEMENTED" && (
-                      <span className="text-xs text-green-400 bg-green-500/20
-                                       border border-green-500/30 px-2 py-0.5 rounded-full">
-                        ✅ Implemented
-                      </span>
+<span className="text-[10px] md:text-xs text-green-400 bg-green-500/20 
+                 border border-green-500/30 px-2 md:px-3 py-0.5 rounded-full whitespace-nowrap">
+  ✅ Implemented
+</span>
                     )}
                     {idea.status === "UNDER_REVIEW" && (
                       <span className="text-xs text-blue-400 bg-blue-500/20

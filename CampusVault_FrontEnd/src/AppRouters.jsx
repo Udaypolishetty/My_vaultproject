@@ -207,9 +207,10 @@ function AppRouters() {
       <Route path="/contact"              element={<Contact />} />
 
       {/* Admin */}
-      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      {/* <Route path="/admin/dashboard" element={<AdminDashboard />} /> */}
+      <Route path="/admin/dashboard" element={<Navigate to="/admin/dashboard/students" />} />
+
       <Route path="/admin/dashboard/:tab" element={<AdminDashboard />} />
-<Route path="/admin/dashboard" element={<Navigate to="/admin/dashboard/students" />} />
 
       {/* Public idea page */}
       <Route path="/idea/:id" element={<PublicIdeaPage />} />

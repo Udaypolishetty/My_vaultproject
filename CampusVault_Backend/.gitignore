@@ -34,5 +34,7 @@ build/
 
 
 application-secrets.properties
+CampusVault_Backend/application-secrets.properties
+CampusVault_Backend/src/main/resources/application-secrets.properties
 .env
 .env.*

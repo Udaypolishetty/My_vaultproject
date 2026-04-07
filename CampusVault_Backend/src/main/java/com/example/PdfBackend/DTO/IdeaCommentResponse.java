@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class IdeaCommentResponse {
     private String id;                    // idea id
-    private List<CommentResponse> comments; // ✅ full updated comment list
+    private List<CommentResponse> comments; //  full updated comment list
     private int likes;
     private List<String> likedBy;
 }

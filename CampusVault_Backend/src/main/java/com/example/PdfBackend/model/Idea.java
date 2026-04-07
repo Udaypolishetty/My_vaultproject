@@ -24,15 +24,15 @@ public class Idea {
     private LocalDateTime createdAt;
     private String createdByBranch;
     private String createdByYear;
-    private String createdById;      // ✅ added
-    private String createdByEmail;   // ✅ added
+    private String createdById;      //  added
+    private String createdByEmail;   // added
     private Integer  likes = 0;
     private List<String> likedBy = new ArrayList<>();
     private List<Comment> comments = new ArrayList<>();
     private String createdByRollNumber;
 
 
-        // ✅ Phase 1 — Idea status system
+        //  Phase 1 — Idea status system
     private String status = "OPEN"; // OPEN, UNDER_REVIEW, ON_HOLD, IMPLEMENTED, REJECTED
     private String moderatorNote;   // reason/message from moderator
     private String reviewedBy;      // moderator's name who changed status

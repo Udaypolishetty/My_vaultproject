@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-
+import { Lightbulb, Users, Megaphone } from "lucide-react";
 const CARDS = [
   {
-    emoji: "💡",
+    emoji: Lightbulb,
     title: "Share an Idea",
     desc: "Post ideas that improve campus life. Get likes, get noticed, get implemented.",
     cta: "Post Idea →",
@@ -13,7 +13,7 @@ const CARDS = [
     dark: "rgba(38,242,208,0.08)",
   },
   {
-    emoji: "🏛️",
+    emoji: Users,
     title: "Join a Club",
     desc: "Find your people. Tech, culture, sports — your tribe is waiting.",
     cta: "Explore Clubs →",
@@ -23,7 +23,7 @@ const CARDS = [
     dark: "rgba(167,139,250,0.08)",
   },
   {
-    emoji: "📢",
+    emoji: Megaphone,
     title: "Buzz the Campus",
     desc: "Lost something? Found an opportunity? Start a conversation.",
     cta: "Start Buzzing →",
@@ -199,6 +199,7 @@ export default function FirstUserSuggestion({ onDismiss, onTabSelect }) {
               marginTop: isMobile ? "20px" : "28px",
             }}>
               {CARDS.map((c, i) => {
+                const IconComponent = c.emoji;
                 const isActive = hoveredCard === i || (hoveredCard === null && activeCard === i);
                 return (
                   <button key={i}
@@ -233,11 +234,16 @@ export default function FirstUserSuggestion({ onDismiss, onTabSelect }) {
                       }} />
                     )}
 
-                    <div style={{
-                      fontSize: isMobile ? "24px" : "32px",
-                      marginBottom: isMobile ? "0" : "12px",
-                      flexShrink: 0,
-                    }}>{c.emoji}</div>
+<div style={{
+  marginBottom: isMobile ? "0" : "12px",
+  flexShrink: 0,
+  display: "flex",
+  alignItems: "center",
+  color: isActive ? c.accent : "#4b5563",
+  transition: "all 0.3s ease"
+}}>
+  <IconComponent size={isMobile ? 24 : 32} strokeWidth={2.5} />
+</div>
 
                     <div style={{ flex: isMobile ? 1 : "auto" }}>
                       <div style={{

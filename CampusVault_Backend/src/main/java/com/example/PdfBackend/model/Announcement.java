@@ -12,8 +12,8 @@ public class Announcement {
     private String title;
     private String content;
     private String category; // "General", "Event", "Academic", "Notice"
-    private String imageUrl; // ✅ added
+    private String imageUrl; //  added
     private long timestamp;
     private String postedBy;
-    private boolean pinned = false; // ✅ new
+    private boolean pinned = false; //  new
 }

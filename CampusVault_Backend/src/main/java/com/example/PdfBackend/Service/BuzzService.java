@@ -26,7 +26,7 @@ public class BuzzService {
 
     private final BuzzRepository buzzRepository;
     private final StudentProfileRepository studentRepository;
-    private final NotificationService notificationService; // ✅ added for notifications
+    private final NotificationService notificationService; // added for notifications
 
 
     private boolean isAdminOnly(String rollNumber) {
@@ -36,7 +36,7 @@ public class BuzzService {
 }
 
 
-    // ✅ filter posts based on student's year and branch
+    // filter posts based on student's year and branch
     public List<BuzzPost> getAll(String rollNumber) {
         StudentProfile student = studentRepository.findByRollNumber(rollNumber)
                 .orElseThrow(() -> new NotFoundException("Student not found: " + rollNumber));
@@ -77,7 +77,7 @@ public class BuzzService {
         BuzzPost post = new BuzzPost();
         post.setContent(request.getContent().trim());
         post.setTag(request.getTag());
-        post.setVisibility(request.getVisibility() != null ? request.getVisibility() : "EVERYONE"); // ✅
+        post.setVisibility(request.getVisibility() != null ? request.getVisibility() : "EVERYONE"); 
         post.setCreatedByName(student.getName());
         post.setCreatedByRollNumber(rollNumber);
         post.setCreatedByBranch(student.getBranch());
@@ -135,7 +135,7 @@ public class BuzzService {
         post.getReplies().add(reply);
         BuzzPost savedPost = buzzRepository.save(post);
 
-        // ✅ notify post owner when someone replies
+        //  notify post owner when someone replies
         if (!rollNumber.equals(post.getCreatedByRollNumber())) {
             notificationService.create(
                     post.getCreatedByRollNumber(),
@@ -175,36 +175,6 @@ public class BuzzService {
     return buzzRepository.save(post);
 }
 
-    // public BuzzPost deleteReply(String postId, String replyId, String rollNumber) {
-    //     BuzzPost post = buzzRepository.findById(postId)
-    //             .orElseThrow(() -> new NotFoundException("Post not found: " + postId));
-
-    //     if (post.getReplies() == null) post.setReplies(new ArrayList<>());
-
-    //     BuzzReply target = post.getReplies().stream()
-    //             .filter(r -> replyId.equals(r.getId()))
-    //             .findFirst()
-    //             .orElseThrow(() -> new NotFoundException("Reply not found: " + replyId));
-
-    //     if (!rollNumber.equals(target.getCreatedByRollNumber())) {
-    //         throw new ForbiddenException("You can only delete your own replies");
-    //     }
-
-    //     post.getReplies().remove(target);
-    //     return buzzRepository.save(post);
-    // }
-
-    // public void deletePost(String postId, String rollNumber) {
-    //     BuzzPost post = buzzRepository.findById(postId)
-    //             .orElseThrow(() -> new NotFoundException("Post not found: " + postId));
-
-    //     if (!rollNumber.equals(post.getCreatedByRollNumber())) {
-    //         throw new ForbiddenException("You can only delete your own posts");
-    //     }
-
-    //     buzzRepository.deleteById(postId);
-    // }
-
 
 
     public void deletePost(String postId, String rollNumber) {
@@ -240,7 +210,7 @@ public class BuzzService {
         BuzzPost post = buzzRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("Post not found: " + postId));
 
-        // ✅ only post owner or admin can resolve
+        //  only post owner or admin can resolve
         StudentProfile student = studentRepository.findByRollNumber(rollNumber)
                 .orElseThrow(() -> new NotFoundException("Student not found: " + rollNumber));
 

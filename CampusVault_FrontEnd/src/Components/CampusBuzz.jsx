@@ -1516,7 +1516,7 @@
 import { useState, useEffect, useRef } from "react";
 import BuzzComposer from "./Buzz/BuzzComposer";
 import BuzzFeed from "./Buzz/BuzzFeed";
-import { ArrowUp, RefreshCw, Zap } from "lucide-react";
+import { ArrowUp, RefreshCw, Zap,Megaphone } from "lucide-react";
 
 export default function CampusBuzz({ onNewPost }) {
   const [posts, setPosts] = useState([]);
@@ -1691,10 +1691,14 @@ export default function CampusBuzz({ onNewPost }) {
       <BuzzComposer token={token} onPost={handlePost} />
 
       {posts.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-4xl mb-3">📢</p>
-          <p className="text-gray-400">No posts yet. Be the first to buzz!</p>
-        </div>
+<div className="flex flex-col items-center justify-center py-20 text-center">
+  <Megaphone 
+    size={48} 
+    className="text-gray-600 mb-4 opacity-20" 
+    strokeWidth={1.5} 
+  />
+  <p className="text-gray-400">No posts yet. Be the first to buzz!</p>
+</div>
       ) : (
         <BuzzFeed
           posts={posts}

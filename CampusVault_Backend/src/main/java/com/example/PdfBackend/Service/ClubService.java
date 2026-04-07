@@ -91,7 +91,6 @@ public class ClubService {
             a.setRiskLevel(risk);
             a.setMinDaysToComplete(minDays);
             a.setMaxDaysExpected(maxDays);
-            // ✅ Activity availableFrom set to null initially
             a.setAvailableFrom(null);
             a.setCreatedAt(semesterStart);
             a.setVotes(new ArrayList<>());
@@ -371,26 +370,6 @@ public class ClubService {
         return mapToResponse(club);
     }
 
-//     public ClubResponse leaveClub(String clubId, String rollNumber) {
-//     Club club = clubRepository.findById(clubId).orElseThrow(() -> new NotFoundException("Club not found"));
-    
-//     // 1. Remove from members or pending
-//     boolean removed = club.getMembers().remove(rollNumber);
-//     if (!removed) {
-//         club.getPendingMembers().removeIf(p -> p.getRollNumber().equals(rollNumber));
-//     }
-
-//     // 2. Clear Roles if they were leadership
-//     if (rollNumber.equals(club.getPresidentRoll())) {
-//         club.setPresidentRoll(null);
-//         // Note: Admin will see the "Request President" button again on frontend
-//     }
-//     if (rollNumber.equals(club.getVpRoll())) {
-//         club.setVpRoll(null);
-//     }
-
-//     return mapToResponse(clubRepository.save(club));
-// }
 
 
 public ClubResponse leaveClub(String clubId, String rollNumber) {
@@ -411,7 +390,7 @@ public ClubResponse leaveClub(String clubId, String rollNumber) {
         club.setVpRoll(null);
     }
  
-    // ✅ 3. Record leave timestamp for 24-hour cooldown enforcement
+    //  3. Record leave timestamp for 24-hour cooldown enforcement
     if (club.getRecentLeaves() == null) {
         club.setRecentLeaves(new java.util.HashMap<>());
     }

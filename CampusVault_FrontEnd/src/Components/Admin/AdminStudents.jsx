@@ -3,6 +3,7 @@ import { Trash2, Shield, User } from "lucide-react";
 
 export default function AdminStudents({ students, loading, onDelete }) {
   const [confirmId, setConfirmId] = useState(null);
+  const [search, setSearch] = useState("");
 
   if (loading) return null;
 
@@ -11,7 +12,13 @@ export default function AdminStudents({ students, loading, onDelete }) {
       <h2 className="text-2xl font-black bg-gradient-to-r from-[#26F2D0] to-[#00d4ff] bg-clip-text text-transparent drop-shadow-lg">
         👥 All Students ({students.length})
       </h2>
-      
+      <input
+  type="text"
+  placeholder="Search by name or roll number..."
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  className="w-full md:w-80 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#26F2D0]/50 backdrop-blur-sm"
+/>
       <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0f0f0f]/50 backdrop-blur-sm shadow-2xl">
         <table className="w-full text-sm">
           <thead className="bg-gradient-to-r from-[#1a1a1a] to-[#0f0f0f] backdrop-blur-sm sticky top-0 border-b border-white/20">
@@ -26,7 +33,12 @@ export default function AdminStudents({ students, loading, onDelete }) {
             </tr>
           </thead>
           <tbody>
-            {students.map(s => (
+{students
+  .filter((s) =>
+    s.name.toLowerCase().includes(search.toLowerCase()) ||
+    String(s.rollNumber).toLowerCase().includes(search.toLowerCase())
+  )
+  .map((s) => (
               <tr key={s.id} className="border-b border-white/5 hover:bg-white/10 hover:shadow-lg hover:shadow-[#26F2D0]/10 transition-all duration-300 backdrop-blur-sm group">
                 <td className="p-4 font-medium text-white group-hover:text-[#26F2D0]">{s.name}</td>
                 <td className="p-4 font-mono text-gray-300 bg-white/5 rounded-lg px-3 py-1">{s.rollNumber}</td>

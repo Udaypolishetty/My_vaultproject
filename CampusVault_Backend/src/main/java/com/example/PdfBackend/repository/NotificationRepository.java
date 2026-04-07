@@ -12,15 +12,15 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     List<Notification> findByRecipientRollNumberAndIsRead(String rollNumber, boolean isRead);
     boolean existsByRecipientRollNumberAndMessage(String rollNumber, String message);
     
-    // ✅ new — for time-based duplicate check
+    //  new — for time-based duplicate check
     boolean existsByRecipientRollNumberAndMessageAndCreatedAtAfter(
         String rollNumber, String message, LocalDateTime after
     );
-    // ✅ for manual delete
+    //  for manual delete
     void deleteByIdAndRecipientRollNumber(String id, String rollNumber);
         void deleteByRecipientRollNumber(String recipientRollNumber);
 
 
-    // ✅ for auto cleanup
+    //  for auto cleanup
     List<Notification> findByCreatedAtBefore(LocalDateTime cutoff);
 }

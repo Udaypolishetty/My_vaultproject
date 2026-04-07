@@ -29,7 +29,7 @@ public class BuzzPost {
     private String createdByYear;
 
     private LocalDateTime createdAt;
-    private LocalDateTime expiresAt; // ✅ auto-delete after 7 days
+    private LocalDateTime expiresAt; // auto-delete after 7 days
 
     private int likes = 0;
     private List<String> likedBy = new ArrayList<>();

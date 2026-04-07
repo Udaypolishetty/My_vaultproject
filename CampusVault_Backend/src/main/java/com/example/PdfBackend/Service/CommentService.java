@@ -36,7 +36,7 @@ public class CommentService {
                 .toList();
     }
 
-    // ✅ Map Comment model → CommentResponse DTO
+    //  Map Comment model → CommentResponse DTO
     private CommentResponse mapToCommentResponse(Comment c) {
         return new CommentResponse(
                 c.getId(),
@@ -51,7 +51,7 @@ public class CommentService {
         );
     }
 
-    // ✅ Map full idea → IdeaCommentResponse DTO
+    //  Map full idea → IdeaCommentResponse DTO
     private IdeaCommentResponse mapToIdeaCommentResponse(Idea idea) {
         List<CommentResponse> commentResponses = idea.getComments() == null
                 ? new ArrayList<>()
@@ -76,7 +76,7 @@ public class CommentService {
 
         if (idea.getComments() == null) idea.setComments(new ArrayList<>());
 
-        // ✅ One comment per student
+        //  One comment per student
         boolean alreadyCommented = idea.getComments().stream()
                 .anyMatch(c -> c.getOwnerRoll() != null && c.getOwnerRoll().equals(rollNumber));
 
@@ -84,9 +84,9 @@ public class CommentService {
             throw new ForbiddenException("You have already commented on this idea");
         }
 
-        // ✅ Build from student profile
+        //  Build from student profile
         Comment comment = new Comment();
-       comment.setId(UUID.randomUUID().toString()); // ✅
+       comment.setId(UUID.randomUUID().toString()); 
         comment.setComment(request.getComment());
         comment.setCommentedBy(student.getName());
         comment.setCommentedYear(student.getYear());
@@ -97,7 +97,7 @@ public class CommentService {
         idea.getComments().add(comment);
         ideaRepository.save(idea);
 
-        return mapToIdeaCommentResponse(idea); // ✅ return full updated idea
+        return mapToIdeaCommentResponse(idea); //  return full updated idea
     }
 
     public IdeaCommentResponse deleteComment(String ideaId, String commentId, String rollNumber) {

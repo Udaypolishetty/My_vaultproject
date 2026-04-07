@@ -19,5 +19,5 @@ public class CommentResponse {
     private LocalDateTime commentedAt;
     private int likes;
     private List<String> likedBy;
-    private String ownerRoll; // ✅ needed for frontend ownership check
+    private String ownerRoll; // needed for frontend ownership check
 }

@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class StudentIdea {
 
     @Id
-    private String roll;   // ✅ roll number = PRIMARY KEY
+    private String roll;   //  roll number = PRIMARY KEY
 
     private String name;
     private String year;

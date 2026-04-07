@@ -47,7 +47,7 @@ public class IdeaArchiveScheduler {
             .filter(idea -> idea.isArchived())
             .filter(idea -> idea.getArchivedAt() != null && idea.getArchivedAt().isBefore(cutoff))
             .filter(idea -> {
-                // ✅ never delete IMPLEMENTED ideas with likes > 5 — leaderboard legends
+                //  never delete IMPLEMENTED ideas with likes > 5 — leaderboard legends
                 if ("IMPLEMENTED".equals(idea.getStatus()) && idea.getLikes() > 5) {
                     return false;
                 }

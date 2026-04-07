@@ -17,5 +17,5 @@ public class AuthResponse {
     private String branch;
     private String year;
     private String role;
-    private String email; // ✅ proper field declaration
+    private String email; //  proper field declaration
 }

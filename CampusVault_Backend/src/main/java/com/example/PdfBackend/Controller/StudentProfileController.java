@@ -16,18 +16,6 @@ public class StudentProfileController {
 
     private final StudentProfileService studentProfileService;
 
-    // // ✅ Public — register new student (password auto = rollNumber)
-    // @PostMapping("/student-profile")
-    // public ResponseEntity<?> createProfile(@RequestBody StudentProfile studentProfile) {
-    //     try {
-    //         StudentProfileResponse saved = studentProfileService.saveProfile(studentProfile);
-    //         return ResponseEntity.ok(saved);
-    //     } catch (IllegalArgumentException e) {
-    //         return ResponseEntity.badRequest().body(e.getMessage());
-    //     }
-    // }
-
-    // 🔒 Protected — only logged in student can view profile
     @GetMapping("/student/{rollNumber}")
     public ResponseEntity<?> getProfile(
             @PathVariable String rollNumber,

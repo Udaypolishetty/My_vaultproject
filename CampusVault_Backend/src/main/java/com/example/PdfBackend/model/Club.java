@@ -56,12 +56,9 @@ public class Club {
     private boolean thirtyDayWarningSent = false;
     private boolean sevenDayWarningSent = false;
 
-    // ✅ NEW — tracks when each student last left this specific club
-    // key = rollNumber, value = ISO timestamp of when they left
-    // Used to enforce 24-hour rejoin cooldown
+    
     private Map<String, LocalDateTime> recentLeaves = new HashMap<>();
 
-    // ─── COMPUTED HELPERS ────────────────────────────────────────────
 
     public boolean isFull() {
         return (members.size() + pendingMembers.size()) >= maxMembers;

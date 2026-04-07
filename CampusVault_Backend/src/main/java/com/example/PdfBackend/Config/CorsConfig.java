@@ -15,16 +15,16 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // ✅ Allow React frontend
+        //  Allow React frontend
         config.setAllowedOrigins(List.of("http://localhost:5173"));
 
-        // ✅ Allow all HTTP methods
+        //  Allow all HTTP methods
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        // ✅ Allow all headers including Authorization
+        //  Allow all headers including Authorization
         config.setAllowedHeaders(List.of("*"));
-
-        // ✅ Allow Authorization header to be sent
+        
+        //  Allow Authorization header to be sent
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

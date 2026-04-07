@@ -39,6 +39,6 @@ public class AdminSeeder implements CommandLineRunner {
         admin.setRole(Role.ADMIN);
 
         studentRepository.save(admin);
-        System.out.println("✅ Admin ready → RollNumber: " + item.getRollNumber());
+        System.out.println(" Admin ready → RollNumber: " + item.getRollNumber());
     }
 }

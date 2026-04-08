@@ -29,7 +29,7 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    @Value("${cors.allowed-origins:http://localhost:5173,https://my-vaultproject.vercel.app}")
+    @Value("${cors.allowed-origins:http://localhost:5173,https://my-vaultproject.vercel.app,https://campusvault.live,https://www.campusvault.live}")
     private String allowedOriginsRaw;
 
     /* ══════════════════════════════════════════════════════

@@ -2,6 +2,7 @@ package com.example.PdfBackend.Config;
 
 import com.example.PdfBackend.Security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,7 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.beans.factory.annotation.Value;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,162 +27,168 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+
+    /*
+      Reads from application.properties:
+        cors.allowed.origins=http://localhost:5173,https://my-vaultproject.vercel.app
+      Add your Railway URL there too if you need browser → Railway direct calls.
+    */
     @Value("${cors.allowed.origins:http://localhost:5173,https://my-vaultproject.vercel.app}")
-    private String allowedOrigins;
+    private String allowedOriginsRaw;
+
+    /* ══════════════════════════════════════════════════════
+       CORS configuration — ONE place, reads from properties.
+       This is the ONLY CORS bean. The old corsFilter() bean
+       is removed — having two CORS setups caused the conflict.
+    ══════════════════════════════════════════════════════ */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        // Parse comma-separated origins from properties
+        List<String> origins = Arrays.stream(allowedOriginsRaw.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+
+        config.setAllowedOrigins(origins);
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+        // Cache preflight for 1 hour — reduces OPTIONS round-trips
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-        .headers(headers -> headers
-    .frameOptions(frameOptions -> frameOptions.sameOrigin())  // ← THIS LINE ONLY
-)
-                // .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sess -> sess
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
+            // ── CORS — wired to the bean above ──
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                        // ===== AUTH =====
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+            // ── Frame options for admin.html (same-origin iframes) ──
+            .headers(headers -> headers
+                .frameOptions(frameOptions -> frameOptions.sameOrigin()))
 
-                        // ===== STUDENT =====
-                        .requestMatchers("/student-profile").permitAll()
-                        .requestMatchers("/student/exists/**").permitAll()
-                        .requestMatchers("/student/count").permitAll()
-                        .requestMatchers("/student/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(sess -> sess
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                        // ===== FILES =====
-                        .requestMatchers("/api/files/view/**").permitAll()
-                        .requestMatchers("/api/files/download/**").permitAll()
+            .authorizeHttpRequests(auth -> auth
 
-                        // ===== IDEAS =====
-                        .requestMatchers(HttpMethod.GET,  "/api/ideas").permitAll()
-                        .requestMatchers(HttpMethod.GET,  "/api/ideas/leaderboard").permitAll()
-                        .requestMatchers(HttpMethod.GET,  "/api/ideas/showcase").permitAll()
-                        .requestMatchers(HttpMethod.GET,  "/api/ideas/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/ideas/create").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH,"/api/ideas/*/status").hasAnyRole("MODERATOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH,"/api/ideas/*/edit").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers("/api/ideas/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                // ── Preflight — must be first ──
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // ===== CLUBS — specific rules BEFORE general catch-all =====
+                // ── Static / health ──
+                .requestMatchers("/admin.html").permitAll()
+                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/").permitAll()
 
-                        // Public reads
-                        .requestMatchers(HttpMethod.GET, "/api/clubs/all").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/clubs/count").permitAll()
+                // ── Auth ──
+                .requestMatchers("/api/auth/**").permitAll()
 
-                        // Admin-only club lifecycle
-                        .requestMatchers(HttpMethod.POST,   "/api/clubs/create").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH,  "/api/clubs/*/dissolve").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH,  "/api/clubs/*/renew").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH,  "/api/clubs/*/extend-members").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/clubs/*").hasRole("ADMIN")
+                // ── Student ──
+                .requestMatchers("/student-profile").permitAll()
+                .requestMatchers("/student/exists/**").permitAll()
+                .requestMatchers("/student/count").permitAll()
+                .requestMatchers("/student/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
 
-                        // Admin + Moderator club management
-                        .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/assign-role").hasAnyRole("ADMIN", "MODERATOR")
-                        .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/admin-edit").hasAnyRole("ADMIN", "MODERATOR")
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/admin-remove-member").hasAnyRole("ADMIN", "MODERATOR")
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/admin-confirm-all").hasAnyRole("ADMIN", "MODERATOR")
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/admin-confirm-one").hasAnyRole("ADMIN", "MODERATOR")
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/dev-backdate").hasAnyRole("ADMIN", "MODERATOR")
+                // ── Files ──
+                .requestMatchers("/api/files/view/**").permitAll()
+                .requestMatchers("/api/files/download/**").permitAll()
 
-                        // Admin + Moderator activity overrides
-                        .requestMatchers(HttpMethod.DELETE, "/api/clubs/*/activities/*").hasAnyRole("ADMIN", "MODERATOR")
-                        .requestMatchers(HttpMethod.PATCH,  "/api/clubs/*/activities/*/admin-complete").hasAnyRole("ADMIN", "MODERATOR")
-                        .requestMatchers(HttpMethod.PATCH,  "/api/clubs/*/activities/*/admin-undo").hasAnyRole("ADMIN", "MODERATOR")
+                // ── Ideas ──
+                .requestMatchers(HttpMethod.GET,  "/api/ideas").permitAll()
+                .requestMatchers(HttpMethod.GET,  "/api/ideas/leaderboard").permitAll()
+                .requestMatchers(HttpMethod.GET,  "/api/ideas/showcase").permitAll()
+                .requestMatchers(HttpMethod.GET,  "/api/ideas/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/ideas/create").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH,"/api/ideas/*/status").hasAnyRole("MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH,"/api/ideas/*/edit").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers("/api/ideas/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
 
-                        // Admin + Moderator announcement management
-                        .requestMatchers(HttpMethod.DELETE, "/api/clubs/*/announcements/*").hasAnyRole("ADMIN", "MODERATOR")
+                // ── Clubs — public reads first ──
+                .requestMatchers(HttpMethod.GET, "/api/clubs/all").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/clubs/count").permitAll()
 
-                        // All authenticated members
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/join").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/remove-member").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/president-remove-member").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/request-role").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                // Admin-only club lifecycle
+                .requestMatchers(HttpMethod.POST,   "/api/clubs/create").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH,  "/api/clubs/*/dissolve").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH,  "/api/clubs/*/renew").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH,  "/api/clubs/*/extend-members").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/clubs/*").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/activities").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/activities/*/vote").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/activities/*/complete").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                // Admin + Moderator
+                .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/assign-role").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/admin-edit").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/admin-remove-member").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/admin-confirm-all").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/admin-confirm-one").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/dev-backdate").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers(HttpMethod.DELETE, "/api/clubs/*/activities/*").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers(HttpMethod.PATCH,  "/api/clubs/*/activities/*/admin-complete").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers(HttpMethod.PATCH,  "/api/clubs/*/activities/*/admin-undo").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers(HttpMethod.DELETE, "/api/clubs/*/announcements/*").hasAnyRole("ADMIN", "MODERATOR")
 
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/announcements").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/announcements/*/pin").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                // All authenticated
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/join").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/remove-member").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/president-remove-member").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/request-role").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/activities").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/activities/*/vote").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/activities/*/complete").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/announcements").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/announcements/*/pin").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST,  "/api/clubs/*/messages").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE,"/api/clubs/*/messages/*").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/president-edit").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/set-nickname").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers("/api/clubs/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
 
-                        .requestMatchers(HttpMethod.POST,  "/api/clubs/*/messages").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/api/clubs/*/messages/*").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                // ── Admin panel ──
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/president-edit").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/clubs/*/set-nickname").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                // ── Notifications ──
+                .requestMatchers("/api/notifications/stream").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/notifications/broadcast-admin").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/notifications/broadcast-mod").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers("/api/notifications/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
 
-                        // General clubs catch-all — MUST be last in clubs section
-                        .requestMatchers("/api/clubs/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                // ── Announcements ──
+                .requestMatchers(HttpMethod.GET,    "/api/announcements").permitAll()
+                .requestMatchers(HttpMethod.GET,    "/api/announcements/**").permitAll()
+                .requestMatchers(HttpMethod.POST,   "/api/announcements/**").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers(HttpMethod.PUT,    "/api/announcements/**").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers(HttpMethod.PATCH,  "/api/announcements/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/announcements/**").hasAnyRole("ADMIN", "MODERATOR")
 
-                        // ===== ADMIN PANEL =====
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                // ── Buzz ──
+                .requestMatchers(HttpMethod.GET,   "/api/buzz").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/buzz/*/resolve").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                .requestMatchers("/api/buzz/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
 
-                        // ===== NOTIFICATIONS =====
-                        .requestMatchers("/api/notifications/stream").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/notifications/broadcast-admin")
-                    .hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/notifications/broadcast-mod")
-                    .hasAnyRole("STUDENT", "MODERATOR", "ADMIN")                   
-             .requestMatchers("/api/notifications/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
+                // ── Warnings ──
+                .requestMatchers("/api/warnings/my").authenticated()
+                .requestMatchers("/api/warnings/mark-read").authenticated()
+                .requestMatchers("/api/warnings/issue").hasRole("ADMIN")
+                .requestMatchers("/api/warnings/suggest").hasAnyRole("ADMIN", "MODERATOR")
+                .requestMatchers("/api/warnings/suggestions").hasRole("ADMIN")
+                .requestMatchers("/api/warnings/*/approve").hasRole("ADMIN")
+                .requestMatchers("/api/warnings/*").hasRole("ADMIN")
 
-                        // ===== ANNOUNCEMENTS =====
-                        .requestMatchers(HttpMethod.GET,    "/api/announcements").permitAll()
-                        .requestMatchers(HttpMethod.GET,    "/api/announcements/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,   "/api/announcements/**").hasAnyRole("ADMIN", "MODERATOR")
-                        .requestMatchers(HttpMethod.PUT,    "/api/announcements/**").hasAnyRole("ADMIN", "MODERATOR")
-                        .requestMatchers(HttpMethod.PATCH,  "/api/announcements/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/announcements/**").hasAnyRole("ADMIN", "MODERATOR")
+                // ── Students search ──
+                .requestMatchers("/api/students/search").hasAnyRole("ADMIN", "MODERATOR")
 
-                        // ===== BUZZ =====
-                        .requestMatchers(HttpMethod.GET,   "/api/buzz").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/buzz/*/resolve").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-                        .requestMatchers("/api/buzz/**").hasAnyRole("STUDENT", "MODERATOR", "ADMIN")
-
-                        // ===== WARNINGS =====
-                        .requestMatchers("/api/warnings/my").authenticated()
-                        .requestMatchers("/api/warnings/mark-read").authenticated()
-                        .requestMatchers("/api/warnings/issue").hasRole("ADMIN")
-                        .requestMatchers("/api/warnings/suggest").hasAnyRole("ADMIN", "MODERATOR")
-                        .requestMatchers("/api/warnings/suggestions").hasRole("ADMIN")
-                        .requestMatchers("/api/warnings/*/approve").hasRole("ADMIN")
-                        .requestMatchers("/api/warnings/*").hasRole("ADMIN")
-
-                        // ===== STUDENTS SEARCH =====
-                        .requestMatchers("/api/students/search").hasAnyRole("ADMIN", "MODERATOR")
-                        .requestMatchers("/").permitAll()
-                          // ✅ ADD THESE TWO LINES:
-                        .requestMatchers("/admin.html").permitAll()           // Static admin page
-                        .requestMatchers("/actuator/**").permitAll()          // Health checks
-
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-
-@Bean
-public org.springframework.web.filter.CorsFilter corsFilter() {
-    CorsConfiguration config = new CorsConfiguration();
-
-    config.setAllowCredentials(true);
-    config.setAllowedOrigins(List.of(
-        "http://localhost:5173",
-        "https://my-vaultproject.vercel.app"
-    ));
-
-    config.setAllowedHeaders(List.of("*"));
-    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config);
-
-    return new org.springframework.web.filter.CorsFilter(source);
-}
 
     @Bean
     public PasswordEncoder passwordEncoder() {

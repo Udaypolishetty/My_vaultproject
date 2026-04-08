@@ -35,7 +35,7 @@ public class SecurityConfig {
         .headers(headers -> headers
     .frameOptions(frameOptions -> frameOptions.sameOrigin())  // ← THIS LINE ONLY
 )
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sess -> sess
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -164,24 +164,23 @@ public class SecurityConfig {
     }
 
 
-
 @Bean
-public CorsConfigurationSource corsConfigurationSource() {
+public org.springframework.web.filter.CorsFilter corsFilter() {
     CorsConfiguration config = new CorsConfiguration();
-    
-    // Split by comma and trim whitespace
-    List<String> origins = Arrays.stream(allowedOrigins.split(","))
-        .map(String::trim)
-        .toList();
-    config.setAllowedOrigins(origins);
-    
-    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-    config.setAllowedHeaders(List.of("*"));
+
     config.setAllowCredentials(true);
+    config.setAllowedOrigins(List.of(
+        "http://localhost:5173",
+        "https://my-vaultproject.vercel.app"
+    ));
+
+    config.setAllowedHeaders(List.of("*"));
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", config);
-    return source;
+
+    return new org.springframework.web.filter.CorsFilter(source);
 }
 
     @Bean

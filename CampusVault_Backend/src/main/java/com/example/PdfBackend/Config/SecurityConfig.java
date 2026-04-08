@@ -147,6 +147,7 @@ public class SecurityConfig {
 
                         // ===== STUDENTS SEARCH =====
                         .requestMatchers("/api/students/search").hasAnyRole("ADMIN", "MODERATOR")
+                        .requestMatchers("/").permitAll()
                           // ✅ ADD THESE TWO LINES:
                         .requestMatchers("/admin.html").permitAll()           // Static admin page
                         .requestMatchers("/actuator/**").permitAll()          // Health checks

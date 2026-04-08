@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Pin, Pencil, Trash2, Upload, X, Save, Plus, Megaphone } from "lucide-react";
+import { API_BASE } from "../../config/api";
 
 export default function AdminAnnouncements({
   announcements, loading,

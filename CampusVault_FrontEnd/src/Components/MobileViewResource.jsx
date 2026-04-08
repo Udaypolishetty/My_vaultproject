@@ -1,3 +1,4 @@
+import { API_BASE } from "../config/api";
 import { useState } from "react";
 import {
   FileText, BookOpen, Upload, Search,
@@ -18,7 +19,7 @@ const MobileViewResource = ({ token }) => {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:8081/api/files?domain=${selectedDomain}`,
+        `${API_BASE}/api/files?domain=${selectedDomain}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -192,14 +193,14 @@ const MobileViewResource = ({ token }) => {
 
               <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
                 <button onClick={() =>
-                  window.open(`http://localhost:8081/api/files/view/${file.id}`)
+                  window.open(`${API_BASE}/api/files/view/${file.id}`)
                 }>
                   <Eye size={14}/>
                 </button>
 
                 <button onClick={() => {
                   const link = document.createElement("a");
-                  link.href = `http://localhost:8081/api/files/download/${file.id}`;
+                  link.href = `${API_BASE}/api/files/download/${file.id}`;
                   link.click();
                 }}>
                   <Download size={14}/>

@@ -1,3 +1,4 @@
+import { API_BASE } from "../../config/api";
 import { useState } from "react";
 import { Pin, Plus, X, Megaphone, AlertCircle } from "lucide-react";
 import { validateNewsTitle, validateNewsContent } from "../../utils/validate";
@@ -31,7 +32,7 @@ export default function ClubAnnouncements({ club, myRoll, token, onUpdate }) {
     setErrors({});
     setAdding(true);
     try {
-      const res = await fetch(`http://localhost:8081/api/clubs/${club.id}/announcements`, {
+      const res = await fetch(`${API_BASE}/api/clubs/${club.id}/announcements`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(form)
@@ -50,7 +51,7 @@ export default function ClubAnnouncements({ club, myRoll, token, onUpdate }) {
   const handlePin = async (annId) => {
     setPinning(annId);
     try {
-      const res = await fetch(`http://localhost:8081/api/clubs/${club.id}/announcements/${annId}/pin`, {
+      const res = await fetch(`${API_BASE}/api/clubs/${club.id}/announcements/${annId}/pin`, {
         method: "PATCH", headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) onUpdate(await res.json());

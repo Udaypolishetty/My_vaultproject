@@ -189,15 +189,10 @@
     <span class="hdr-badge">Emergency Admin</span>
   </div>
 
-  <!--
-    ── BACKEND URL CONFIG ──
-    Change this if your backend runs on a different port or is deployed.
-    e.g.  http://localhost:8081   (local dev)
-          https://api.campusvault.in  (production)
-  -->
+
   <div class="url-bar">
     <label>Backend URL:</label>
-    <input id="base-url" type="text" value="http://localhost:8081" />
+    <input id="base-url" type="text" value="https://myvaultproject-production-9640.up.railway.app" />
     <button onclick="saveBase()">Set</button>
     <span id="base-saved" style="color:#4ade80;display:none">✓ saved</span>
   </div>
@@ -350,7 +345,7 @@
 <script>
   /* ══ STATE ══ */
   let TOKEN       = "";
-  let BASE        = localStorage.getItem("cv_admin_base") || "http://localhost:8081";
+  let BASE        = localStorage.getItem("cv_admin_base") || "https://myvaultproject-production-9640.up.railway.app";
   let allStudents = [];
   let allIdeas    = [];
   let allClubs = [];

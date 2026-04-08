@@ -1,4 +1,4 @@
-
+import { API_BASE } from "../config/api";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ShieldCheck, FileText,Eye,EyeOff } from "lucide-react";
@@ -118,7 +118,7 @@ else if (!isStrongPassword(form.password)) e.password = "Use 8+ chars, uppercase
 
     try {
       // ✅ FIXED: correct URL /api/auth/register (was /auth/register before)
-      const res = await fetch("http://localhost:8081/api/auth/register", {
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

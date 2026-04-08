@@ -1,190 +1,4 @@
-// import { useState, useEffect, useRef } from "react";
-// import { Bell, X, Check } from "lucide-react";
-
-// export default function AdminNotificationDropdown({ token }) {
-//   const [notifications, setNotifications] = useState([]);
-//   const [unread, setUnread] = useState(0);
-//   const [open, setOpen] = useState(false);
-//   const [loading, setLoading] = useState(false);
-//   const dropdownRef = useRef(null);
-
-//   useEffect(() => {
-//     fetchUnreadCount();
-
-//     // ✅ SSE for real-time notifications
-//     const evtSource = new EventSource(
-//       `http://localhost:8081/api/notifications/stream?token=${token}`
-//     );
-//     evtSource.addEventListener("notification", () => {
-//       setUnread(prev => prev + 1);
-//       if (open) fetchNotifications();
-//     });
-//     evtSource.onerror = () => evtSource.close();
-
-//     return () => evtSource.close();
-//   }, []);
-
-//   // ✅ close dropdown when clicking outside
-//   useEffect(() => {
-//     const handleClickOutside = (e) => {
-//       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-//         setOpen(false);
-//       }
-//     };
-//     document.addEventListener("mousedown", handleClickOutside);
-//     return () => document.removeEventListener("mousedown", handleClickOutside);
-//   }, []);
-
-//   const fetchUnreadCount = async () => {
-//     try {
-//       const res = await fetch("http://localhost:8081/api/notifications/unread-count", {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       if (!res.ok) return;
-//       const data = await res.json();
-//       setUnread(data.count);
-//     } catch (err) {
-//       console.error("Unread count failed:", err);
-//     }
-//   };
-
-//   const fetchNotifications = async () => {
-//     setLoading(true);
-//     try {
-//       const res = await fetch("http://localhost:8081/api/notifications/my", {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       if (!res.ok) return;
-//       const data = await res.json();
-//       setNotifications(data.slice(0, 15)); // show latest 15
-//     } catch (err) {
-//       console.error("Fetch notifications failed:", err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleOpen = async () => {
-//     setOpen(prev => !prev);
-//     if (!open) {
-//       await fetchNotifications();
-//       await markAllRead();
-//     }
-//   };
-
-//   const markAllRead = async () => {
-//     try {
-//       await fetch("http://localhost:8081/api/notifications/mark-read", {
-//         method: "POST",
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setUnread(0);
-//       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-//     } catch (err) {
-//       console.error("Mark read failed:", err);
-//     }
-//   };
-
-//   const deleteNotification = async (id) => {
-//     try {
-//       await fetch(`http://localhost:8081/api/notifications/${id}`, {
-//         method: "DELETE",
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setNotifications(prev => prev.filter(n => n.id !== id));
-//     } catch (err) {
-//       console.error("Delete notification failed:", err);
-//     }
-//   };
-
-//   const formatTime = (dt) => {
-//     if (!dt) return "";
-//     const diff = Date.now() - new Date(dt).getTime();
-//     const mins = Math.floor(diff / 60000);
-//     if (mins < 1) return "just now";
-//     if (mins < 60) return `${mins}m ago`;
-//     const hrs = Math.floor(mins / 60);
-//     if (hrs < 24) return `${hrs}h ago`;
-//     return `${Math.floor(hrs / 24)}d ago`;
-//   };
-
-//   return (
-//     <div className="relative" ref={dropdownRef}>
-//       {/* ✅ Bell button */}
-//       <button
-//         onClick={handleOpen}
-//         className="relative w-10 h-10 flex items-center justify-center
-//                    rounded-xl bg-white/5 hover:bg-white/10
-//                    border border-white/10 transition-all"
-//       >
-//         <Bell size={18} className="text-white" />
-//         {unread > 0 && (
-//           <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#26F2D0] text-black
-//                            text-xs font-bold rounded-full flex items-center justify-center">
-//             {unread > 9 ? "9+" : unread}
-//           </span>
-//         )}
-//       </button>
-
-//       {/* ✅ Dropdown */}
-//       {open && (
-//         <div className="absolute right-0 top-12 w-80 max-h-[480px] overflow-y-auto
-//                         bg-[#111] border border-white/10 rounded-2xl shadow-2xl
-//                         shadow-black/50 z-50">
-
-//           {/* Header */}
-//           <div className="flex items-center justify-between px-4 py-3
-//                           border-b border-white/10 sticky top-0 bg-[#111]">
-//             <p className="text-sm font-semibold text-white">Notifications</p>
-//             <div className="flex items-center gap-2">
-//               {notifications.some(n => !n.read) && (
-//                 <button onClick={markAllRead}
-//                   className="flex items-center gap-1 text-xs text-[#26F2D0]
-//                              hover:text-white transition">
-//                   <Check size={11} /> Mark all read
-//                 </button>
-//               )}
-//             </div>
-//           </div>
-
-//           {/* Content */}
-//           {loading ? (
-//             <div className="flex items-center justify-center py-10">
-//               <div className="w-6 h-6 border-2 border-[#26F2D0] border-t-transparent
-//                               rounded-full animate-spin" />
-//             </div>
-//           ) : notifications.length === 0 ? (
-//             <div className="text-center py-10">
-//               <p className="text-2xl mb-2">🔔</p>
-//               <p className="text-gray-500 text-sm">No notifications</p>
-//             </div>
-//           ) : (
-//             <div className="divide-y divide-white/5">
-//               {notifications.map(n => (
-//                 <div key={n.id}
-//                   className={`flex items-start gap-3 px-4 py-3 transition-all
-//                     ${!n.read ? "bg-[#26F2D0]/5" : "hover:bg-white/[0.02]"}`}>
-//                   <div className="flex-1 min-w-0">
-//                     <p className="text-xs text-gray-200 leading-relaxed">{n.message}</p>
-//                     <p className="text-xs text-gray-600 mt-1">{formatTime(n.createdAt)}</p>
-//                   </div>
-//                   {!n.read && (
-//                     <div className="w-2 h-2 rounded-full bg-[#26F2D0] shrink-0 mt-1" />
-//                   )}
-//                   <button onClick={() => deleteNotification(n.id)}
-//                     className="text-gray-600 hover:text-red-400 transition shrink-0 mt-0.5">
-//                     <X size={12} />
-//                   </button>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
+import { API_BASE } from "../../config/api";
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Bell, X, Check } from "lucide-react";
@@ -200,7 +14,7 @@ export default function AdminNotificationDropdown({ token }) {
     fetchUnreadCount();
 
     const evtSource = new EventSource(
-      `http://localhost:8081/api/notifications/stream?token=${token}`
+      `${API_BASE}/api/notifications/stream?token=${token}`
     );
     evtSource.addEventListener("notification", () => {
       setUnread(prev => prev + 1);
@@ -211,7 +25,7 @@ export default function AdminNotificationDropdown({ token }) {
 
   const fetchUnreadCount = async () => {
     try {
-      const res = await fetch("http://localhost:8081/api/notifications/unread-count", {
+      const res = await fetch(`${API_BASE}/api/notifications/unread-count`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) return;
@@ -225,7 +39,7 @@ export default function AdminNotificationDropdown({ token }) {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8081/api/notifications/my", {
+      const res = await fetch(`${API_BASE}/api/notifications/my`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) return;
@@ -246,7 +60,7 @@ export default function AdminNotificationDropdown({ token }) {
 
   const markAllRead = async () => {
     try {
-      await fetch("http://localhost:8081/api/notifications/mark-read", {
+      await fetch(`${API_BASE}/api/notifications/mark-read`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -259,7 +73,7 @@ export default function AdminNotificationDropdown({ token }) {
 
   const deleteNotification = async (id) => {
     try {
-      await fetch(`http://localhost:8081/api/notifications/${id}`, {
+      await fetch(`${API_BASE}/api/notifications/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });

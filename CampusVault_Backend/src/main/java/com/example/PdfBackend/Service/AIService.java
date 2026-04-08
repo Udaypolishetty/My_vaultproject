@@ -15,6 +15,8 @@ public class AIService {
 
     @Value("${openrouter.api.key}")
     private String apiKey;
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     public String getAdvisorResponse(String prompt) {
         RestTemplate restTemplate = new RestTemplate();
@@ -48,9 +50,8 @@ public class AIService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
-        headers.set("HTTP-Referer", "http://localhost:5173");
-        headers.set("X-Title", "Campus AI Advisor");
-
+headers.set("HTTP-Referer", frontendUrl);
+headers.set("X-Title", "Campus AI Advisor");
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
         try {

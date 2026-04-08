@@ -45,17 +45,17 @@ public class AuthService {
         student.setEmail(request.getEmail());
         student.setLinkedinUrl(request.getLinkedinUrl() != null ? request.getLinkedinUrl().trim() : "");
 
-        // ✅ Encode the student's chosen password
+        //  Encode the student's chosen password
         student.setPassword(passwordEncoder.encode(request.getPassword().trim()));
         student.setRole(Role.STUDENT);
 
         StudentProfile saved = studentRepository.save(student);
 
-        // ✅ Generate token immediately after registration so frontend can redirect to login
+        //  Generate token immediately after registration so frontend can redirect to login
         // We return NO token here — frontend must login separately after registration
         return new AuthResponse(
                 saved.getId(),
-                null,          // ✅ no token on register — forces proper login flow
+                null,          //  no token on register — forces proper login flow
                 "Student registered successfully",
                 saved.getRollNumber(),
                 saved.getName(),

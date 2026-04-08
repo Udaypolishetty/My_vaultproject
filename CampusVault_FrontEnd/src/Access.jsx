@@ -1,4 +1,4 @@
-
+import { API_BASE } from "./config/api";
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
@@ -30,7 +30,7 @@ export default function Access() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8081/api/auth/login", {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rollNumber: rollUp, password }),

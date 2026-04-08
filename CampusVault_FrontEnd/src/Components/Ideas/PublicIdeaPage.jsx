@@ -1,3 +1,4 @@
+import { API_BASE } from "../../config/api";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ThumbsUp, MessageCircle, Flame } from "lucide-react";
@@ -36,7 +37,7 @@ export default function PublicIdeaPage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:8081/api/ideas/${id}`)
+    fetch(`${API_BASE}/api/ideas/${id}`)
       .then(res => {
         if (!res.ok) { setNotFound(true); return null; }
         return res.json();

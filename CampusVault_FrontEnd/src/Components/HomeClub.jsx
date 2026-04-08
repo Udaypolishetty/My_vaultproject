@@ -1,3 +1,4 @@
+import { API_BASE } from "../config/api";
 import { useNavigate,useParams  } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -256,7 +257,7 @@ const HomeClub = ({ isModerator }) => {
 
   /* ── fetch ── */
   useEffect(() => {
-    fetch("http://localhost:8081/api/clubs/all")
+    fetch(`${API_BASE}/api/clubs/all`)
       .then(r => r.json())
       .then(data => {
         const active = data

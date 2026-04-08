@@ -1,3 +1,4 @@
+import { API_BASE } from "../../config/api";
 import { useState, useCallback } from "react";
 import {
   CheckCircle2, Circle, Lock, Plus, ThumbsUp, X, Sparkles,
@@ -278,7 +279,7 @@ return;      return;
     setConfirmComplete(null);
     try {
       const res = await fetch(
-        `http://localhost:8081/api/clubs/${club.id}/activities/${confirmComplete.id}/complete`,
+        `${API_BASE}/api/clubs/${club.id}/activities/${confirmComplete.id}/complete`,
         { method: "PATCH", headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.ok) onUpdate(await res.json());
@@ -292,7 +293,7 @@ return;      return;
     setCompleting(activityId);
     try {
       const res = await fetch(
-        `http://localhost:8081/api/clubs/${club.id}/activities/${activityId}/admin-complete`,
+        `${API_BASE}/api/clubs/${club.id}/activities/${activityId}/admin-complete`,
         { method: "PATCH", headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.ok) onUpdate(await res.json());
@@ -305,7 +306,7 @@ return;      return;
     setCompleting(activityId);
     try {
       const res = await fetch(
-        `http://localhost:8081/api/clubs/${club.id}/activities/${activityId}/admin-undo`,
+        `${API_BASE}/api/clubs/${club.id}/activities/${activityId}/admin-undo`,
         { method: "PATCH", headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.ok) onUpdate(await res.json());
@@ -317,7 +318,7 @@ return;      return;
     if (!isAdmin) return;
     setDeletingId(activityId);
     try {
-      const res = await fetch(`http://localhost:8081/api/clubs/${club.id}/activities/${activityId}`, {
+      const res = await fetch(`${API_BASE}/api/clubs/${club.id}/activities/${activityId}`, {
         method: "DELETE", headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) onUpdate(await res.json());
@@ -328,7 +329,7 @@ return;      return;
     if (voting) return;
     setVoting(activityId);
     try {
-      const res = await fetch(`http://localhost:8081/api/clubs/${club.id}/activities/${activityId}/vote`, {
+      const res = await fetch(`${API_BASE}/api/clubs/${club.id}/activities/${activityId}/vote`, {
         method: "POST", headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) onUpdate(await res.json());
@@ -341,7 +342,7 @@ return;      return;
     setErrors({});
     setAdding(true);
     try {
-      const res = await fetch(`http://localhost:8081/api/clubs/${club.id}/activities`, {
+      const res = await fetch(`${API_BASE}/api/clubs/${club.id}/activities`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(form)

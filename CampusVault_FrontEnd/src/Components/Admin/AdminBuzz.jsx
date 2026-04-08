@@ -1,3 +1,4 @@
+import { API_BASE } from "../../config/api";
 import { useState, useEffect, useCallback } from "react";
 import {
   Zap, Trash2, CheckCircle2, Search, RefreshCw,
@@ -61,7 +62,7 @@ function AdminBuzzCard({ post, token, onUpdate, onDelete }) {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`http://localhost:8081/api/buzz/${post.id}`, {
+      const res = await fetch(`${API_BASE}/api/buzz/${post.id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -73,7 +74,7 @@ function AdminBuzzCard({ post, token, onUpdate, onDelete }) {
   const handleResolve = async () => {
     setResolving(true);
     try {
-      const res = await fetch(`http://localhost:8081/api/buzz/${post.id}/resolve`, {
+      const res = await fetch(`${API_BASE}/api/buzz/${post.id}/resolve`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -82,7 +83,7 @@ function AdminBuzzCard({ post, token, onUpdate, onDelete }) {
   };
 
   const handleDeleteReply = async (replyId) => {
-    const res = await fetch(`http://localhost:8081/api/buzz/${post.id}/reply/${replyId}`, {
+    const res = await fetch(`${API_BASE}/api/buzz/${post.id}/reply/${replyId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -283,7 +284,7 @@ export default function AdminBuzz({ token }) {
     if (!silent) setLoading(true);
     else setRefreshing(true);
     try {
-      const res = await fetch("http://localhost:8081/api/buzz", { headers });
+      const res = await fetch(`${API_BASE}/api/buzz`, { headers });
       if (res.ok) setPosts(await res.json());
     } finally { setLoading(false); setRefreshing(false); }
   }, [token]);

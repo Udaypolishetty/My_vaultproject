@@ -1,3 +1,4 @@
+import { API_BASE } from "../../config/api";
 import { useState } from "react";
 import { ArrowLeft, Crown, UserCheck, Users, ClipboardList, Megaphone, MessageSquare, Handshake, Hourglass,Building2 } from "lucide-react";
 import ClubMembers from "./ClubMembers";
@@ -31,7 +32,7 @@ export default function ClubDetail({ club, myRoll, myName, token, onBack, onUpda
   const handleRequestRole = async (role) => {
     setRequestingRole(true);
     try {
-      const res = await fetch(`http://localhost:8081/api/clubs/${club.id}/request-role`, {
+      const res = await fetch(`${API_BASE}/api/clubs/${club.id}/request-role`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ role })

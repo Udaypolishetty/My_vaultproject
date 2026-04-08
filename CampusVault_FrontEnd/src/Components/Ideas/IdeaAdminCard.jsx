@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { API_BASE } from "../../config/api";
 const getStampConfig = (status) => {
   switch (status) {
     case "IMPLEMENTED":
@@ -33,7 +33,7 @@ export default function IdeaAdminCard({ idea, onDelete }) {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`http://localhost:8081/api/ideas/${idea.id || idea._id}`, {
+      const res = await fetch(`${API_BASE}/api/ideas/${idea.id || idea._id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });

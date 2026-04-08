@@ -1,4 +1,4 @@
-
+import { API_BASE } from "../config/api";
 import { useEffect, useState } from "react";
 import { useNavigate,useParams } from "react-router-dom";
 import { LogOut, Users, Shield, Lightbulb, Building, Megaphone, Search, ShieldAlert,Zap } from "lucide-react";
@@ -46,35 +46,35 @@ export default function AdminDashboard() {
 
   const fetchStudents = async () => {
     setLoading(true);
-    const res = await fetch("http://localhost:8081/api/admin/students", { headers });
+    const res = await fetch(`${API_BASE}/api/admin/students`, { headers });
     setStudents(await res.json());
     setLoading(false);
   };
 
   const fetchModerators = async () => {
     setLoading(true);
-    const res = await fetch("http://localhost:8081/api/admin/moderators", { headers });
+    const res = await fetch(`${API_BASE}/api/admin/moderators`, { headers });
     setModerators(await res.json());
     setLoading(false);
   };
 
   const fetchIdeas = async () => {
     setLoading(true);
-    const res = await fetch("http://localhost:8081/api/ideas", { headers });
+    const res = await fetch(`${API_BASE}/api/ideas`, { headers });
     setIdeas(await res.json());
     setLoading(false);
   };
 
   const fetchClubs = async () => {
     setLoading(true);
-    const res = await fetch("http://localhost:8081/api/clubs/all", { headers });
+    const res = await fetch(`${API_BASE}/api/clubs/all`, { headers });
     setClubs(await res.json());
     setLoading(false);
   };
 
   const fetchAnnouncements = async () => {
     setLoading(true);
-    const res = await fetch("http://localhost:8081/api/announcements", { headers });
+    const res = await fetch(`${API_BASE}/api/announcements`, { headers });
     setAnnouncements(await res.json());
     setLoading(false);
   };
@@ -88,35 +88,35 @@ export default function AdminDashboard() {
   }, [activeTab]);
 
   const deleteStudent = async (id) => {
-    const res = await fetch(`http://localhost:8081/api/admin/students/${id}`, {
+    const res = await fetch(`${API_BASE}/api/admin/students/${id}`, {
       method: "DELETE", headers
     });
     if (res.ok) setStudents(prev => prev.filter(s => s.id !== id));
   };
 
   const assignModerator = async (rollNumber) => {
-    await fetch(`http://localhost:8081/api/admin/students/${rollNumber}/assign-moderator`, {
+    await fetch(`${API_BASE}/api/admin/students/${rollNumber}/assign-moderator`, {
       method: "PATCH", headers
     });
     fetchModerators();
   };
 
   const revokeModerator = async (rollNumber) => {
-    await fetch(`http://localhost:8081/api/admin/students/${rollNumber}/revoke-moderator`, {
+    await fetch(`${API_BASE}/api/admin/students/${rollNumber}/revoke-moderator`, {
       method: "PATCH", headers
     });
     fetchModerators();
   };
 
   const deleteAnnouncement = async (id) => {
-    const res = await fetch(`http://localhost:8081/api/announcements/${id}`, {
+    const res = await fetch(`${API_BASE}/api/announcements/${id}`, {
       method: "DELETE", headers
     });
     if (res.ok) setAnnouncements(prev => prev.filter(a => a.id !== id));
   };
 
   const pinAnnouncement = async (id) => {
-    const res = await fetch(`http://localhost:8081/api/announcements/${id}/pin`, {
+    const res = await fetch(`${API_BASE}/api/announcements/${id}/pin`, {
       method: "PATCH", headers
     });
     if (res.ok) {
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
   };
 
   const saveAnnouncementEdit = async (id, form) => {
-    const res = await fetch(`http://localhost:8081/api/announcements/${id}`, {
+    const res = await fetch(`${API_BASE}/api/announcements/${id}`, {
       method: "PUT", headers, body: JSON.stringify(form)
     });
     if (res.ok) {
@@ -143,7 +143,7 @@ export default function AdminDashboard() {
   };
 
   const postAnnouncement = async (form) => {
-    const res = await fetch("http://localhost:8081/api/announcements", {
+    const res = await fetch(`${API_BASE}/api/announcements`, {
       method: "POST", headers, body: JSON.stringify(form)
     });
     const saved = await res.json();

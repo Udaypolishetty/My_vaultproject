@@ -1,3 +1,4 @@
+import { API_BASE } from "../../config/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Trash2, Crown, Lock, AlertCircle } from "lucide-react";
 import { validateShortText } from "../../utils/validate";
@@ -92,7 +93,7 @@ const canChat = (isConfirmed && isUnlocked) || isAdmin;
     if (checkSpam()) { setError("Too fast! Blocked for 5 minutes."); return; }
     setError(""); setSending(true); lastSentRef.current = now;
     try {
-      const res = await fetch(`http://localhost:8081/api/clubs/${club.id}/messages`, {
+      const res = await fetch(`${API_BASE}/api/clubs/${club.id}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ content: text.trim() })
@@ -104,7 +105,7 @@ const canChat = (isConfirmed && isUnlocked) || isAdmin;
   }, [text, sending, spamBlocked, canChat]);
 
   const handleDelete = async (messageId) => {
-    const res = await fetch(`http://localhost:8081/api/clubs/${club.id}/messages/${messageId}`, {
+    const res = await fetch(`${API_BASE}/api/clubs/${club.id}/messages/${messageId}`, {
       method: "DELETE", headers: { Authorization: `Bearer ${token}` }
     });
     if (res.ok) onUpdate(await res.json());

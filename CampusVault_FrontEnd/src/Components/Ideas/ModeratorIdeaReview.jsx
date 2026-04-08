@@ -1,3 +1,4 @@
+import { API_BASE } from "../../config/api";
 import { useState, useEffect } from "react";
 import IdeaReviewCard from "./IdeaReviewCard";
 
@@ -20,7 +21,7 @@ export default function ModeratorIdeaReview({ token, isAdmin = false }) {
   const auditIdeas = ideas.filter(i => i.reviewedBy && i.reviewedAt);
 
   useEffect(() => {
-    fetch("http://localhost:8081/api/ideas")
+    fetch(`${API_BASE}/api/ideas`)
       .then(res => res.json())
       .then(data => {
         const sorted = data.sort((a, b) => (b.likes || 0) - (a.likes || 0));

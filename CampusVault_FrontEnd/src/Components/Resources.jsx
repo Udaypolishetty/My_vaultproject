@@ -1,4 +1,4 @@
-
+import { API_BASE } from "../config/api";
 import React, { useState, useEffect } from "react";
 import UsefulResources from "./UsefulResources";
 import {
@@ -166,12 +166,12 @@ function ContributeForm({ token }) {
     try {
       /* Send two separate broadcasts — admin gets full, mod gets limited */
       const [adminRes, modRes] = await Promise.all([
-        fetch("http://localhost:8081/api/notifications/broadcast-admin", {
+        fetch(`${API_BASE}/api/notifications/broadcast-admin`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ message: adminMessage, type: "CONTRIBUTE_REQUEST" }),
         }),
-        fetch("http://localhost:8081/api/notifications/broadcast-mod", {
+        fetch(`${API_BASE}/api/notifications/broadcast-mod`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ message: modMessage, type: "CONTRIBUTE_REQUEST" }),
@@ -538,7 +538,7 @@ const Resources = () => {
     setFetching(true);
     try {
       const res = await fetch(
-        `http://localhost:8081/api/files?domain=${selectedDomain}`,
+        `${API_BASE}/api/files?domain=${selectedDomain}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPapers(await res.json());
@@ -551,7 +551,7 @@ const Resources = () => {
 
   const handleDownload = (id, filename) => {
     const link = document.createElement("a");
-    link.href = `http://localhost:8081/api/files/download/${id}`;
+    link.href = `${API_BASE}/api/files/download/${id}`;
     link.download = filename;
     link.click();
   };
@@ -796,7 +796,7 @@ const Resources = () => {
                             <FileText size={14} style={{ color: "#26F2D0" }} />
                           </div>
                           <span
-                            onClick={() => window.open(`http://localhost:8081/api/files/view/${file.id}`, "_blank")}
+                            onClick={() => window.open(`${API_BASE}/api/files/view/${file.id}`, "_blank")}
                             style={{ color: "white", fontSize: 13, fontWeight: 500,
                               cursor: "pointer", overflow: "hidden",
                               textOverflow: "ellipsis", whiteSpace: "nowrap" }}
@@ -808,7 +808,7 @@ const Resources = () => {
                         </div>
                         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
                           <button
-                            onClick={() => window.open(`http://localhost:8081/api/files/view/${file.id}`, "_blank")}
+                            onClick={() => window.open(`${API_BASE}/api/files/view/${file.id}`, "_blank")}
                             style={{
                               display: "flex", alignItems: "center", gap: 4,
                               padding: "6px 12px", borderRadius: 8, fontSize: 12,

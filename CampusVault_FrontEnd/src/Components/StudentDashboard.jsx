@@ -1,4 +1,4 @@
-
+import { API_BASE } from "../config/api";
 import { useState, useEffect, useRef } from "react";
 import { useLocation,useParams,useNavigate } from "react-router-dom";
 import { Shield, Settings } from "lucide-react";
@@ -47,12 +47,12 @@ export default function StudentDashboard() {
 const fetchData = async () => {
   try {
     // 🔹 Ideas
-    const ideasRes = await fetch("http://localhost:8081/api/ideas");
+    const ideasRes = await fetch(`${API_BASE}/api/ideas`);
     const allIdeas = await ideasRes.json();
     setIdeas(allIdeas.filter(i => String(i.createdById) === String(myId)));
 
     // 🔹 Clubs (FIXED — no /my)
-    const allClubsRes = await fetch("http://localhost:8081/api/clubs/all", {
+    const allClubsRes = await fetch(`${API_BASE}/api/clubs/all`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -74,7 +74,7 @@ const fetchData = async () => {
     }
 
     // 🔹 Notifications
-    const notifRes = await fetch("http://localhost:8081/api/notifications/my", {
+    const notifRes = await fetch(`${API_BASE}/api/notifications/my`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -85,7 +85,7 @@ const fetchData = async () => {
     }
 
     // 🔹 Warnings
-    const warnRes = await fetch("http://localhost:8081/api/warnings/my", {
+    const warnRes = await fetch(`${API_BASE}/api/warnings/my`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -104,7 +104,7 @@ const fetchData = async () => {
   const markAllRead = async () => {
     if (unread === 0) return;
     try {
-      await fetch("http://localhost:8081/api/notifications/mark-read", {
+      await fetch(`${API_BASE}/api/notifications/mark-read`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` }
       });

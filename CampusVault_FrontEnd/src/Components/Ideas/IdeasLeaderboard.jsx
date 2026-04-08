@@ -1,3 +1,4 @@
+import { API_BASE } from "../../config/api";
 import { useEffect, useState } from "react";
 import { Trophy, Flame,Lightbulb,TrendingUp,Star,Landmark,Building } from "lucide-react";
 
@@ -35,7 +36,7 @@ export default function IdeasLeaderboard({ myId }) {
   const token = sessionStorage.getItem("token");
 
   useEffect(() => {
-    fetch("http://localhost:8081/api/ideas/leaderboard", {
+    fetch(`${API_BASE}/api/ideas/leaderboard`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())

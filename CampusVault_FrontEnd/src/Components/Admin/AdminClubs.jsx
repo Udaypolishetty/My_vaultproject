@@ -1,4 +1,6 @@
+import { API_BASE } from "../../config/api";
 import { useState } from "react";
+
 import {
   Trash2, Plus, Crown, X, Check, Pencil, RotateCcw,
   AlertTriangle, Users, ChevronLeft, ClipboardList,
@@ -21,7 +23,7 @@ function RoleModal({ club, token, onClose, onRefresh }) {
     try {
       const r = await A.patch(`/api/clubs/${club.id}/assign-role`);
       // assign-role needs body — use direct fetch
-      const res = await fetch(`http://localhost:8081/api/clubs/${club.id}/assign-role`, {
+      const res = await fetch(`${API_BASE}/api/clubs/${club.id}/assign-role`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(roleForm),
@@ -226,7 +228,7 @@ export default function AdminClubs({ clubs, loading, onDelete, onRefresh }) {
     if (!form.title.trim() || !form.description.trim()) return;
     setCreating(true);
     try {
-      const res = await fetch("http://localhost:8081/api/clubs/create", {
+      const res = await fetch("${API_BASE}/api/clubs/create", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(form),
@@ -247,7 +249,7 @@ export default function AdminClubs({ clubs, loading, onDelete, onRefresh }) {
     if (!editClub) return;
     setEditing(true);
     try {
-      const res = await fetch(`http://localhost:8081/api/clubs/${editClub.id}/admin-edit`, {
+      const res = await fetch(`${API_BASE}/api/clubs/${editClub.id}/admin-edit`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(editForm),
@@ -452,7 +454,7 @@ export default function AdminClubs({ clubs, loading, onDelete, onRefresh }) {
                   <input type="number" value={extendMax} min={club.maxMembers + 1} max={100}
                     onChange={e => setExtendMax(parseInt(e.target.value))}
                     className="w-14 bg-[#111] border border-white/20 rounded-lg px-2 py-1 text-xs text-white outline-none" />
-                  <button onClick={async () => { const r = await fetch(`http://localhost:8081/api/clubs/${club.id}/extend-members`, { method:"PATCH", headers:{"Content-Type":"application/json", Authorization:`Bearer ${token}`}, body:JSON.stringify({maxMembers:extendMax}) }); if (r.ok) { setExtending(null); onRefresh?.(); } }}
+                  <button onClick={async () => { const r = await fetch(`${API_BASE}/api/clubs/${club.id}/extend-members`, { method:"PATCH", headers:{"Content-Type":"application/json", Authorization:`Bearer ${token}`}, body:JSON.stringify({maxMembers:extendMax}) }); if (r.ok) { setExtending(null); onRefresh?.(); } }}
                     className="p-1.5 bg-[#26F2D0] text-black rounded-lg"><Check size={11} /></button>
                   <button onClick={() => setExtending(null)} className="p-1.5 bg-white/10 text-gray-400 rounded-lg"><X size={11} /></button>
                 </div>

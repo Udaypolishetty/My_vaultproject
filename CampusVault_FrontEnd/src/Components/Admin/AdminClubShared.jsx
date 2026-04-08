@@ -1,3 +1,4 @@
+import { API_BASE } from "../../config/api";
 import { Bot, Printer, Code2, Cog, Rocket, Star, Trophy, Music2, Mic2, Camera } from "lucide-react";
 
 export const PREDEFINED_CLUBS = [
@@ -45,9 +46,9 @@ export const ClubIcon = ({ category }) =>
     : <span className="text-lg">🏛️</span>;
 
 export const call = (token) => ({
-  patch: (url) => fetch(`http://localhost:8081${url}`, { method: "PATCH", headers: { Authorization: `Bearer ${token}` } }),
-  del:   (url) => fetch(`http://localhost:8081${url}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }),
-  post:  (url, body) => fetch(`http://localhost:8081${url}`, {
+  patch: (url) => fetch(`${API_BASE}${url}`, { method: "PATCH", headers: { Authorization: `Bearer ${token}` } }),
+  del:   (url) => fetch(`${API_BASE}${url}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }),
+  post:  (url, body) => fetch(`${API_BASE}${url}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(body),

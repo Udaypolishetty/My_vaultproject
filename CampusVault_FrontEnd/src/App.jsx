@@ -1,7 +1,7 @@
 
 import { API_BASE } from "./config/api";
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate,useLocation } from "react-router-dom";
 import Navbar from "./Components/Navbar";
 import Home from "./Components/Home";
 import Update from "./Components/Update";
@@ -17,8 +17,11 @@ import SplashScreen from "./Components/SplashScreen";
 function App() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const pathSection = window.location.pathname.split("/").pop();
+useEffect(() => {
+  const path = location.pathname.split("/").pop();
+
   const sectionMap = {
     home: "Home",
     updates: "Updates",
@@ -27,6 +30,9 @@ function App() {
     connect: "Connect",
     about: "About"
   };
+
+  setActiveSection(sectionMap[path] || "Home");
+}, [location.pathname]);
 
   const [activeSection, setActiveSection] = useState(
     sectionMap[pathSection] || "Home"

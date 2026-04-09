@@ -228,7 +228,7 @@ export default function AdminClubs({ clubs, loading, onDelete, onRefresh }) {
     if (!form.title.trim() || !form.description.trim()) return;
     setCreating(true);
     try {
-      const res = await fetch("${API_BASE}/api/clubs/create", {
+      const res = await fetch(`${API_BASE}/api/clubs/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(form),

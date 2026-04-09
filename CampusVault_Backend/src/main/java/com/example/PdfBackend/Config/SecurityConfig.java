@@ -28,9 +28,9 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
-
-    @Value("${cors.allowed-origins:http://localhost:5173,https://my-vaultproject.vercel.app,https://campusvault.live,https://www.campusvault.live}")
-    private String allowedOriginsRaw;
+    
+@Value("${cors.allowed-origins:http://localhost:5173,http://localhost:8081,https://my-vaultproject.vercel.app,https://myvaultproject-production-9640.up.railway.app,https://campusvault.live,https://www.campusvault.live}")
+private String allowedOriginsRaw;
 
     /* ══════════════════════════════════════════════════════
        Shared helper — builds the CorsConfiguration from the

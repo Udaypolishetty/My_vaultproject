@@ -43,7 +43,7 @@ function formatCountdown(ms) {
 }
 
 const RAZORPAY_LINK = "https://rzp.io/l/campusvault";
-const UPI_ID        = "yourupi@bank";
+const UPI_ID        = "udaypolishetty54-3@okicici";
 const AMOUNTS = [
   { label: "₹20",  value: 20,  note: "Every bit helps us grow"   },
   { label: "₹50",  value: 50,  note: "Covers a day of hosting"   },

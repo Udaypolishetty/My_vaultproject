@@ -1,4 +1,4 @@
-import { API_BASE } from "./config/api";
+import { API_BASE } from "../../config/api";
 import { useState } from "react";
 import { Search, Shield, UserMinus } from "lucide-react";
 

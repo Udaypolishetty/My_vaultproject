@@ -485,7 +485,7 @@ else if (!isStrongPassword(form.password)) e.password = "Use 8+ chars, uppercase
           </Field>
 
           {/* Email */}
-          <Field label="College Email" required error={errors.email}>
+          <Field label="Your Email" required error={errors.email}>
             <input type="email" placeholder="you@email.com" value={form.email}
               onChange={e => set("email", e.target.value)}
               onBlur={() => { if (form.email && !isValidEmail(form.email)) setErrors(e => ({ ...e, email: "Enter a valid email address" })); }}

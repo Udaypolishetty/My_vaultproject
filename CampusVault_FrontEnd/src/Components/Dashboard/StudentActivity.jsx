@@ -23,8 +23,9 @@ const severityConfig = {
   LOW:    { color: "text-yellow-400", bg: "bg-yellow-500/20", border: "border-yellow-500/30", label: "📢 LOW" },
 };
 
-export default function StudentActivity({ notifications, warnings, setNotifications, setWarnings, token }) {
+export default function StudentActivity({ notifications, warnings, setNotifications, setWarnings, token,loading }) {
   const [clearing, setClearing] = useState(false);
+  
 
   // mark warnings as read when Activity tab opens
   useEffect(() => {
@@ -69,6 +70,15 @@ export default function StudentActivity({ notifications, warnings, setNotificati
 
   const warningCount  = warnings.length;
   const unreadCount   = notifications.filter(n => !n.read).length;
+
+    if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <div className="w-8 h-8 border-2 border-[#26F2D0]/30 border-t-[#26F2D0] rounded-full animate-spin" />
+        <p className="text-gray-500 text-sm">Loading your activity...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-10">

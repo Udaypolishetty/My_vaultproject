@@ -218,6 +218,7 @@ const fetchData = async () => {
             setNotifications={setNotifications}
             setWarnings={setWarnings}
             token={token}
+             loading={loading}
           />
         )}
 

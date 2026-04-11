@@ -66,8 +66,7 @@ const IdeaForm = ({ onClose, onSubmit }) => {
   };
 
 const handleFieldChange = (key, value) => {
-  const cleaned = cleanInput(value); // 🔥 clean here
-  setFields(prev => ({ ...prev, [key]: cleaned }));
+  setFields(prev => ({ ...prev, [key]: value })); // ✅ no cleaning here
   if (error) setError(null);
 };
 
@@ -76,7 +75,8 @@ const handleFieldChange = (key, value) => {
     setError(null);
 
     // ✅ INTEGRATED VALIDATION
-    const description = buildDescription();
+const description = cleanInput(buildDescription());
+const cleanedTitle = cleanInput(form.title);
     const { valid, errors } = validateAll({
       title: validateIdeaTitle(form.title),
       description: validateDescription(description),
@@ -91,8 +91,8 @@ const handleFieldChange = (key, value) => {
     try {
       await onSubmit({
         category: form.category,
-        title: form.title.trim(),
-        description,
+title: cleanedTitle.trim(),
+description,
       });
     } catch (err) {
       setError(err.message);
@@ -198,8 +198,7 @@ const handleFieldChange = (key, value) => {
                 value={form.title}
                 placeholder="Write a clear concise title..."
 onChange={e => {
-  const cleaned = cleanInput(e.target.value); // 🔥 clean title
-  setForm(p => ({ ...p, title: cleaned }));
+  setForm(p => ({ ...p, title: e.target.value })); // ✅ no cleaning here
   if (error) setError(null);
 }}
                 maxLength={maxTitle}

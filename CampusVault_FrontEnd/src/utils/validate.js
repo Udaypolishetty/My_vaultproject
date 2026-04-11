@@ -153,7 +153,9 @@ export const validateUrl = (url) => {
 };
 
 export const cleanInput = (text) => {
-  return text.replace(/[^a-zA-Z0-9 ,.&()\n:-]/g, "");
+  return text
+    .replace(/[<>]/g, "")   // only remove dangerous chars
+    .replace(/script/gi, ""); // remove script word
 };
 
 // ✅ validate all fields at once — pass an object of { fieldName: result }

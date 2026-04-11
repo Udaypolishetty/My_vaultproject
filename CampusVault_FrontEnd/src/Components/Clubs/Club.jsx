@@ -16,6 +16,10 @@ const CATEGORIES = [
   { key: "CULTURAL",       label: "Cultural" },
   { key: "TOASTMASTERS",   label: "Toastmasters" },
   { key: "PHOTOGRAPHY",    label: "Photography" },
+    { key: "WELFARE",          label: "Social Welfare" }, 
+  { key: "APP_DEV",          label: "App Dev" },         
+  { key: "SOCIAL",           label: "Media & Content" },  
+  { key: "STARTUP",          label: "Startup Hub" },     
 ];
 
 export default function Club() {

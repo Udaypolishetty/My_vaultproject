@@ -1,5 +1,5 @@
 import { API_BASE } from "../../config/api";
-import { Bot, Printer, Code2, Cog, Rocket, Star, Trophy, Music2, Mic2, Camera } from "lucide-react";
+import { Bot, Printer, Code2, Cog, Rocket, Star, Trophy, Music2, Mic2, Camera, Lightbulb, Smartphone, Video } from "lucide-react";
 
 export const PREDEFINED_CLUBS = [
   { title: "Artificial Intelligence Club", category: "AI", emoji: "🤖" },
@@ -13,6 +13,10 @@ export const PREDEFINED_CLUBS = [
   { title: "Toastmasters Club", category: "TOASTMASTERS", emoji: "🎤" },
   { title: "Photography Club", category: "PHOTOGRAPHY", emoji: "📷" },
   { title: "Social Welfare Club", category: "CULTURAL", emoji: "🤝" },
+{ title: "App Development Club",          category: "APP_DEV", emoji: "📱" },  
+{ title: "Media & Content Creation Club", category: "SOCIAL",  emoji: "🤳" },  
+ { title: "Startup & Innovation Hub", category: "STARTUP", emoji: "💡" },
+
 ];
 
 export const STATUS_COLORS = {
@@ -38,6 +42,9 @@ const ICON_MAP = {
   CULTURAL:         <Music2 size={18} className="text-pink-400" />,
   TOASTMASTERS:     <Mic2 size={18} className="text-indigo-400" />,
   PHOTOGRAPHY:      <Camera size={18} className="text-amber-400" />,
+  APP_DEV: <Smartphone size={18} className="text-sky-400" />,  
+SOCIAL:  <Video size={18} className="text-rose-400" />,    
+ STARTUP:          <Lightbulb size={18} className="text-yellow-300" />,    
 };
 
 export const ClubIcon = ({ category }) =>

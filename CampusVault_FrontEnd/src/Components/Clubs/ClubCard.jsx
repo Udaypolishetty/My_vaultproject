@@ -1,5 +1,7 @@
 import { Users, UserCheck,Building2, Leaf, Zap, Crown, Trophy, Handshake } from "lucide-react";
-import { Bot, Printer, Code2, Cog, Rocket, Star,  Music2, Mic2, Camera, Heart,GraduationCap } from "lucide-react";
+import { Bot, Printer, Code2, Cog, Rocket, Star, Music2, Mic2, Camera, Heart, GraduationCap, Lightbulb, Smartphone, Video } from "lucide-react";
+
+
 
 const CATEGORY_ACCENT = {
   AI:               { from: "#7c3aed", to: "#4f46e5", glow: "rgba(124,58,237,0.3)" },
@@ -12,6 +14,10 @@ const CATEGORY_ACCENT = {
   CULTURAL:         { from: "#db2777", to: "#9333ea", glow: "rgba(219,39,119,0.3)" },
   TOASTMASTERS:     { from: "#4f46e5", to: "#7c3aed", glow: "rgba(79,70,229,0.3)" },
   PHOTOGRAPHY:      { from: "#b45309", to: "#92400e", glow: "rgba(180,83,9,0.3)" },
+  WELFARE:   { from: "#0d9488", to: "#0891b2", glow: "rgba(13,148,136,0.3)" },
+APP_DEV:   { from: "#0284c7", to: "#6366f1", glow: "rgba(2,132,199,0.3)"  },
+SOCIAL:    { from: "#e11d48", to: "#be185d", glow: "rgba(225,29,72,0.3)"  },
+STARTUP:   { from: "#ca8a04", to: "#16a34a", glow: "rgba(202,138,4,0.3)"  },
 };
 
 const BADGE_EMOJI = {
@@ -33,7 +39,20 @@ const CLUB_ICONS = {
     CULTURAL:         <Music2 size={22} className="text-pink-400" />,
     TOASTMASTERS:     <Mic2 size={22} className="text-indigo-400" />,
     PHOTOGRAPHY:      <Camera size={22} className="text-amber-400" />,
+    WELFARE:   <Heart      size={22} className="text-teal-400"   />,
+APP_DEV:   <Smartphone size={22} className="text-sky-400"    />,
+SOCIAL:    <Video      size={22} className="text-rose-400"   />,
+STARTUP:   <Lightbulb  size={22} className="text-yellow-300" />,
 };
+
+
+
+if (typeof document !== "undefined" && !document.getElementById("fire-pulse")) {
+  const style = document.createElement("style");
+  style.id = "fire-pulse";
+  style.textContent = `@keyframes firePulse { 0%,100%{opacity:1; transform:scale(1);} 50%{opacity:0.8; transform:scale(1.05);} }`;
+  document.head.appendChild(style);
+}
 export default function ClubCard({ club, myRoll, onJoin, joining, onClick }) {
   const accent = CATEGORY_ACCENT[club.category] || { from: "#26F2D0", to: "#0891b2", glow: "rgba(38,242,208,0.3)" };
   const isMember = club.members?.includes(myRoll);
@@ -74,6 +93,22 @@ export default function ClubCard({ club, myRoll, onJoin, joining, onClick }) {
         background: `linear-gradient(90deg, ${accent.from}, ${accent.to}, ${accent.from})`,
         backgroundSize: "200% 100%",
       }} />
+
+{["WELFARE", "APP_DEV", "SOCIAL", "STARTUP","WEB_DEV"].includes(club.category) && (
+  <div style={{
+    position: "absolute", top: "10px", right: "10px",
+    background: "rgba(255,255,255,0.06)",
+    backdropFilter: "blur(8px)",
+    border: "1px solid rgba(255,100,0,0.3)",
+    color: "#ff6a00", fontSize: "10px", fontWeight: 700,
+    padding: "3px 10px", borderRadius: "20px",
+    display: "flex", alignItems: "center", gap: "4px",
+    letterSpacing: "0.05em",
+    zIndex: 10,
+  }}>
+    🔥 trending
+  </div>
+)}
 
       {/* Inner emboss highlight */}
       <div style={{

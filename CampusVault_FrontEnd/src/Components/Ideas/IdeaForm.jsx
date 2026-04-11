@@ -1,8 +1,6 @@
-
-
 import { useState } from "react";
 import { Lightbulb, Target, Wrench, Users, Send, X, Eye } from "lucide-react";
-import { validateIdeaTitle, validateDescription, validateAll } from "../../utils/validate"; // ✅ IMPORTED
+import { validateIdeaTitle, validateDescription, validateAll, cleanInput } from "../../utils/validate";
 
 const IdeaForm = ({ onClose, onSubmit }) => {
   const [form, setForm] = useState({ category: "Tech", title: "" });
@@ -65,25 +63,40 @@ const IdeaForm = ({ onClose, onSubmit }) => {
     return parts.join("\n\n");
   };
 
-const handleFieldChange = (key, value) => {
-  setFields(prev => ({ ...prev, [key]: value })); // ✅ no cleaning here
-  if (error) setError(null);
-};
+  // ✅ simple grammar polish — runs on blur, no AI, no lag
+  const polishText = (text) => {
+    return text
+      .replace(/\s{2,}/g, " ")                                          // collapse double spaces
+      .replace(/([.!?])\s*([a-z])/g, (_, p, c) => `${p} ${c.toUpperCase()}`) // capitalize after . ! ?
+      .replace(/^([a-z])/, (c) => c.toUpperCase())                      // capitalize first char
+      .replace(/\bi\b/g, "I")                                           // lone i → I
+      .trim();
+  };
+
+  const handleFieldChange = (key, value) => {
+    setFields(prev => ({ ...prev, [key]: value }));
+    if (error) setError(null);
+  };
+
+  // ✅ polish fires only when user leaves the field
+  const handleFieldBlur = (key) => {
+    setFields(prev => ({ ...prev, [key]: polishText(prev[key]) }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
-    // ✅ INTEGRATED VALIDATION
-const description = cleanInput(buildDescription());
-const cleanedTitle = cleanInput(form.title);
+    const description = cleanInput(buildDescription());
+    const cleanedTitle = cleanInput(form.title);
+
     const { valid, errors } = validateAll({
-      title: validateIdeaTitle(form.title),
+      title: validateIdeaTitle(cleanedTitle),
       description: validateDescription(description),
     });
-    
+
     if (!valid) {
-      setError(errors.title || errors.description); // show first error
+      setError(errors.title || errors.description);
       return;
     }
 
@@ -91,8 +104,8 @@ const cleanedTitle = cleanInput(form.title);
     try {
       await onSubmit({
         category: form.category,
-title: cleanedTitle.trim(),
-description,
+        title: cleanedTitle.trim(),
+        description,
       });
     } catch (err) {
       setError(err.message);
@@ -197,10 +210,11 @@ description,
               <input
                 value={form.title}
                 placeholder="Write a clear concise title..."
-onChange={e => {
-  setForm(p => ({ ...p, title: e.target.value })); // ✅ no cleaning here
-  if (error) setError(null);
-}}
+                onChange={e => {
+                  setForm(p => ({ ...p, title: e.target.value }));
+                  if (error) setError(null);
+                }}
+                onBlur={() => setForm(p => ({ ...p, title: polishText(p.title) }))}
                 maxLength={maxTitle}
                 required
                 className={`w-full p-2 pr-16 bg-[#222] rounded-xl text-white outline-none
@@ -245,6 +259,7 @@ onChange={e => {
                     placeholder={placeholder}
                     maxLength={max}
                     onChange={e => handleFieldChange(key, e.target.value)}
+                    onBlur={() => handleFieldBlur(key)}
                     rows={2}
                     className={`w-full p-2 pb-6 bg-[#222] rounded-xl text-white
                                outline-none border transition resize-none text-sm

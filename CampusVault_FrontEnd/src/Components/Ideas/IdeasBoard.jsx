@@ -164,6 +164,7 @@ export default function IdeasBoard() {
               ...saved,
               createdByName: student?.name || saved.createdByName,
               createdById: myId || saved.createdById,
+              createdAt: new Date().toISOString(),
             }, ...prev]);
             setShowForm(false);
             setPostError(`Idea posted! You can post another after 48 hours. Next in ${getTimeRemaining(postedAt)}.`);

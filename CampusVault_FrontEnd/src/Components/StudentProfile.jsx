@@ -2,6 +2,7 @@ import { API_BASE } from "../config/api";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ShieldCheck, FileText,Eye,EyeOff } from "lucide-react";
+import emailjs from "@emailjs/browser";
 
 /* ─── Validators ───────────────────────────── */
 function getRollError(roll) {
@@ -146,8 +147,25 @@ else if (!isStrongPassword(form.password)) e.password = "Use 8+ chars, uppercase
 
       // ✅ FIXED: show success then redirect to LOGIN page (/)
       // Registration does NOT log you in — user must login with their new password
-      setSuccess(true);
-      setTimeout(() => navigate("/"), 2000);
+setSuccess(true);
+
+// ✅ send welcome email — fire and forget, never blocks registration
+try {
+  await emailjs.send(
+    "service_nzys8qi",     // replace with your EmailJS service ID
+    "template_g509b0j",    // replace with your welcome template ID
+    {
+      to_name:  form.name.trim(),
+      to_email: form.email.trim(),
+      message:  "Welcome aboard! Join clubs, share ideas, and engage with the community. Invite your friends too! For any issues or suggestions, use the contact form in the About section or the footer of the application.",
+    },
+    "REgM7dQQ8Hzs68xhz"      // replace with your EmailJS public key
+  );
+} catch (err) {
+  console.warn("Welcome email failed (non-critical):", err);
+}
+
+setTimeout(() => navigate("/"), 2000);
 
     } catch {
       setErrors({ api: "Server not reachable. Please try again." });

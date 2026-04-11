@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Lightbulb, Target, Wrench, Users, Send, X, Eye } from "lucide-react";
-import { validateIdeaTitle, validateDescription, validateAll, cleanInput } from "../../utils/validate";
+import { validateIdeaTitle, validateDescription, validateAll } from "../../utils/validate";
 
 const IdeaForm = ({ onClose, onSubmit }) => {
   const [form, setForm] = useState({ category: "Tech", title: "" });
@@ -83,36 +83,39 @@ const IdeaForm = ({ onClose, onSubmit }) => {
     setFields(prev => ({ ...prev, [key]: polishText(prev[key]) }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError(null);
 
-    const description = cleanInput(buildDescription());
-    const cleanedTitle = cleanInput(form.title);
+  // ✅ inlined cleanInput — no import needed, no bundler cache issues
+  const clean = (text) => text.replace(/[<>]/g, "").replace(/script/gi, "").trim();
 
-    const { valid, errors } = validateAll({
-      title: validateIdeaTitle(cleanedTitle),
-      description: validateDescription(description),
+  const description = clean(buildDescription());
+  const cleanedTitle = clean(form.title);
+
+  const { valid, errors } = validateAll({
+    title: validateIdeaTitle(cleanedTitle),
+    description: validateDescription(description),
+  });
+
+  if (!valid) {
+    setError(errors.title || errors.description);
+    return;
+  }
+
+  setSubmitting(true);
+  try {
+    await onSubmit({
+      category: form.category,
+      title: cleanedTitle,
+      description,
     });
-
-    if (!valid) {
-      setError(errors.title || errors.description);
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      await onSubmit({
-        category: form.category,
-        title: cleanedTitle.trim(),
-        description,
-      });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const isTitleNearLimit = form.title.length >= 35;
   const isDuplicateError = error?.toLowerCase().includes("already") ||

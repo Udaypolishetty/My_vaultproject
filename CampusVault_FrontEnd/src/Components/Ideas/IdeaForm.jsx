@@ -65,10 +65,11 @@ const IdeaForm = ({ onClose, onSubmit }) => {
     return parts.join("\n\n");
   };
 
-  const handleFieldChange = (key, value) => {
-    setFields(prev => ({ ...prev, [key]: value }));
-    if (error) setError(null);
-  };
+const handleFieldChange = (key, value) => {
+  const cleaned = cleanInput(value); // 🔥 clean here
+  setFields(prev => ({ ...prev, [key]: cleaned }));
+  if (error) setError(null);
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -196,10 +197,11 @@ const IdeaForm = ({ onClose, onSubmit }) => {
               <input
                 value={form.title}
                 placeholder="Write a clear concise title..."
-                onChange={e => {
-                  setForm(p => ({ ...p, title: e.target.value }));
-                  if (error) setError(null);
-                }}
+onChange={e => {
+  const cleaned = cleanInput(e.target.value); // 🔥 clean title
+  setForm(p => ({ ...p, title: cleaned }));
+  if (error) setError(null);
+}}
                 maxLength={maxTitle}
                 required
                 className={`w-full p-2 pr-16 bg-[#222] rounded-xl text-white outline-none

@@ -18,14 +18,14 @@ const SCRIPT_PATTERNS = [
 ];
 
 const SQL_PATTERNS = [
-  /(\bDROP\b|\bDELETE\b|\bINSERT\b|\bUPDATE\b|\bSELECT\b|\bUNION\b|\bEXEC\b)/gi,
   /('|\bOR\b|\bAND\b)\s+\d+\s*=\s*\d+/gi, // ' OR 1=1
-  /;\s*(DROP|DELETE|INSERT|UPDATE)/gi,
+  /;\s*(DROP|DELETE|INSERT|UPDATE)/gi,   // only dangerous combos
 ];
 
 const SPAM_PATTERNS = [
   /(.)\1{9,}/g, // same char repeated 10+ times: aaaaaaaaaa
 ];
+const ALLOWED_TEXT_REGEX = /^[a-zA-Z0-9 ,.&()\-:\n]+$/;
 
 // ✅ check if text contains malicious patterns
 const containsMalicious = (text) => {
@@ -35,7 +35,7 @@ const containsMalicious = (text) => {
   }
   for (const pattern of SQL_PATTERNS) {
     pattern.lastIndex = 0;
-    if (pattern.test(text)) return { found: true, reason: "Invalid characters detected." };
+    if (pattern.test(text)) return { found: true, reason: "Remove special symbols like < > or scripts." };
   }
   for (const pattern of SPAM_PATTERNS) {
     pattern.lastIndex = 0;
@@ -71,10 +71,17 @@ export const validateIdeaTitle = (title) => {
 // ✅ Idea / proposal description — 10 to 500 chars
 export const validateDescription = (text) => {
   if (!text || !text.trim()) return { valid: false, error: "Description is required." };
+
+  if (!ALLOWED_TEXT_REGEX.test(text)) {
+    return { valid: false, error: "Only basic text and punctuation allowed." };
+  }
+
   if (text.trim().length < 10) return { valid: false, error: "Description must be at least 10 characters." };
   if (text.trim().length > 500) return { valid: false, error: "Description must be under 500 characters." };
+
   const check = containsMalicious(text);
   if (check.found) return { valid: false, error: check.reason };
+
   return { valid: true, error: "" };
 };
 
@@ -143,6 +150,10 @@ export const validateUrl = (url) => {
   } catch {
     return { valid: false, error: "Please enter a valid URL (https://...)" };
   }
+};
+
+export const cleanInput = (text) => {
+  return text.replace(/[^a-zA-Z0-9 ,.&()\n:-]/g, "");
 };
 
 // ✅ validate all fields at once — pass an object of { fieldName: result }

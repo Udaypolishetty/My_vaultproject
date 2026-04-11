@@ -116,7 +116,35 @@ useEffect(() => {
         <>
           <IdeasFilters activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8 items-start">
-filteredIdeas
+{filteredIdeas.length === 0 ? (
+  loading ? (
+    // ✅ loading spinner
+    <div className="col-span-3 flex flex-col items-center justify-center h-64 gap-4">
+      <div className="w-8 h-8 border-2 border-[#26F2D0]/30 border-t-[#26F2D0] rounded-full animate-spin" />
+      <p className="text-gray-500 text-sm">Loading ideas...</p>
+    </div>
+  ) : (
+    // existing empty state
+    <div className="col-span-3 flex flex-col items-center justify-center h-64 text-center">
+      <p className="text-4xl mb-4"><Lightbulb size={34}/></p>
+      <p className="text-white text-lg font-semibold">No ideas yet.</p>
+      <p className="text-gray-400 text-sm mt-2 max-w-sm">
+        Be the first to share an idea for campus wellbeing and student growth.
+      </p>
+    </div>
+  )
+) : (
+  filteredIdeas.map(idea => (
+    <IdeaCard
+      key={idea.id}
+      idea={idea}
+      student={student}
+      ideas={ideas}
+      setIdeas={setIdeas}
+      myId={myId}
+    />
+  ))
+)}
           </div>
         </>
       )}

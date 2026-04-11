@@ -27,14 +27,21 @@ export default function IdeasBoard() {
   const [activeView, setActiveView] = useState("board");
   const [postError, setPostError] = useState("");
   const [showRules, setShowRules] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!token || !myId) { window.location.href = "/"; return; }
-    fetch(`${API_BASE}/api/ideas`)
-      .then(res => res.json())
-      .then(data => setIdeas(data))
-      .catch(err => console.error("Failed to fetch ideas:", err));
-  }, []);
+useEffect(() => {
+  if (!token || !myId) { window.location.href = "/"; return; }
+  fetch(`${API_BASE}/api/ideas`)
+    .then(res => res.json())
+    .then(data => {
+      setIdeas(data);
+      setLoading(false); // ✅ add this
+    })
+    .catch(err => {
+      console.error("Failed to fetch ideas:", err);
+      setLoading(false); // ✅ add this
+    });
+}, []);
 
   useEffect(() => {
     if (!myId || !token) return;
@@ -109,26 +116,7 @@ export default function IdeasBoard() {
         <>
           <IdeasFilters activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8 items-start">
-            {filteredIdeas.length === 0 ? (
-              <div className="col-span-3 flex flex-col items-center justify-center h-64 text-center">
-                <p className="text-4xl mb-4"><Lightbulb size ={34}/></p>
-                <p className="text-white text-lg font-semibold">No ideas yet.</p>
-                <p className="text-gray-400 text-sm mt-2 max-w-sm">
-                  Be the first to share an idea for campus wellbeing and student growth.
-                </p>
-              </div>
-            ) : (
-              filteredIdeas.map(idea => (
-                <IdeaCard
-                  key={idea.id}
-                  idea={idea}
-                  student={student}
-                  ideas={ideas}
-                  setIdeas={setIdeas}
-                  myId={myId}
-                />
-              ))
-            )}
+filteredIdeas
           </div>
         </>
       )}

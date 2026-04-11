@@ -280,7 +280,8 @@ export default function IdeaCard({ idea, student, ideas, setIdeas, myId }) {
   const [canEdit, setCanEdit] = useState(isWithinEditWindow(idea.createdAt));
 
   const token = sessionStorage.getItem("token");
-  const resolvedMyId = myId || sessionStorage.getItem("id");
+  const resolvedMyId = sessionStorage.getItem("id");
+
   const rollNumber = student?.rollNumber;
   const isMyIdea = String(idea.createdById) === String(resolvedMyId);
 

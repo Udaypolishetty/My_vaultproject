@@ -143,9 +143,7 @@ const isStrongPassword = (password) => {
         return;
       }
 
-      // ✅ FIXED: show success then redirect to LOGIN page (/)
-      // Registration does NOT log you in — user must login with their new password
-setSuccess(true);
+
 
 // ✅ send welcome email — fire and forget, never blocks registration
 // ✅ send email FIRST, then show success

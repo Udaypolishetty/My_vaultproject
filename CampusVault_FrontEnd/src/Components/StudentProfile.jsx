@@ -90,7 +90,7 @@ else if (!isValidRoll(form.roll)) e.roll = "Invalid roll number/college ID";
     if (!form.year)              e.year     = "Select your year";
     if (!form.branch)            e.branch   = "Select your branch";
 if (!form.password)          e.password = "Password is required";
-else if (!isStrongPassword(form.password)) e.password = "Use 8+ chars, uppercase, lowercase, number, special char, no repeated chars";
+else if (!isStrongPassword(form.password)) e.password = "Use 6+ chars, uppercase, lowercase, one number, special char";
     if (!form.confirm)           e.confirm  = "Please confirm your password";
     else if (form.confirm !== form.password) e.confirm = "Passwords do not match";
     if (is4thYear) {
@@ -103,14 +103,12 @@ else if (!isStrongPassword(form.password)) e.password = "Use 8+ chars, uppercase
     return Object.keys(e).length === 0;
   };
 
-  const isStrongPassword = (password) => {
-  if (password.length < 8) return false;
-  if (!/[A-Z]/.test(password)) return false;
-  if (!/[a-z]/.test(password)) return false;
-  if (!/[0-9]/.test(password)) return false;
-  if (!/[!@#$%^&*(),.?":{}|<>_\-\\[\]/;'+=]/.test(password)) return false;
-  if (/(.)\1/.test(password)) return false; // blocks aa, 11, @@
-  return true;
+const isStrongPassword = (password) => {
+  if (password.length < 6) return false;           //  lowered from 8 to 6
+  if (!/[A-Z]/.test(password)) return false;       // one uppercase
+  if (!/[0-9]/.test(password)) return false;       // one number
+  if (!/[!@#$%^&*(),.?":{}|<>_\-\\[\]/;'+=]/.test(password)) return false; // one special char
+  return true;                                      //  removed lowercase + repeated char rules
 };
 
   const handleSubmit = async () => {
@@ -549,7 +547,7 @@ setTimeout(() => navigate("/"), 2000);
   error={errors.password}
   hint={
     !errors.password
-      ? "8+ chars, uppercase, lowercase, number, special character"
+      ? "6+ chars, uppercase, lowercase, number, special character"
       : ""
   }
 >

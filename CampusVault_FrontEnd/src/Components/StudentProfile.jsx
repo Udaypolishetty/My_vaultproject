@@ -150,21 +150,24 @@ else if (!isStrongPassword(form.password)) e.password = "Use 8+ chars, uppercase
 setSuccess(true);
 
 // ✅ send welcome email — fire and forget, never blocks registration
+// ✅ send email FIRST, then show success
 try {
   await emailjs.send(
-    "service_nzys8qi",     // replace with your EmailJS service ID
-    "template_g509b0j",    // replace with your welcome template ID
+    "service_nzys8qi",
+    "template_g509b0j",
     {
       to_name:  form.name.trim(),
       to_email: form.email.trim(),
       message:  "Welcome aboard! Join clubs, share ideas, and engage with the community. Invite your friends too! For any issues or suggestions, use the contact form in the About section or the footer of the application.",
     },
-    "REgM7dQQ8Hzs68xhz"      // replace with your EmailJS public key
+    "REgM7dQQ8Hzs68xhz"
   );
 } catch (err) {
   console.warn("Welcome email failed (non-critical):", err);
 }
 
+// ✅ THEN show success and redirect
+setSuccess(true);
 setTimeout(() => navigate("/"), 2000);
 
     } catch {
@@ -232,7 +235,7 @@ setTimeout(() => navigate("/"), 2000);
 
 
 <img
-  src="/cv-logo.png"
+  src="/project-logo.png"
   alt="Campus Vault logo"
   style={{
     width: 56,

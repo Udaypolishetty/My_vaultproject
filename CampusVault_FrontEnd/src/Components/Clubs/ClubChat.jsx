@@ -35,7 +35,9 @@ const isUnlocked = confirmedCount >= halfMembers;
   const isAdmin     = role === "ADMIN" || role === "MODERATOR";
 
   // ✅ confirmed members and admin can chat. Pending CANNOT.
-const canChat = (isConfirmed && isUnlocked) || isAdmin;
+  
+// const canChat = (isConfirmed && isUnlocked) || isAdmin;
+const canChat = isConfirmed || isAdmin; 
 
   // Grace hours left for pending member display
   const graceHoursLeft = isPending ? (() => {

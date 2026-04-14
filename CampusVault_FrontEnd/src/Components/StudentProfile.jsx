@@ -231,7 +231,7 @@ setTimeout(() => navigate("/"), 2000);
 
 
 <img
-  src="/project-logo.png"
+  src="/cv-logo.png"
   alt="Campus Vault logo"
   style={{
     width: 56,

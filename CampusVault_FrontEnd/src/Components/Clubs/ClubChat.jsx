@@ -23,7 +23,7 @@ export default function ClubChat({ club, myRoll, token, onUpdate }) {
   // ✅ BUG 2 FIX: correctly check confirmed vs pending
   // club.members is an array of roll number STRINGS
   // club.pendingMembers is an array of OBJECTS with rollNumber field
-  const isConfirmed = Array.isArray(club.members) && club.members.includes(myRoll);
+const isConfirmed = Array.isArray(club.members) && club.members.map(String).includes(String(myRoll));
   const isPending   = Array.isArray(club.pendingMembers) &&
 
     club.pendingMembers.some(p => p.rollNumber === myRoll);
